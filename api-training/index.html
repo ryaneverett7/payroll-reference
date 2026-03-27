@@ -612,14 +612,14 @@ tbody td { padding: 13px 18px; font-size: 13px; color: #374151; vertical-align: 
     <!-- QUIZ 3 -->
     <div class="quiz-card">
       <div class="quiz-label">✏️ Check Your Understanding</div>
-      <h4>A partner is sending updated deduction amounts to Employee Navigator. Which HTTP method should they use?</h4>
+      <h4>EN needs to send a new benefit deduction for an employee to the payroll partner. Which HTTP method should EN use?</h4>
       <div class="quiz-options">
-        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">A</span>GET — to retrieve the current deduction amount first</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">A</span>GET — to retrieve the current deduction amount from the partner first</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">B</span>DELETE — to remove the old amount before adding the new one</div>
-        <div class="quiz-opt" onclick="checkQuiz(this,'correct',3)"><span class="quiz-opt-letter">C</span>POST or PATCH — POST to create a new deduction, PATCH to update part of an existing one</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',3)"><span class="quiz-opt-letter">C</span>POST or PATCH — POST to create a new deduction record in payroll, PATCH to update part of an existing one</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">D</span>PUT — to replace the entire employee record including the deduction</div>
       </div>
-      <div class="quiz-feedback correct-fb" id="qfb3">✅ Correct! POST creates new data, PATCH updates part of existing data. GET is read-only and never changes data. Choosing the wrong method is a common integration mistake.</div>
+      <div class="quiz-feedback correct-fb" id="qfb3">✅ Correct! Deductions flow one direction: EN sends them TO the payroll partner — the partner never sends deductions to EN. POST creates a new deduction record in payroll, PATCH updates part of an existing one. GET is read-only and never changes data.</div>
     </div>
 
     <button class="chapter-done-btn" onclick="markDone(3)">✓ Mark Module 3 Complete</button>
@@ -870,14 +870,14 @@ tbody td { padding: 13px 18px; font-size: 13px; color: #374151; vertical-align: 
     <!-- QUIZ 7 -->
     <div class="quiz-card">
       <div class="quiz-label">✏️ Check Your Understanding</div>
-      <h4>A partner successfully sends a POST deduction update to payroll (receives a 200 response), but the deduction appears on the employee's next check with the wrong amount. What is the most likely cause?</h4>
+      <h4>EN successfully POSTs a deduction update to the payroll partner (receives a 200 response), but the deduction appears on the employee's next check with the wrong amount. What is the most likely cause?</h4>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">A</span>The API was down and cached a previous response</div>
-        <div class="quiz-opt" onclick="checkQuiz(this,'correct',7)"><span class="quiz-opt-letter">C</span>The POST was accepted but the payload contained the wrong perPayAmount value — a 200 means the structure was valid, not that the values were correct</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',7)"><span class="quiz-opt-letter">C</span>The POST was accepted but EN's payload contained the wrong perPayAmount value — a 200 means the structure was valid, not that the values were correct</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">B</span>The payroll system recalculated the deduction on its own</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">D</span>The deduction code was mapped to the wrong plan in EN</div>
       </div>
-      <div class="quiz-feedback correct-fb" id="qfb7">✅ Correct! A 200 response confirms the structure was valid and accepted — not that the values were correct. Always verify the payload values match the expected amounts before investigating other causes.</div>
+      <div class="quiz-feedback correct-fb" id="qfb7">✅ Correct! Remember: EN sends deductions TO the payroll partner — it's always EN doing the POST, not the other way around. A 200 response confirms the structure was valid and accepted, not that the values inside were correct. Always verify the payload values match expected amounts before investigating other causes.</div>
     </div>
 
     <button class="chapter-done-btn" onclick="markDone(7)">✓ Mark Module 7 Complete</button>
@@ -992,14 +992,14 @@ tbody td { padding: 13px 18px; font-size: 13px; color: #374151; vertical-align: 
     <!-- QUIZ 9 -->
     <div class="quiz-card">
       <div class="quiz-label">✏️ Check Your Understanding</div>
-      <h4>A partner receives a 400 Bad Request when posting a deduction update. They say "the payload looks fine to us." What is the correct next step?</h4>
+      <h4>EN POSTs a deduction update to the payroll partner and receives a 400 Bad Request back. The broker says "the payload looks fine to us." What is the correct next step?</h4>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">A</span>Tell them to re-authenticate and try again</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">B</span>Check if the payroll system is experiencing downtime</div>
-        <div class="quiz-opt" onclick="checkQuiz(this,'correct',9)"><span class="quiz-opt-letter">C</span>Request the full request body and response body — 400 indicates a structural or validation issue that will be described in the response body</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',9)"><span class="quiz-opt-letter">C</span>Pull the full request body EN sent and the full response body the partner returned — 400 means the partner rejected EN's payload and the response body will say exactly why</div>
         <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">D</span>Escalate to Tier 2 immediately without further investigation</div>
       </div>
-      <div class="quiz-feedback correct-fb" id="qfb9">✅ Correct! A 400 always means the request body failed validation. The response body will contain the specific reason — missing field, wrong data type, etc. Always get the full response before escalating.</div>
+      <div class="quiz-feedback correct-fb" id="qfb9">✅ Correct! EN sends deductions to the partner — so when a 400 comes back, it means the partner's system rejected what EN sent. The response body will contain the specific reason (missing field, wrong data type, invalid code, etc.). Always get the full response before escalating.</div>
     </div>
 
     <button class="chapter-done-btn" onclick="markDone(9)">✓ Mark Module 9 Complete</button>
