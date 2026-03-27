@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Error Handling Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Mulish:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #0d1b2a;
+    --ink-mid:   #1e3a52;
+    --steel:     #2d5f8a;
+    --sky:       #3b82c4;
+    --sky-pale:  #e8f2fb;
+    --red:       #c0392b;
+    --red-pale:  #fdf1f0;
+    --amber:     #b45309;
+    --amber-pale:#fef3dc;
+    --green:     #166534;
+    --green-pale:#ecfdf5;
+    --slate:     #64748b;
+    --border:    #d1dce8;
+    --surface:   #f5f8fc;
+    --white:     #ffffff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Mulish', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--ink);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 52px 48px 44px;
+    position: relative;
+    z-index: 2;
+  }
+  .header-tag {
+    display: inline-block;
+    font-family: 'Mulish', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--sky);
+    background: rgba(59,130,196,.15);
+    border: 1px solid rgba(59,130,196,.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 14px;
+    letter-spacing: -.01em;
+  }
+  header h1 span { color: var(--sky); }
+  header p {
+    font-size: 15px;
+    color: rgba(255,255,255,.55);
+    max-width: 520px;
+    line-height: 1.7;
+  }
+  /* decorative circles */
+  .deco {
+    position: absolute;
+    border-radius: 50%;
+    opacity: .06;
+    background: var(--sky);
+  }
+  .deco-1 { width: 340px; height: 340px; right: -60px; top: -100px; }
+  .deco-2 { width: 180px; height: 180px; right: 180px; bottom: -60px; }
+
+  /* ─── SEARCH + FILTER BAR ─── */
+  .controls {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  .controls-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate);
+  }
+  #search {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    font-family: 'Mulish', sans-serif;
+    font-size: 13.5px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    transition: border .2s;
+  }
+  #search:focus { border-color: var(--sky); background: var(--white); }
+
+  .filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Mulish', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--slate);
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--sky); color: var(--sky); }
+  .filter-btn.active { background: var(--sky); border-color: var(--sky); color: var(--white); }
+
+  .count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* ─── MAIN ─── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 48px 64px;
+  }
+
+  /* ─── GROUP HEADER ─── */
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 36px 0 14px;
+  }
+  .group-header:first-of-type { margin-top: 0; }
+  .group-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .group-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .card:hover { box-shadow: 0 4px 24px rgba(13,27,42,.08); border-color: #b8cfe4; }
+  .card.hidden { display: none; }
+
+  .card-header {
+    display: grid;
+    grid-template-columns: 72px 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* HTTP status badge */
+  .status-badge {
+    width: 58px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.2;
+    padding: 4px;
+  }
+  .s-red    { background: var(--red-pale);   color: var(--red); }
+  .s-amber  { background: var(--amber-pale); color: var(--amber); }
+  .s-sky    { background: var(--sky-pale);   color: var(--steel); }
+  .s-green  { background: var(--green-pale); color: var(--green); }
+  .s-gray   { background: #f1f5f9; color: var(--slate); font-size: 10px; }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .card-preview {
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.5;
+    max-width: 340px;
+  }
+
+  .action-tag {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .a-escalate  { background: var(--red-pale);   color: var(--red); }
+  .a-defined   { background: var(--green-pale);  color: var(--green); }
+  .a-research  { background: var(--amber-pale);  color: var(--amber); }
+  .a-check     { background: var(--sky-pale);    color: var(--steel); }
+  .a-noaction  { background: #f1f5f9; color: var(--slate); }
+
+  .chevron-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--slate);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .card.open .chevron-icon { transform: rotate(180deg); }
+
+  /* ─── CARD BODY ─── */
+  .card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 20px 20px 22px;
+    background: #fcfeff;
+  }
+  .card.open .card-body { display: block; }
+
+  .detail-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .detail-item label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 5px;
+  }
+  .detail-item p {
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .detail-item p.muted { color: var(--slate); font-style: italic; }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 64px 20px;
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-state p { color: var(--slate); font-size: 15px; margin-top: 12px; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 680px) {
+    .header-inner, .controls-inner, main { padding-left: 20px; padding-right: 20px; }
+    .card-header { grid-template-columns: 58px 1fr; }
+    .card-preview, .action-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="deco deco-1"></div>
+  <div class="deco deco-2"></div>
+  <div class="header-inner">
+    <div class="header-tag">Internal Reference</div>
+    <h1>API Error <span>Handling</span> Guide</h1>
+    <p>A complete reference for all error categories returned by payroll partner APIs — including HTTP codes, meanings, examples, and what action to take.</p>
+  </div>
+</header>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input id="search" type="text" placeholder="Search errors, codes, partners…">
+    </div>
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="escalate">Escalate</button>
+    <button class="filter-btn" data-filter="defined">Defined in Dashboard</button>
+    <button class="filter-btn" data-filter="research">Research</button>
+    <span class="count-badge" id="count"></span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- GROUP: HTTP Status Code Errors -->
+  <div class="group-header">
+    <span class="group-title">HTTP Status Code Errors</span>
+    <div class="group-line"></div>
+  </div>
+
+  <!-- 0 / Timeout -->
+  <div class="card" data-action="defined" data-text="an error status was returned by the api 0 api timed out dropped the call partners server timeout all http request transmission failed transmission timed out">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-amber">0</div>
+      <div>
+        <div class="card-title">API Timed Out / Transmission Failed</div>
+        <div class="card-preview">Partner's server wasn't prepared to wait — call dropped</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Messages</label><p>• An error status was returned by the API (code 0)<br>• HTTP request transmission failed<br>• Transmission timed out</p></div>
+        <div class="detail-item"><label>Meaning</label><p>API timed out on EN and dropped the call. Partner's server was not prepared to wait long enough for a response.</p></div>
+        <div class="detail-item"><label>Example</label><p>Partner's server was not prepared to wait this long for them to respond with a record.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All<br><em>(408 specific to Kronect)</em></p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 400 -->
+  <div class="card" data-action="defined" data-text="400 bad syntax deduction code adp benefits deduction code was not found all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-amber">400</div>
+      <div>
+        <div class="card-title">Bad Syntax / Deduction Code Not Found</div>
+        <div class="card-preview">EN sent something the partner wasn't expecting</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Messages</label><p>• An error status was returned by the API (code 400)<br>• Deduction code was not found</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Bad syntax — EN sent something the partner was not expecting. Or deduction code mapped into EN does not exist in payroll.</p></div>
+        <div class="detail-item"><label>Example</label><p>EN sent a deduction code that is managed by ADP Benefits.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 401 -->
+  <div class="card" data-action="escalate" data-text="401 authentication token outdated escalate slack rm all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-red">401</div>
+      <div>
+        <div class="card-title">Authentication Failure</div>
+        <div class="card-preview">EN is not authenticating properly — outdated token</div>
+      </div>
+      <span class="action-tag a-escalate">Escalate</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>An error status was returned by the API (code 401)</p></div>
+        <div class="detail-item"><label>Meaning</label><p>EN is not authenticating properly.</p></div>
+        <div class="detail-item"><label>Example</label><p>EN is using an outdated token to gain access to partner's system.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Escalate to Slack channel and @RM.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 403 -->
+  <div class="card" data-action="escalate" data-text="403 authorization access partner api not enabled isolved legal services escalate payroll partner">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-red">403</div>
+      <div>
+        <div class="card-title">Authorization Denied</div>
+        <div class="card-preview">EN doesn't have authorization to access partner</div>
+      </div>
+      <span class="action-tag a-escalate">Escalate</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>An error status was returned by the API (code 403)</p></div>
+        <div class="detail-item"><label>Meaning</label><p>EN does not have authorization to access partner.</p></div>
+        <div class="detail-item"><label>Example</label><p>API is not enabled on the partner side for us to retrieve/update data.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Escalate to Payroll Partner.<br><br>⚠️ If partner is with iSolved, ensure they have <strong>Legal Services</strong> enabled for the company(s) in question.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 404 -->
+  <div class="card" data-action="research" data-text="404 resource no longer exists employee record deleted payroll id research team lead">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-amber">404</div>
+      <div>
+        <div class="card-title">Resource No Longer Exists</div>
+        <div class="card-preview">Employee record tied to payroll ID has been deleted</div>
+      </div>
+      <span class="action-tag a-research">Research</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>An error status was returned by the API (code 404)</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Resource no longer exists.</p></div>
+        <div class="detail-item"><label>Example</label><p>Employee record tied to the payroll ID being used on the call has been deleted.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Research issue → Escalate to Team Lead if needed.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 429 -->
+  <div class="card" data-action="defined" data-text="429 rate limited adp wfn paycor too many api calls 60 second">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-amber">429</div>
+      <div>
+        <div class="card-title">Rate Limited by Partner</div>
+        <div class="card-preview">Too many API calls within a 60-second window</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Messages</label><p>• An error status was returned by the API (code 429)<br>• Request has been rate-limited by API</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Partner rate-limited EN.</p></div>
+        <div class="detail-item"><label>Example</label><p>EN is sending too many API calls within a 60-second timeframe and the partner has "cut us off."</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. ADP WFN<br>2. Paycor</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 500 -->
+  <div class="card" data-action="research" data-text="500 unexpected condition misconfigured setting retry isolved unexpected error occurred">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-red">500</div>
+      <div>
+        <div class="card-title">Internal Server Error</div>
+        <div class="card-preview">Partner server cannot fulfill request — misconfigured setting</div>
+      </div>
+      <span class="action-tag a-research">Research / Retry</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>An error status was returned by the API (code 500)</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Partner server cannot fulfill our request due to an "unexpected" condition — which could be a misconfigured setting in their system.</p></div>
+        <div class="detail-item"><label>Example</label><p class="muted">No specific example provided.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Use Retry button. If failure still persists, research issue → Escalate to Team Lead if needed.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>Some partners, like iSolved, might return a 500 for an improperly configured deduction code: <em>"Unexpected error has occurred."</em></p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 502 / 503 / 504 -->
+  <div class="card" data-action="defined" data-text="502 503 504 bad gateway server unavailable gateway timeout partner server issues all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-red">502<br>503<br>504</div>
+      <div>
+        <div class="card-title">Gateway / Server Unavailable Errors</div>
+        <div class="card-preview">Partner server is down, unavailable, or timing out</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Messages</label><p>• Code 502 — Bad gateway<br>• Code 503 — Partner server is unavailable<br>• Code 504 — Gateway timeout</p></div>
+        <div class="detail-item"><label>Meaning</label><p><strong>502:</strong> Bad gateway — partner server is experiencing issues.<br><strong>503:</strong> Partner server is unavailable.<br><strong>504:</strong> Gateway timeout — partner wasn't ready to respond in time.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROUP: Named Error Categories -->
+  <div class="group-header">
+    <span class="group-title">Named Error Categories</span>
+    <div class="group-line"></div>
+  </div>
+
+  <!-- Authentication with partner failed -->
+  <div class="card" data-action="escalate" data-text="authentication with partner failed data gathering failed unable to obtain auth token taslar rpo escalate slack rm">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-gray">Auth<br>Failed</div>
+      <div>
+        <div class="card-title">Authentication with Partner Failed</div>
+        <div class="card-preview">EN couldn't authenticate — will show "Data Gathering Failed"</div>
+      </div>
+      <span class="action-tag a-escalate">Escalate</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Authentication with partner failed<br><em>(Status = "Data Gathering Failed — Unable to obtain auth token")</em></p></div>
+        <div class="detail-item"><label>Meaning</label><p>EN was unable to authenticate with the partner's server to post a change or retrieve a record.</p></div>
+        <div class="detail-item"><label>Example</label><p>Before updating/retrieving a record, EN needs to "prove who we are" by authenticating, and the partner's server was unavailable.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Escalate to Slack channel and @RM.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>Any partner re-seller of Taslar (RPO)</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body of partner transmission response was empty -->
+  <div class="card" data-action="escalate" data-text="body of partner transmission response was empty 200 post call empty response escalate slack rm rare">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Body of Partner Transmission Response Was Empty</div>
+        <div class="card-preview">API responded to POST call with a completely blank body</div>
+      </div>
+      <span class="action-tag a-escalate">Escalate</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Body of partner transmission response was empty</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Partner's API response to our POST call was empty.</p></div>
+        <div class="detail-item"><label>Example</label><p>We expect a partner to send anything in response to us updating a record, even "[]". If the response is completely blank, we reflect this. No data quality is affected.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Escalate to Slack channel and @RM.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>None — this would be rare.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deserialization of partner data failed -->
+  <div class="card" data-action="defined" data-text="deserialization of partner data failed 200 response processing failed json format field name kronect">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Deserialization of Partner Data Failed</div>
+        <div class="card-preview">Partner response not in expected JSON format</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Deserialization of partner data failed<br><em>(HTTP 200 — Response processing failed)</em></p></div>
+        <div class="detail-item"><label>Meaning</label><p>Response from partner may not be in JSON format or is including a field name we are not expecting.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. Kronect</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee has been disconnected from subscriber group -->
+  <div class="card" data-action="defined" data-text="employee has been disconnected from subscriber group 200 sub group company id all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Employee Disconnected from Subscriber Group</div>
+        <div class="card-preview">Employee unassigned from sub group tied to this company ID</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Employee has been disconnected from subscriber group</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Employee has been unassigned from sub group in EN tied to this company ID on the API call.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee validation failed -->
+  <div class="card" data-action="defined" data-text="employee validation failed 200 payload missing first last name kronect paycor">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Employee Validation Failed</div>
+        <div class="card-preview">Payload structure correct but a required field is missing</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Employee validation failed</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Structure of payload is correct, but something is missing that we require.</p></div>
+        <div class="detail-item"><label>Example</label><p>Response from payroll gives us "firstName" but no value to go along with it. Messages will typically be due to a missing First or Last name value in the returned payload.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. Kronect<br>2. Paycor</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failed to process partner transmission response -->
+  <div class="card" data-action="defined" data-text="failed to process partner transmission response 200 employee id inactive apps page paylocity paycor check wiki">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Failed to Process Partner Transmission Response</div>
+        <div class="card-preview">Employee ID is Inactive in EN — Profile → Apps → Inactive</div>
+      </div>
+      <span class="action-tag a-check">Check Wiki</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Failed to process partner transmission response</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Employee ID is Inactive in EN within the employee's Apps page.</p></div>
+        <div class="detail-item"><label>Example</label><p>Profile → Apps → Inactive</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Check wiki → Share instructions with customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. Paylocity<br>2. Paycor</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failed to retrieve payroll instructions -->
+  <div class="card" data-action="defined" data-text="failed to retrieve payroll instructions data gathering failed adp wfn run error obtaining payroll instructions employee does not have deduction">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-gray">DGF</div>
+      <div>
+        <div class="card-title">Failed to Retrieve Payroll Instructions</div>
+        <div class="card-preview">EN unable or prevented from retrieving data from payroll</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Failed to retrieve payroll instructions<br><em>(Status = "Data Gathering Failed")</em></p></div>
+        <div class="detail-item"><label>Meaning</label><p>EN is unable or prevented from retrieving data from payroll.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. ADP WFN and RUN — Message: <em>"Error obtaining payroll instructions"</em><br>2. ADP RUN — Message: <em>"Employee ____ does not have deduction with code ___"</em></p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failed to update employee from partner -->
+  <div class="card" data-action="defined" data-text="failed to update employee from partner 200 response processing failed product ii howardsimeon paylocity paycor paychex">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Failed to Update Employee from Partner</div>
+        <div class="card-preview">EN states update failed, but record was actually updated — Product I&I</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Failed to update employee from partner<br><em>(HTTP 200 — Response processing failed)</em></p></div>
+        <div class="detail-item"><label>Meaning</label><p>EN is stating an update could not be made, but we truly did update the record. This is a Product I&amp;I issue.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. HowardSimon<br>2. Paylocity<br>3. Paycor<br>4. Paychex</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SSN validation failed -->
+  <div class="card" data-action="defined" data-text="ssn validation failed 200 missing ssn 000-00-0000 blank all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">SSN Validation Failed</div>
+        <div class="card-preview">Employee is missing a valid SSN — 000-00-0000 or blank</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>SSN validation failed</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Employee is missing an SSN value on their record.</p></div>
+        <div class="detail-item"><label>Example</label><p>Employee has 000-00-0000 or a blank SSN.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The identifier has already been assigned -->
+  <div class="card" data-action="research" data-text="identifier already assigned different employee 200 payroll id ssn different record research team lead rare all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Identifier Already Assigned to Different Employee</div>
+        <div class="card-preview">Payroll ID in partner's payload matches a different SSN in our system</div>
+      </div>
+      <span class="action-tag a-research">Research</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>The identifier has already been assigned to a different employee</p></div>
+        <div class="detail-item"><label>Meaning</label><p>The payroll ID in the partner's payload is already assigned to a record with a different SSN in our system.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Research issue → Escalate to Team Lead if needed.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All — is rare.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unable to match employee between systems -->
+  <div class="card" data-action="defined" data-text="unable to match employee between systems 200 ssn payload already belongs another employee invalid ssn 111-11-1111 paycor paylocity paychex">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-sky">200</div>
+      <div>
+        <div class="card-title">Unable to Match Employee Between Systems</div>
+        <div class="card-preview">SSN in payload belongs to a different EN employee record</div>
+      </div>
+      <span class="action-tag a-defined">Defined in Dashboard</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Unable to match employee between systems</p></div>
+        <div class="detail-item"><label>Meaning</label><p>SSN in payload already belongs to another employee record in EN.</p></div>
+        <div class="detail-item"><label>Example</label><p>Partner allows invalid SSNs such as 111-11-1111 and it has been given to more than one employee in their system.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Defined in Integration Health dashboard for customer.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>1. Paycor<br>2. Paylocity<br>3. Paychex</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failed to create incoming notification -->
+  <div class="card" data-action="noaction" data-text="failed to create incoming notification 404 company not found incoming notification not on integration will not appear dashboard">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-amber">404</div>
+      <div>
+        <div class="card-title">Failed to Create Incoming Notification</div>
+        <div class="card-preview">Partner sent a notification for a company not on the integration</div>
+      </div>
+      <span class="action-tag a-noaction">No Action Needed</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Failed to create incoming notification</p></div>
+        <div class="detail-item"><label>Meaning</label><p>We were unable to find a company in our system to match what was received on an incoming notification.</p></div>
+        <div class="detail-item"><label>Example</label><p>A partner sent us a notification for a company that is not on the integration.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Will not appear on company dashboard — team will not see this error.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>—</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unexpected scenario -->
+  <div class="card" data-action="research" data-text="unexpected scenario should be investigated retry research team lead rare all">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="status-badge s-gray">—</div>
+      <div>
+        <div class="card-title">Unexpected Scenario — Should Be Investigated</div>
+        <div class="card-preview">Self-explanatory — use Retry first, then escalate</div>
+      </div>
+      <span class="action-tag a-research">Research / Retry</span>
+      <svg class="chevron-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div class="card-body">
+      <div class="detail-row">
+        <div class="detail-item"><label>Error Message</label><p>Unexpected scenario. Should be investigated.</p></div>
+        <div class="detail-item"><label>Meaning</label><p>Self-explanatory.</p></div>
+        <div class="detail-item"><label>What To Do</label><p>Use Retry button. If failure still persists, research issue → Escalate to Team Lead if needed.</p></div>
+        <div class="detail-item"><label>Common Partners</label><p>All — is rare.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <p>No errors match your search. Try different keywords.</p>
+  </div>
+
+</main>
+
+<script>
+  // Toggle card open/closed
+  function toggle(header) {
+    header.closest('.card').classList.toggle('open');
+  }
+
+  // Search
+  const searchEl = document.getElementById('search');
+  const countEl  = document.getElementById('count');
+  let currentFilter = 'all';
+
+  function updateCards() {
+    const q = searchEl.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+    cards.forEach(card => {
+      const text   = (card.dataset.text || '') + ' ' + card.innerText.toLowerCase();
+      const action = card.dataset.action || '';
+      const matchSearch = !q || text.includes(q);
+      const matchFilter = currentFilter === 'all' || action === currentFilter;
+      if (matchSearch && matchFilter) {
+        card.classList.remove('hidden');
+        visible++;
+      } else {
+        card.classList.add('hidden');
+        card.classList.remove('open');
+      }
+    });
+    countEl.textContent = visible + ' of ' + cards.length + ' errors';
+    document.getElementById('emptyState').classList.toggle('visible', visible === 0);
+  }
+
+  searchEl.addEventListener('input', updateCards);
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      updateCards();
+    });
+  });
+
+  // Initial count
+  updateCards();
+</script>
+</body>
+</html>
