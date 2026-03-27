@@ -1,0 +1,875 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Problem Analysis & Root Cause Thinking · Employee Navigator Payroll Support</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e2d3d;
+  --navy-mid: #263545;
+  --navy-light: #2e4158;
+  --green: #4caf50;
+  --green-dark: #2e7d32;
+  --green-light: #a5d6a7;
+  --green-pale: #e8f5e9;
+  --amber: #f59e0b;
+  --amber-pale: #fffbeb;
+  --amber-dark: #92400e;
+  --red: #ef4444;
+  --red-pale: #fef2f2;
+  --red-dark: #991b1b;
+  --blue: #3b82f6;
+  --blue-pale: #eff6ff;
+  --purple: #7c3aed;
+  --purple-pale: #f5f3ff;
+  --cream: #fafaf8;
+  --white: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a2332;
+  --text-muted: #64748b;
+  --shadow: 0 4px 16px rgba(0,0,0,.07);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; font-size: 16px; }
+
+/* ── SIDEBAR ── */
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 272px; flex-shrink: 0; background: var(--navy);
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; z-index: 100; display: flex; flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 2px; }
+.sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.brand-eye { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-light); margin-bottom: 6px; }
+.brand-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: #fff; line-height: 1.35; }
+.sidebar-nav { padding: 14px 0; flex: 1; }
+.nav-section { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.3); padding: 12px 24px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 24px; color: rgba(255,255,255,.6); font-size: 13px; font-weight: 500;
+  border-left: 3px solid transparent; text-decoration: none; transition: all .18s; cursor: pointer;
+}
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #fff; border-left-color: var(--green); background: rgba(76,175,80,.1); }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.2); flex-shrink: 0; transition: all .18s; }
+.nav-item.active .nav-dot { background: var(--green); }
+.sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.08); font-size: 11px; color: rgba(255,255,255,.3); line-height: 1.6; }
+
+/* ── MAIN ── */
+.main { margin-left: 272px; flex: 1; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--navy); padding: 72px 64px 64px;
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content: ''; position: absolute; bottom: -60px; right: -60px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(76,175,80,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(76,175,80,.15); border: 1px solid rgba(76,175,80,.3);
+  color: var(--green-light); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+}
+.hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(30px, 4vw, 50px); color: #fff; line-height: 1.15; margin-bottom: 16px; }
+.hero h1 em { color: var(--green-light); font-style: italic; }
+.hero-sub { font-size: 16px; color: rgba(255,255,255,.6); max-width: 600px; line-height: 1.7; margin-bottom: 32px; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.7); font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px; }
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+/* ── CONTENT ── */
+.content { padding: 56px 64px; max-width: 920px; }
+
+.section { margin-bottom: 80px; opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+.section.visible { opacity: 1; transform: none; }
+
+.section-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 30px; }
+.section-num { width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0; background: var(--navy); color: var(--green); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(76,175,80,.2); }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-dark); margin-bottom: 4px; }
+.section h2 { font-family: 'DM Serif Display', serif; font-size: clamp(20px, 2.5vw, 28px); color: var(--navy); line-height: 1.2; }
+
+p { margin-bottom: 18px; color: #374151; line-height: 1.75; }
+.lead { font-size: 17px; color: #1f2937; line-height: 1.75; margin-bottom: 28px; padding-left: 18px; border-left: 3px solid var(--green); }
+h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin: 28px 0 12px; }
+h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin: 18px 0 8px; }
+
+/* CALLOUTS */
+.callout { border-radius: 12px; padding: 20px 24px; margin: 24px 0; border: 1px solid; }
+.callout-label { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.callout p { margin: 0; font-size: 14px; line-height: 1.65; }
+.callout-key { background: var(--navy); border-color: var(--navy); color: #fff; }
+.callout-key .callout-label { color: var(--green-light); }
+.callout-key p { color: rgba(255,255,255,.82); }
+.callout-warn { background: var(--amber-pale); border-color: #fde68a; }
+.callout-warn .callout-label { color: var(--amber-dark); }
+.callout-warn p { color: #78350f; }
+.callout-tip { background: var(--green-pale); border-color: #bbf7d0; }
+.callout-tip .callout-label { color: #166534; }
+.callout-tip p { color: #14532d; }
+.callout-info { background: var(--blue-pale); border-color: #bfdbfe; }
+.callout-info .callout-label { color: #1d4ed8; }
+.callout-info p { color: #1e3a5f; }
+.callout-danger { background: var(--red-pale); border-color: #fecaca; }
+.callout-danger .callout-label { color: var(--red-dark); }
+.callout-danger p { color: #7f1d1d; }
+
+/* STEP LIST */
+.steps { display: flex; flex-direction: column; gap: 14px; margin: 22px 0; }
+.step { display: flex; align-items: flex-start; gap: 16px; background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+.step-n { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; background: var(--navy); color: var(--green); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.step h5 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.step p { font-size: 13px; color: #64748b; margin: 0; line-height: 1.55; }
+
+/* WHYS CHAIN */
+.whys-chain { margin: 28px 0; }
+.why-row {
+  display: flex; align-items: stretch; gap: 0; margin-bottom: 0;
+  position: relative;
+}
+.why-connector {
+  width: 3px; background: linear-gradient(180deg, var(--green), rgba(76,175,80,.2));
+  margin: 0 0 0 20px; flex-shrink: 0; min-height: 24px;
+}
+.why-card {
+  background: #fff; border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 12px; flex: 1;
+  display: flex; gap: 14px; align-items: flex-start;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05); transition: border-color .2s;
+}
+.why-card:hover { border-color: var(--green); }
+.why-num {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+}
+.w1 { background: #fee2e2; color: #dc2626; }
+.w2 { background: #fef3c7; color: #d97706; }
+.w3 { background: #dbeafe; color: #2563eb; }
+.w4 { background: var(--purple-pale); color: var(--purple); }
+.w5 { background: var(--green-pale); color: var(--green-dark); }
+.why-q { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+.why-a { font-size: 14px; font-weight: 600; color: var(--navy); line-height: 1.4; }
+.why-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+.why-root {
+  background: var(--navy); border-radius: 12px; padding: 18px 22px;
+  display: flex; gap: 14px; align-items: center; margin-top: 4px;
+}
+.root-badge { background: var(--green); color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+.root-text { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.4; }
+.root-action { font-size: 12px; color: var(--green-light); margin-top: 3px; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; margin: 22px 0; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+thead { background: var(--navy); }
+thead th { padding: 13px 18px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.65); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f8fafc; }
+tbody td { padding: 13px 18px; font-size: 13px; color: #374151; vertical-align: top; line-height: 1.55; }
+.code { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+.badge { display: inline-flex; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-stop { background: #fee2e2; color: #dc2626; }
+.badge-check { background: var(--green-pale); color: var(--green-dark); }
+.badge-warn { background: #fef3c7; color: #92400e; }
+
+/* TRAP CARDS */
+.trap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 22px 0; }
+.trap-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+.trap-card.danger { border-top: 3px solid var(--red); }
+.trap-card.safe  { border-top: 3px solid var(--green); }
+.trap-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.trap-card.danger h4 { color: var(--red-dark); }
+.trap-card.safe  h4 { color: var(--green-dark); }
+.trap-card p { font-size: 13px; color: #64748b; margin: 0; line-height: 1.55; }
+
+/* CHECKLIST */
+.checklist { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin: 22px 0; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+.checklist-header { background: var(--navy); padding: 14px 22px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-light); }
+.checklist-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 22px; border-bottom: 1px solid var(--border); cursor: pointer;
+  transition: background .15s;
+}
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item:hover { background: #f8fafc; }
+.check-box {
+  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+  border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+  transition: all .18s;
+}
+.checklist-item.checked .check-box { background: var(--green); border-color: var(--green); }
+.check-mark { display: none; font-size: 11px; color: #fff; }
+.checklist-item.checked .check-mark { display: block; }
+.check-text h5 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+.check-text p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+.checklist-item.checked .check-text h5 { text-decoration: line-through; color: var(--text-muted); }
+
+/* MINDSET CARDS */
+.mindset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 22px 0; }
+.mindset-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.05); text-align: center; }
+.mindset-icon { font-size: 32px; margin-bottom: 10px; }
+.mindset-card h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+.mindset-card p { font-size: 12px; color: #64748b; margin: 0; line-height: 1.55; }
+
+/* DIVIDER */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 48px 0; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .sidebar { width: 240px; }
+  .main { margin-left: 240px; }
+  .content { padding: 40px 32px; }
+  .hero { padding: 48px 32px 40px; }
+  .trap-grid, .mindset-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 660px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .content { padding: 28px 18px; }
+  .hero { padding: 36px 20px 28px; }
+  .trap-grid { grid-template-columns: 1fr; }
+  .mindset-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-eye">Employee Navigator</div>
+    <div class="brand-title">Problem Analysis<br>for Payroll Support</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Sections</div>
+    <a href="#s1" class="nav-item active" data-s="s1"><span class="nav-dot"></span>The Support Trap</a>
+    <a href="#s2" class="nav-item" data-s="s2"><span class="nav-dot"></span>What RCA Actually Is</a>
+    <a href="#s3" class="nav-item" data-s="s3"><span class="nav-dot"></span>The Right Mindset First</a>
+    <a href="#s4" class="nav-item" data-s="s4"><span class="nav-dot"></span>The 5 Whys at EN</a>
+    <a href="#s5" class="nav-item" data-s="s5"><span class="nav-dot"></span>Collecting Evidence</a>
+    <a href="#s6" class="nav-item" data-s="s6"><span class="nav-dot"></span>The Diagnostic Layers</a>
+    <a href="#s7" class="nav-item" data-s="s7"><span class="nav-dot"></span>Common Traps to Avoid</a>
+    <a href="#s8" class="nav-item" data-s="s8"><span class="nav-dot"></span>Patience as a Skill</a>
+    <a href="#s9" class="nav-item" data-s="s9"><span class="nav-dot"></span>The Investigation Checklist</a>
+    <a href="#s10" class="nav-item" data-s="s10"><span class="nav-dot"></span>After the Fix</a>
+  </div>
+  <div class="sidebar-footer">
+    Built for EN Payroll Support<br>
+    Based on real integration patterns
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<div class="hero">
+  <div class="hero-badge">🔍 Support Training</div>
+  <h1>Stop fixing symptoms.<br><em>Find the cause.</em></h1>
+  <p class="hero-sub">A practical guide to root cause analysis for EN Payroll support staff — built around the real integrations, real errors, and real patterns you encounter every day. Not theory. Judgment.</p>
+  <div class="hero-chips">
+    <div class="chip"><span class="chip-dot"></span>Built for payroll support staff</div>
+    <div class="chip"><span class="chip-dot"></span>EN-specific examples throughout</div>
+    <div class="chip"><span class="chip-dot"></span>Patience &amp; process over speed</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════
+     SECTION 1 — THE SUPPORT TRAP
+════════════════════════════════ -->
+<div class="section visible" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div>
+      <div class="section-label">The Problem</div>
+      <h2>The Support Trap — Fixing the Symptom, Not the Cause</h2>
+    </div>
+  </div>
+
+  <p class="lead">Every support team has a version of this story: a broker calls in, a deduction didn't feed to payroll, you retry it, it works, ticket closed. Three weeks later — same broker, same employee, same issue. You fixed the symptom. The cause is still there.</p>
+
+  <p>This is the single most common failure pattern in technical support work. Not laziness, not incompetence — just the natural pressure of a queue, a customer who wants a quick resolution, and a system that <em>appears</em> to be working again after a retry. It's a trap, and it's easy to fall into.</p>
+
+  <div class="callout callout-warn">
+    <div class="callout-label">⚠️ The Payroll Version of This Trap</div>
+    <p>In EN's payroll integrations, symptoms are everywhere: a deduction failed, a termination didn't feed, a compensation update is wrong. But these are just the <strong>visible surface</strong>. The actual cause might be a misconfigured deduction code, a blocked payroll ID, an expired token, or a partner system that's behaving differently than expected. Retry-and-close without diagnosing is technical debt — it just hasn't come due yet.</p>
+  </div>
+
+  <p>The goal of this guide isn't to make you slower. It's to make you sharper. A disciplined diagnosis — even a 5-minute one — changes the question from <em>"did it send?"</em> to <em>"why didn't it send, and will it happen again?"</em> That's the difference between support and expertise.</p>
+
+  <div class="callout callout-key">
+    <div class="callout-label">🔑 The Core Mindset Shift</div>
+    <p>Your job is not to close tickets. Your job is to understand what happened, fix it at the right level, and make sure it doesn't come back. Sometimes those are the same thing. Often they're not.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 2 — WHAT RCA IS
+════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div>
+      <div class="section-label">The Foundation</div>
+      <h2>What Root Cause Analysis Actually Is</h2>
+    </div>
+  </div>
+
+  <p class="lead">Root Cause Analysis (RCA) is the process of tracing a visible problem back through its chain of causes until you reach the one that, if fixed, prevents the problem from recurring. Not the first answer. The right answer.</p>
+
+  <p>The concept came from Toyota's manufacturing system in the 1950s — when a machine broke on the production line, engineers were trained not to just fix the machine, but to ask <em>why</em> it broke, and keep asking until they reached something they could actually change at a systems level. The number five isn't magic — sometimes two whys is enough, sometimes you need seven. What matters is that you don't stop at the obvious.</p>
+
+  <h3>The Oil Leak Analogy</h3>
+  <p>Think about a car that keeps running low on oil. You could top it off every week and call it handled — the car runs fine. But the cause (a faulty gasket) is still there, slowly getting worse. Eventually the engine seizes. The fix was always available, it just required someone willing to actually look.</p>
+
+  <p>In payroll support terms: <strong>a deduction failing to send to Paycor is the oil warning light. The root cause is somewhere upstream</strong> — a missing "Calculate" checkbox, a deduction code that doesn't exist in all company IDs, an employee ID that was never properly linked. Retrying the deduction is topping off the oil.</p>
+
+  <div class="callout callout-info">
+    <div class="callout-label">💡 RCA Is Not a Post-Mortem Tool Only</div>
+    <p>Most people think RCA is something you do <em>after</em> a big failure. At EN, it should be a daily habit on any issue that has recurred, involves multiple employees, or where the immediate fix feels too easy. If the answer came too fast, you probably stopped too soon.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 3 — MINDSET
+════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div>
+      <div class="section-label">Before You Diagnose</div>
+      <h2>The Right Mindset Before You Touch Anything</h2>
+    </div>
+  </div>
+
+  <p class="lead">The tools and techniques of RCA are secondary. The mindset comes first. Without it, you'll use the 5 Whys to arrive at the answer you already had before you started.</p>
+
+  <div class="mindset-grid">
+    <div class="mindset-card">
+      <div class="mindset-icon">🧊</div>
+      <h4>Stay Cold</h4>
+      <p>Don't start with a conclusion. Urgency from a broker or HR doesn't mean the obvious answer is correct. Pressure to close fast is when mistakes happen.</p>
+    </div>
+    <div class="mindset-card">
+      <div class="mindset-icon">🎯</div>
+      <h4>Follow Evidence</h4>
+      <p>What does the transmission log actually say? What does the Integration Health Dashboard actually show? Not what the partner thinks happened — what the data shows.</p>
+    </div>
+    <div class="mindset-card">
+      <div class="mindset-icon">🔁</div>
+      <h4>Assume It'll Recur</h4>
+      <p>Ask yourself: if I fix this right now exactly the way I'm about to, will this come back? If the honest answer is "probably," you haven't gone deep enough yet.</p>
+    </div>
+    <div class="mindset-card">
+      <div class="mindset-icon">🚫</div>
+      <h4>No Blame, No Shame</h4>
+      <p>Good RCA is blameless. The goal is a systems fix, not a person to point at. This also means you don't assume the broker did something wrong — or right.</p>
+    </div>
+    <div class="mindset-card">
+      <div class="mindset-icon">🐢</div>
+      <h4>Slow Is Smooth</h4>
+      <p>A diagnosis that takes 10 extra minutes and prevents 3 future tickets is faster overall. Speed in the moment often creates rework downstream.</p>
+    </div>
+    <div class="mindset-card">
+      <div class="mindset-icon">📡</div>
+      <h4>Systems Thinking</h4>
+      <p>EN is a hub. Changes ripple. What looks like a deduction issue might be a demographic issue. What looks like a partner issue might be a configuration issue on our side.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-label">✅ The One Question to Always Ask First</div>
+    <p>Before you do <em>anything</em> — before you retry, before you escalate, before you even open the Integration Health Dashboard — ask yourself: <strong>"What do I actually know for certain right now, and what am I assuming?"</strong> Write the two lists. You'll be surprised how short the first one is.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 4 — 5 WHYS AT EN
+════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div>
+      <div class="section-label">The Core Technique</div>
+      <h2>The 5 Whys — Applied to a Real EN Payroll Scenario</h2>
+    </div>
+  </div>
+
+  <p class="lead">The 5 Whys is the most powerful diagnostic tool you have — and the most commonly misused. The goal is not to ask "why" five times. The goal is to keep asking until you reach a cause that is <em>actionable</em> and <em>preventable</em>.</p>
+
+  <p>Here's how it plays out on a real EN scenario: a broker calls in saying a deduction for an employee didn't appear in Paycor after open enrollment.</p>
+
+  <div class="whys-chain">
+    <div class="why-card">
+      <div class="why-num w1">W1</div>
+      <div>
+        <div class="why-q">Why didn't the deduction appear in Paycor?</div>
+        <div class="why-a">The deduction transmission failed to send from EN.</div>
+        <div class="why-sub">→ Confirmed via Integration Health Dashboard — "Needs Action" status for this employee.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-num w2">W2</div>
+      <div>
+        <div class="why-q">Why did the transmission fail to send?</div>
+        <div class="why-a">Paycor returned a 400 Bad Request error on the POST call.</div>
+        <div class="why-sub">→ Confirmed by pulling the full response body from the transmission log.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-num w3">W3</div>
+      <div>
+        <div class="why-q">Why did Paycor return a 400 on this deduction?</div>
+        <div class="why-a">The deduction code "MDCL" sent by EN doesn't exist in one of the client's Paycor company IDs.</div>
+        <div class="why-sub">→ Confirmed by asking the broker to check all company IDs in Paycor — the code only exists in two of their three.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-num w4">W4</div>
+      <div>
+        <div class="why-q">Why does the code only exist in two of the three company IDs?</div>
+        <div class="why-a">When the client set up their deduction codes during implementation, they missed creating the code in their third company ID.</div>
+        <div class="why-sub">→ The third company ID was added to the integration later and the setup checklist wasn't re-run.</div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-num w5">W5</div>
+      <div>
+        <div class="why-q">Why wasn't the setup checklist re-run when the third company ID was added?</div>
+        <div class="why-a">There is no documented process requiring a full deduction code audit when a new company ID is added to an existing integration.</div>
+        <div class="why-sub">→ This is a process gap, not a broker or user error.</div>
+      </div>
+    </div>
+    <div class="why-root">
+      <span class="root-badge">Root Cause</span>
+      <div>
+        <div class="root-text">Missing process step: no deduction code audit checklist when adding a new company ID to a live integration.</div>
+        <div class="root-action">Fix: Create the missing code in Paycor + add a checklist item to the "Add Company ID" workflow so this can't recur.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-label">⚠️ Where Most People Stop</div>
+    <p>Most support staff would have stopped at Why 1 or Why 2 — retried the transmission, seen it fail again, then told the broker to add the code to Paycor. That fixes <em>this</em> employee on <em>this</em> ticket. But the third company ID is still misconfigured, other employees will hit the same wall, and the process gap that allowed it remains. W5 is where the permanent fix lives.</p>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-label">✅ How to Know You've Hit the Real Root</div>
+    <p>You've reached the root cause when: (1) fixing it would have prevented the original problem entirely, (2) the fix is something that can be changed at a systems or process level, and (3) asking "why" one more time would only give you answers outside your control (e.g., "because software has bugs").</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 5 — COLLECTING EVIDENCE
+════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div>
+      <div class="section-label">Before You Diagnose</div>
+      <h2>Collecting Evidence — You Can't Diagnose What You Can't See</h2>
+    </div>
+  </div>
+
+  <p class="lead">RCA runs on evidence, not instinct. Before you form a hypothesis, collect everything relevant. Assumptions made without data are just guesses wearing confidence.</p>
+
+  <p>In EN payroll support, the evidence is usually all there — it's just a matter of knowing where to look and being disciplined enough to gather it before jumping to a conclusion.</p>
+
+  <h3>The Standard Evidence Set — Ask for All of This</h3>
+  <div class="checklist" id="evidence-checklist">
+    <div class="checklist-header">📋 Required Evidence Before Diagnosing</div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Endpoint + HTTP Method</h5><p>The full URL and whether it was GET, POST, PATCH, etc. This tells you immediately what layer the failure is likely in.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Exact Timestamp with Timezone</h5><p>Without this you cannot correlate the failure with logs, partner system events, or other changes that happened around the same time.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Company ID + Employee ID</h5><p>The specific identifiers used. For subscriber group customers, note which subscriber group / company ID the employee falls under.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Full Request Headers</h5><p>Especially api-version, Authorization token, and any custom headers like dataAuthorizationKey. Missing or expired tokens are invisible without this.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Full Request Body (Payload)</h5><p>The complete JSON that was sent. A 400 almost always traces back to something specific in here — a missing field, wrong data type, or invalid code.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Full Response — Status Code + Body</h5><p>The status code alone is not enough. The response body (ProblemDetails if present) contains the specific rule that was violated. This is your most valuable piece of evidence.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Integration Health Dashboard Status</h5><p>What bucket is this employee in? In Sync, Needs Action, or We're On It? This context shapes everything about how you approach the issue.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Has This Happened Before for This Employee or Group?</h5><p>Pattern recognition is one of your sharpest diagnostic tools. A recurring issue on the same employee or same partner is a strong signal the root cause was never addressed.</p></div>
+    </div>
+  </div>
+
+  <div class="callout callout-danger">
+    <div class="callout-label">🚫 Never Diagnose Without the Response Body</div>
+    <p>The status code (400, 403, 500) tells you the <em>category</em> of failure. The response body tells you the <em>specific rule</em> that was violated. Diagnosing a 400 without the response body is like being told "the car is broken" without being allowed to look under the hood. Always get the full response.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 6 — DIAGNOSTIC LAYERS
+════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div>
+      <div class="section-label">The Framework</div>
+      <h2>The Diagnostic Layers — Where Every Failure Lives</h2>
+    </div>
+  </div>
+
+  <p class="lead">Every API failure in EN's payroll integrations lives in one of these layers. Knowing which layer you're in immediately narrows down the possible causes and tells you who needs to act.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Status Code</th><th>Plain English</th><th>EN Payroll Example</th><th>Who Acts</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>No Response</strong></td>
+          <td class="code">Timeout</td>
+          <td>The request never completed or no response came back</td>
+          <td>Partner system was down during a bulk OE deduction push</td>
+          <td><span class="badge badge-warn">EN retries</span></td>
+        </tr>
+        <tr>
+          <td><strong>Authentication</strong></td>
+          <td class="code" style="color:#dc2626">401</td>
+          <td>"I don't know who you are" — token missing, expired, or wrong</td>
+          <td>ADP token expired mid-batch during demographic audit; Paychex account locked while AM is logged in</td>
+          <td><span class="badge badge-check">Re-authenticate</span></td>
+        </tr>
+        <tr>
+          <td><strong>Authorization</strong></td>
+          <td class="code" style="color:#d97706">403</td>
+          <td>"I know you, but you can't do this"</td>
+          <td>UKG Ready deduction codes not set to IsEmployeeNavigator; ADP code still "Managed by Benefits"</td>
+          <td><span class="badge badge-warn">Config fix</span></td>
+        </tr>
+        <tr>
+          <td><strong>Request Validity</strong></td>
+          <td class="code" style="color:#7c3aed">400</td>
+          <td>"I can't process what you sent" — bad structure, missing fields, wrong values</td>
+          <td>Paylocity employee missing Annual Salary (only has Per Check); isolved deduction code without Allow Employee Value checked</td>
+          <td><span class="badge badge-stop">Data fix</span></td>
+        </tr>
+        <tr>
+          <td><strong>Not Found</strong></td>
+          <td class="code" style="color:#0891b2">404</td>
+          <td>"This resource doesn't exist"</td>
+          <td>Deduction code exists in 2 of 3 Paycor company IDs; employee ID not yet synced in EN</td>
+          <td><span class="badge badge-stop">Setup fix</span></td>
+        </tr>
+        <tr>
+          <td><strong>Conflict</strong></td>
+          <td class="code" style="color:#db2777">409</td>
+          <td>"This conflicts with existing data"</td>
+          <td>Paycor HSA deduction linked to direct deposit; ADP deduction where cost being sent = cost already in ADP</td>
+          <td><span class="badge badge-warn">Manual fix</span></td>
+        </tr>
+        <tr>
+          <td><strong>Server Error</strong></td>
+          <td class="code" style="color:#dc2626">500</td>
+          <td>"Something went wrong on our end"</td>
+          <td>Paychex processing error; partner system experiencing downtime</td>
+          <td><span class="badge badge-warn">Retry / wait</span></td>
+        </tr>
+        <tr>
+          <td><strong>Unavailable</strong></td>
+          <td class="code" style="color:#9333ea">503/504</td>
+          <td>"We're not able to handle this right now"</td>
+          <td>Partner system throttling EN during high-volume OE push; gateway timeout on large payload</td>
+          <td><span class="badge badge-warn">EN retries</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-label">💡 Partner-Specific Quirks That Change the Diagnosis</div>
+    <p>
+      <strong>ADP WFN:</strong> Won't accept solely effective date changes — cost must also change. Won't process deductions when a code is "Managed by Benefits."<br><br>
+      <strong>Paychex:</strong> Rejects changes when an Account Manager is logged in ("Account Locked"). Won't accept prior effective dates — start date becomes the transmission date.<br><br>
+      <strong>Paycor:</strong> HSA deductions linked to direct deposits must be managed manually. 1099/contractor records are blocked entirely.<br><br>
+      <strong>UKG Ready:</strong> Deduction codes must be flagged IsEmployeeNavigator with Default Amount = Flat Amount before they'll return on a GET call.<br><br>
+      <strong>isolved:</strong> Sends change notifications whenever the General screen is saved — even for fields not in the integration. Creates noise that can obscure real failures.<br><br>
+      <strong>Paylocity:</strong> Only passes Annual Salary — Per Check Salary alone returns $0.00 to EN.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 7 — TRAPS TO AVOID
+════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div>
+      <div class="section-label">Watch Out</div>
+      <h2>Common Diagnostic Traps — and How to Avoid Them</h2>
+    </div>
+  </div>
+
+  <p class="lead">These are the patterns that lead experienced support staff to wrong conclusions. Knowing they exist is half the defense against them.</p>
+
+  <div class="trap-grid">
+    <div class="trap-card danger">
+      <h4>🚫 Stopping at the First Answer</h4>
+      <p>"The deduction failed because Paycor returned a 400." That's the symptom, not the cause. Why did Paycor return a 400? Keep going until you reach something fixable at its source.</p>
+    </div>
+    <div class="trap-card safe">
+      <h4>✅ Instead: Ask One More Why</h4>
+      <p>Every time you have an answer, ask "but why did that happen?" at least once more before treating it as the root. You should feel the chain of causes before you stop.</p>
+    </div>
+    <div class="trap-card danger">
+      <h4>🚫 Confusing "It Works Now" with "It's Fixed"</h4>
+      <p>A retry succeeding doesn't mean the root cause is resolved. Partner systems recover from downtime. Tokens get refreshed. The exact same conditions that caused the failure can re-emerge.</p>
+    </div>
+    <div class="trap-card safe">
+      <h4>✅ Instead: Ask Why It Failed Before It Worked</h4>
+      <p>Even if the retry succeeded, document what the original failure was and why. If you can't explain why the retry worked when the original failed, you haven't diagnosed anything.</p>
+    </div>
+    <div class="trap-card danger">
+      <h4>🚫 Assuming the Broker Is Wrong</h4>
+      <p>"They probably didn't set up the code correctly." Maybe. But assuming this before checking the data leads you to miss EN-side configuration issues, partner bugs, and process gaps.</p>
+    </div>
+    <div class="trap-card safe">
+      <h4>✅ Instead: Evidence First, Hypothesis After</h4>
+      <p>Pull the Integration Health Dashboard, the transmission log, and the response body before forming any opinion about who or what is at fault. Let the data lead.</p>
+    </div>
+    <div class="trap-card danger">
+      <h4>🚫 Isolating a Single Root Cause Too Early</h4>
+      <p>Payroll issues often have multiple contributing factors. An employee failing to receive deductions might involve a bad code <em>and</em> a blocked ID <em>and</em> a prior effective date issue.</p>
+    </div>
+    <div class="trap-card safe">
+      <h4>✅ Instead: Cast a Wide Net First</h4>
+      <p>List all possible contributing factors before narrowing down. Check the employee's payroll ID, their deduction codes, the plan's send setting, whether they completed their enrollment, and the Integration Health Dashboard — all of it.</p>
+    </div>
+    <div class="trap-card danger">
+      <h4>🚫 Escalating Without Doing the Diagnostic Work</h4>
+      <p>Escalating to Tier 2 without the evidence set wastes everyone's time and delays the customer. "The deduction didn't work" is not a diagnostic — it's a description of the complaint.</p>
+    </div>
+    <div class="trap-card safe">
+      <h4>✅ Instead: Escalate With Evidence, Not Questions</h4>
+      <p>When you escalate, include: the status code, the full response body, the employee + company IDs, the timestamp, and what you've already checked and ruled out. This is what good escalation looks like.</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 8 — PATIENCE AS A SKILL
+════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div>
+      <div class="section-label">The Underrated Skill</div>
+      <h2>Patience Is Not Slowness — It's Precision</h2>
+    </div>
+  </div>
+
+  <p class="lead">The most common complaint about support staff who do RCA well is that they "take too long." The most common complaint about support staff who don't is that "the same issues keep coming back." You decide which complaint you'd rather earn.</p>
+
+  <p>Patience in diagnosis is not about being slow for its own sake. It's about refusing to be rushed into a wrong answer. When a broker calls in frustrated and wants a fix immediately, the pressure to give them something — anything — is real. The skill is acknowledging the urgency while not letting it collapse your process.</p>
+
+  <h3>What Patient Diagnosis Actually Looks Like</h3>
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><div><h5>Acknowledge the problem first, diagnose second</h5><p>Let the broker or HR know you've seen the issue and you're investigating. "I can see this failed — give me a moment to trace what happened" buys you time and shows competence simultaneously.</p></div></div>
+    <div class="step"><div class="step-n">2</div><div><h5>Don't narrate your uncertainty</h5><p>You don't need to say "I'm not sure yet" five times. Just work the problem. Silence while you investigate is professional, not suspicious.</p></div></div>
+    <div class="step"><div class="step-n">3</div><div><h5>Confirm before you conclude</h5><p>Before you tell the broker "the code doesn't exist in Paycor," verify it. Before you tell them "it's a partner issue," check the Integration Health Dashboard. One wrong confident statement costs more trust than a careful pause.</p></div></div>
+    <div class="step"><div class="step-n">4</div><div><h5>Explain the why, not just the what</h5><p>"Your deduction failed because the MDCL code doesn't exist in your third Paycor company ID" is infinitely more useful than "it failed — please add the code." One teaches. One just closes the ticket.</p></div></div>
+    <div class="step"><div class="step-n">5</div><div><h5>Set expectations on timing honestly</h5><p>If diagnosing properly will take 15 minutes, say so. "I want to trace this through the full log before I give you an answer — I'll have something concrete for you in 15 minutes" is always better than a fast wrong answer.</p></div></div>
+  </div>
+
+  <div class="callout callout-key">
+    <div class="callout-label">🔑 The Trust Equation</div>
+    <p>Brokers and HR admins don't expect you to have every answer instantly. They expect you to find the right answer. Being thorough and explaining what you found — even if it takes a bit longer — builds more trust than fast answers that turn out to be wrong or incomplete. The integration is complex. You're allowed to treat it that way.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 9 — INVESTIGATION CHECKLIST
+════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">09</div>
+    <div>
+      <div class="section-label">Your Field Guide</div>
+      <h2>The EN Payroll Investigation Checklist</h2>
+    </div>
+  </div>
+
+  <p class="lead">Use this sequence when a deduction, demographic change, or integration issue is reported. Don't skip steps. Each one rules out a layer before you move to the next.</p>
+
+  <h3>For Deduction Issues</h3>
+  <div class="checklist">
+    <div class="checklist-header">💸 Deduction Not Sending / Wrong Amount</div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Check Integration Health Dashboard first</h5><p>Is this employee In Sync, Needs Action, or We're On It? This single check eliminates half of all possible causes immediately.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Does the employee have a Payroll ID connected?</h5><p>Profile → Employment → Payroll Integrations box. No ID = no deductions can ever send. Use Force Demographic Change macro if missing.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Is the plan set to "Never Send"?</h5><p>Check the employee's Payroll Group — what is the transmission setting for this specific plan? Never Send means EN will never transmit it regardless of enrollment status.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Did the employee complete their enrollment?</h5><p>"Agree and Complete" must be clicked. An incomplete New Hire workflow = no deduction trigger. Check the employee's enrollment status.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Is the deduction code mapped and does it exist in all company IDs?</h5><p>Check the Payroll Group's code mapping. For multi-company-ID customers, confirm the code exists and is active in every company ID, not just the primary one.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>If a transmission exists but failed — pull the full response body</h5><p>Don't stop at the status code. The response body tells you the exact rule that was violated. This is where the real diagnosis lives.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Check for partner-specific known issues</h5><p>Paycor: Calculate checkbox. ADP: Managed by Benefits. Paychex: Account locked. UKG: IsEmployeeNavigator flag. isolved: Allow Employee Value. These are invisible without knowing to look.</p></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">For Demographic / Change Feed Issues</h3>
+  <div class="checklist">
+    <div class="checklist-header">👤 Change Made in Payroll — Not Reflecting in EN</div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Integration Health Dashboard — incoming demographics</h5><p>Look for an incoming demographics row for this employee around the time the change was made. Did EN receive the webhook at all?</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Is the employee's Payroll ID blocked?</h5><p>Payroll tab → Blocked Demographic Sync List. A blocked ID means EN is intentionally ignoring all incoming changes for this person.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Was the group in Audit Mode when the change was made?</h5><p>Changes made before a group reaches "Demographics Live" status are not automatically applied. Use Force Demographic Change or the Integration Health Dashboard pull action.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>Did the partner actually send a webhook?</h5><p>Some partners (ADP) don't send webhooks for bulk-imported changes. If HR imported updates in ADP, the Nightly Company API Pull job may be needed to capture them.</p></div>
+    </div>
+    <div class="checklist-item" onclick="toggleCheck(this)">
+      <div class="check-box"><span class="check-mark">✓</span></div>
+      <div class="check-text"><h5>For subscriber group customers — is the right record the Primary?</h5><p>Compensation, hire date, term date, and deductions only apply to the Primary identifier. If the wrong record is Primary, changes from the right one will be ignored for these fields.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════
+     SECTION 10 — AFTER THE FIX
+════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div>
+      <div class="section-label">Closing the Loop</div>
+      <h2>After the Fix — The Part Most People Skip</h2>
+    </div>
+  </div>
+
+  <p class="lead">The fix is not the end. What happens after the fix determines whether this issue becomes a one-time event or a recurring problem. The three minutes after you resolve something are some of the most valuable in the entire support process.</p>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><div><h5>Verify the fix actually resolved the root cause</h5><p>If you added a deduction code to a missing Paycor company ID — confirm the code now exists in all company IDs before telling the broker it's resolved. If you unblocked a payroll ID — confirm the next incoming change is processed successfully before closing.</p></div></div>
+    <div class="step"><div class="step-n">2</div><div><h5>Ask: could this affect other employees at this company?</h5><p>A missing deduction code in a company ID doesn't only affect the one employee who just called in. It affects every employee in that company ID who has that plan. Check for other Needs Action items with the same code before closing.</p></div></div>
+    <div class="step"><div class="step-n">3</div><div><h5>Document what you found and why</h5><p>Write it in your ticket in plain language: what was wrong, why it was wrong, what you did to fix it, and what would prevent it in the future. This is how institutional knowledge gets built — and how the next person handles the same issue in 5 minutes instead of 45.</p></div></div>
+    <div class="step"><div class="step-n">4</div><div><h5>Flag recurring patterns to your team</h5><p>If this is the third time this month you've seen a missing IsEmployeeNavigator flag on UKG deductions, that's a pattern worth flagging. Patterns are what drive knowledge base updates, partner communications, and process changes.</p></div></div>
+    <div class="step"><div class="step-n">5</div><div><h5>Tell the broker what happened — not just what to do</h5><p>"Please add the code to Paycor" closes the ticket. "Your MDCL code was missing from company ID XYZ — when you added that third company ID last month, the code setup wasn't replicated there. Here's how to make sure that doesn't happen next time you add a company ID" creates a partner who actually understands their integration.</p></div></div>
+  </div>
+
+  <div class="callout callout-key">
+    <div class="callout-label">🔑 The Long Game</div>
+    <p>Every time you do a thorough diagnosis, document it well, and explain the cause clearly to a broker — you're building a partner who calls in less often, handles more themselves, and trusts EN more deeply. That's the compounding return on the investment of doing this right. It doesn't feel measurable in the moment. Over a year it's transformative.</p>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-label">✅ Your Final Check Before Closing Any Ticket</div>
+    <p>
+      1. <strong>Did I fix the symptom or the cause?</strong><br>
+      2. <strong>Could this affect other employees or companies?</strong><br>
+      3. <strong>Did I document what I found clearly enough for the next person?</strong><br>
+      4. <strong>Did I explain the why to the broker — not just the fix?</strong><br>
+      5. <strong>Is there a process gap here worth flagging to the team?</strong><br><br>
+      If you can answer yes to all five, close the ticket with confidence.
+    </p>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<script>
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+// Intersection observer for section fade-in + nav highlight
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      const id = e.target.id;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const nav = document.querySelector(`.nav-item[data-s="${id}"]`);
+      if (nav) nav.classList.add('active');
+    }
+  });
+}, { threshold: 0.08, rootMargin: '-60px 0px -40% 0px' });
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
