@@ -1,0 +1,1130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Foundational Training · Employee Navigator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1e2d3d;
+  --navy-mid: #263545;
+  --navy-light: #2e4158;
+  --green: #4caf50;
+  --green-dark: #2e7d32;
+  --green-light: #a5d6a7;
+  --green-pale: #e8f5e9;
+  --amber: #f59e0b;
+  --amber-pale: #fffbeb;
+  --red: #ef4444;
+  --red-pale: #fef2f2;
+  --blue: #3b82f6;
+  --blue-pale: #eff6ff;
+  --cream: #fafaf8;
+  --white: #ffffff;
+  --slate: #64748b;
+  --border: #e2e8f0;
+  --text: #1a2332;
+  --text-muted: #64748b;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow: 0 4px 16px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.05);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* ── SIDEBAR NAV ── */
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 280px; flex-shrink: 0;
+  background: var(--navy);
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; z-index: 100;
+  display: flex; flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 2px; }
+
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.brand-eyebrow {
+  font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green-light); margin-bottom: 6px;
+}
+.brand-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px; color: #fff; line-height: 1.3;
+}
+
+.sidebar-nav { padding: 16px 0; flex: 1; }
+.nav-section-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,.35); padding: 12px 24px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 24px; cursor: pointer;
+  color: rgba(255,255,255,.6); font-size: 13px; font-weight: 500;
+  transition: all .18s; border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #fff; border-left-color: var(--green); background: rgba(76,175,80,.1); }
+.nav-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.5);
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .18s;
+}
+.nav-item.active .nav-num { background: var(--green); color: #fff; }
+.nav-item.done .nav-num { background: var(--green-dark); color: #fff; }
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 11px; color: rgba(255,255,255,.3);
+}
+.progress-mini { margin-top: 8px; }
+.progress-mini-bar { height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.progress-mini-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .5s ease; width: 0%; }
+
+/* ── MAIN CONTENT ── */
+.main { margin-left: 280px; flex: 1; min-height: 100vh; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--navy);
+  padding: 72px 64px 64px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 360px; height: 360px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(76,175,80,.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(76,175,80,.15); border: 1px solid rgba(76,175,80,.3);
+  color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(32px, 4vw, 52px); color: #fff; line-height: 1.15;
+  margin-bottom: 16px;
+}
+.hero h1 em { color: var(--green-light); font-style: italic; }
+.hero-sub { font-size: 17px; color: rgba(255,255,255,.65); max-width: 580px; line-height: 1.6; margin-bottom: 36px; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.75); font-size: 12px; font-weight: 500;
+  padding: 6px 14px; border-radius: 20px;
+}
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+/* ── SECTIONS ── */
+.content-wrap { padding: 56px 64px; max-width: 900px; }
+
+.chapter {
+  margin-bottom: 80px;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.chapter.visible { opacity: 1; transform: translateY(0); }
+
+.chapter-header {
+  display: flex; align-items: flex-start; gap: 20px; margin-bottom: 32px;
+}
+.chapter-num {
+  width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+  background: var(--navy); color: var(--green);
+  font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(76,175,80,.25);
+}
+.chapter-meta { flex: 1; }
+.chapter-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green-dark); margin-bottom: 4px;
+}
+.chapter h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(22px, 3vw, 30px); color: var(--navy); line-height: 1.2;
+}
+
+/* ── CONTENT ELEMENTS ── */
+.lead {
+  font-size: 17px; color: #2d3748; line-height: 1.75;
+  margin-bottom: 28px; padding-left: 20px;
+  border-left: 3px solid var(--green);
+}
+p { margin-bottom: 18px; color: #374151; line-height: 1.75; }
+
+/* Callout boxes */
+.callout {
+  border-radius: 12px; padding: 20px 24px; margin: 24px 0;
+  border: 1px solid;
+}
+.callout-key { background: var(--navy); color: #fff; border-color: var(--navy); border-radius: 12px; padding: 22px 26px; margin: 28px 0; }
+.callout-key .callout-label { color: var(--green-light); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.callout-key p { color: rgba(255,255,255,.85); margin: 0; font-size: 15px; }
+.callout-info { background: var(--blue-pale); border-color: #bfdbfe; }
+.callout-info .callout-label { color: #1d4ed8; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.callout-info p { color: #1e3a5f; margin: 0; font-size: 14px; }
+.callout-warn { background: var(--amber-pale); border-color: #fde68a; }
+.callout-warn .callout-label { color: #92400e; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.callout-warn p { color: #78350f; margin: 0; font-size: 14px; }
+.callout-tip { background: var(--green-pale); border-color: #bbf7d0; }
+.callout-tip .callout-label { color: #166534; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.callout-tip p { color: #14532d; margin: 0; font-size: 14px; }
+
+/* Analogy cards */
+.analogy-card {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: var(--shadow); margin: 28px 0; border: 1px solid var(--border);
+}
+.analogy-header {
+  background: var(--navy); padding: 14px 22px;
+  display: flex; align-items: center; gap: 10px;
+}
+.analogy-icon { font-size: 20px; }
+.analogy-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-light); }
+.analogy-body { padding: 22px 24px; }
+.analogy-body p { margin: 0 0 12px; font-size: 14px; color: #374151; }
+.analogy-body p:last-child { margin: 0; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 24px 0; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+thead { background: var(--navy); }
+thead th { padding: 13px 18px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.7); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #f8fafc; }
+tbody td { padding: 13px 18px; font-size: 13px; color: #374151; vertical-align: top; }
+.td-method { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+.badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-low { background: #dcfce7; color: #166534; }
+.badge-med { background: #fef9c3; color: #854d0e; }
+.badge-high { background: #fee2e2; color: #991b1b; }
+.badge-vhigh { background: #fce7f3; color: #9d174d; }
+
+/* Code blocks */
+.code-block {
+  background: var(--navy); border-radius: 10px; padding: 18px 22px;
+  margin: 20px 0; overflow-x: auto;
+}
+.code-block pre {
+  font-family: 'DM Mono', monospace; font-size: 12px; color: #a5f3fc;
+  line-height: 1.6; white-space: pre;
+}
+.code-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 10px; }
+
+/* Two-column comparison */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.compare-card {
+  background: #fff; border-radius: 12px; padding: 22px;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.compare-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.compare-card.green-card { border-top: 3px solid var(--green); }
+.compare-card.green-card h4 { color: var(--green-dark); }
+.compare-card.blue-card { border-top: 3px solid var(--blue); }
+.compare-card.blue-card h4 { color: #1d4ed8; }
+.compare-card ul { padding-left: 18px; }
+.compare-card li { font-size: 13px; color: #374151; margin-bottom: 6px; line-height: 1.5; }
+
+/* Step list */
+.step-list { margin: 24px 0; display: flex; flex-direction: column; gap: 14px; }
+.step {
+  display: flex; align-items: flex-start; gap: 16px;
+  background: #fff; border-radius: 12px; padding: 18px 20px;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.step-n {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: var(--navy); color: var(--green);
+  font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.step-content h5 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.step-content p { font-size: 13px; color: #64748b; margin: 0; line-height: 1.55; }
+
+/* Error table status codes */
+.status-row td:first-child { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+.s-401 { color: #dc2626; } .s-403 { color: #d97706; } .s-400 { color: #7c3aed; }
+.s-500 { color: #db2777; } .s-200 { color: #059669; }
+
+/* Divider */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 48px 0; }
+
+/* Quiz check-in */
+.quiz-card {
+  background: var(--navy); border-radius: 16px; padding: 28px 30px; margin: 32px 0;
+  border: 1px solid rgba(76,175,80,.2);
+}
+.quiz-card .quiz-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--green-light); margin-bottom: 14px; }
+.quiz-card h4 { font-family: 'DM Serif Display', serif; font-size: 18px; color: #fff; margin-bottom: 18px; }
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+.quiz-opt {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px; padding: 12px 16px; cursor: pointer; transition: all .18s;
+  color: rgba(255,255,255,.75); font-size: 14px;
+}
+.quiz-opt:hover { background: rgba(255,255,255,.1); border-color: rgba(76,175,80,.4); }
+.quiz-opt.correct { background: rgba(76,175,80,.2); border-color: var(--green); color: #fff; }
+.quiz-opt.wrong { background: rgba(239,68,68,.15); border-color: var(--red); color: rgba(255,255,255,.6); }
+.quiz-opt-letter {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(255,255,255,.1); font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.6);
+  transition: all .18s;
+}
+.quiz-opt.correct .quiz-opt-letter { background: var(--green); color: #fff; }
+.quiz-opt.wrong .quiz-opt-letter { background: rgba(239,68,68,.5); color: #fff; }
+.quiz-feedback { margin-top: 14px; font-size: 13px; padding: 12px 16px; border-radius: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct-fb { background: rgba(76,175,80,.15); color: var(--green-light); }
+.quiz-feedback.wrong-fb { background: rgba(239,68,68,.15); color: #fca5a5; }
+
+/* Chapter complete badge */
+.chapter-done-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green); color: #fff; border: none;
+  border-radius: 10px; padding: 11px 22px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 24px;
+  transition: all .2s; box-shadow: 0 4px 14px rgba(76,175,80,.3);
+}
+.chapter-done-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+/* ── SECTION NAVIGATION ── */
+.section-nav {
+  background: #fff; border-top: 1px solid var(--border);
+  padding: 20px 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.btn-nav {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--navy); color: #fff; border: none; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 11px 22px; cursor: pointer; transition: all .2s;
+}
+.btn-nav:hover { background: var(--navy-light); }
+.btn-nav.outline { background: transparent; color: var(--navy); border: 1.5px solid var(--border); }
+.btn-nav.outline:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { width: 240px; }
+  .main { margin-left: 240px; }
+  .content-wrap { padding: 40px 32px; }
+  .hero { padding: 48px 32px 40px; }
+  .compare-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .content-wrap { padding: 32px 20px; }
+  .hero { padding: 40px 20px 32px; }
+  .section-nav { padding: 16px 20px; flex-direction: column; gap: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-eyebrow">Employee Navigator</div>
+    <div class="brand-title">API Foundational<br>Training</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Modules</div>
+    <a href="#ch1" class="nav-item active" data-ch="1"><span class="nav-num">1</span>What Is an API?</a>
+    <a href="#ch2" class="nav-item" data-ch="2"><span class="nav-num">2</span>Statelessness</a>
+    <a href="#ch3" class="nav-item" data-ch="3"><span class="nav-num">3</span>HTTP & Payloads</a>
+    <a href="#ch4" class="nav-item" data-ch="4"><span class="nav-num">4</span>Auth & Authorization</a>
+    <a href="#ch5" class="nav-item" data-ch="5"><span class="nav-num">5</span>Identity Context</a>
+    <a href="#ch6" class="nav-item" data-ch="6"><span class="nav-num">6</span>Scopes</a>
+    <a href="#ch7" class="nav-item" data-ch="7"><span class="nav-num">7</span>Reads vs. Writes</a>
+    <a href="#ch8" class="nav-item" data-ch="8"><span class="nav-num">8</span>Webhooks</a>
+    <a href="#ch9" class="nav-item" data-ch="9"><span class="nav-num">9</span>Errors & Debugging</a>
+    <a href="#ch10" class="nav-item" data-ch="10"><span class="nav-num">10</span>Putting It Together</a>
+  </div>
+  <div class="sidebar-footer">
+    <div>Your progress</div>
+    <div class="progress-mini">
+      <span id="progLabel" style="font-size:11px;color:rgba(255,255,255,.5)">0 of 10 complete</span>
+      <div class="progress-mini-bar"><div class="progress-mini-fill" id="progFill"></div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow"><span>📡</span> Foundational Training</div>
+    <h1>APIs: Not a pipe.<br><em>A contract.</em></h1>
+    <p class="hero-sub">Work through this guide chronologically to build a real mental model of how APIs work — why they behave the way they do, and how that maps directly to what you'll see every day at Employee Navigator.</p>
+    <div class="hero-chips">
+      <div class="chip"><span class="chip-dot"></span>10 modules</div>
+      <div class="chip"><span class="chip-dot"></span>Check-in questions per module</div>
+      <div class="chip"><span class="chip-dot"></span>Based on EN's internal training deck</div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 1 — WHAT IS AN API?
+  ══════════════════════════════════════════ -->
+  <div class="chapter visible" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-num">01</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 1</div>
+        <h2>What Is an API, Really?</h2>
+      </div>
+    </div>
+
+    <p class="lead">Most people hear "API" and think: data moving between systems. That's not wrong, but it misses the most important part. An API is a <strong>governed contract</strong> — it defines what is allowed, under what conditions, and what happens when rules are broken.</p>
+
+    <div class="callout-key callout">
+      <div class="callout-label">🔑 Core Concept</div>
+      <p>An API is not a pipe that moves data. It is a contractual boundary between systems that exposes capabilities. Every single API call is inspected for identity, permission, validity, and context. If any of those checks fail, the call is rejected.</p>
+    </div>
+
+    <p>This distinction matters because it changes how you think about problems. When a partner says "the data didn't update," you don't think <em>the pipe is broken</em> — you think <em>which rule wasn't satisfied?</em></p>
+
+    <div class="analogy-card">
+      <div class="analogy-header">
+        <span class="analogy-icon">🍽️</span>
+        <span class="analogy-label">Analogy — Ordering at a Restaurant</span>
+      </div>
+      <div class="analogy-body">
+        <p>You don't walk into the kitchen, grab ingredients, and cook your own meal. You interact through a menu and a server — that's the API.</p>
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead><tr><th>Restaurant</th><th>API Equivalent</th></tr></thead>
+            <tbody>
+              <tr><td>Menu</td><td>API documentation</td></tr>
+              <tr><td>Menu items</td><td>Available resources / endpoints</td></tr>
+              <tr><td>Server (waiter)</td><td>The API interface</td></tr>
+              <tr><td>Kitchen</td><td>The backend system</td></tr>
+              <tr><td>Your order slip</td><td>The API request</td></tr>
+              <tr><td>The meal served</td><td>The API response</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:14px">You can only order what's on the menu. The server checks if your order is allowed right now. And when things go wrong, the rejection is informative: "We're out of that" = resource not found. "That's not on the menu" = invalid request.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">The Request–Response Cycle</h3>
+    <p>Every API interaction follows the same three-step loop. Everything else in API design is built on top of this cycle.</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-content"><h5>Ask</h5><p>A client sends a request — it specifies what it wants and proves it has the right to ask.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-content"><h5>Process</h5><p>The server inspects the request: Is it valid? Is the caller who they say they are? Are they allowed to do this?</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-content"><h5>Answer</h5><p>The server responds — with data if successful, or a status code explaining what went wrong if not.</p></div></div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">💡 Why this matters at EN</div>
+      <p>Employee Navigator is a hub, not a data dump. Hubs require rules and intentional "trust" boundaries. When a partner integrates with EN, every single call goes through this cycle — which is why understanding it is the foundation of everything else in this training.</p>
+    </div>
+
+    <!-- QUIZ 1 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>Which of the following best describes what an API is?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',1)"><span class="quiz-opt-letter">A</span>A pipe that moves data between systems automatically</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',1)"><span class="quiz-opt-letter">B</span>A governed contract that enforces rules on every request for identity, permission, validity, and context</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',1)"><span class="quiz-opt-letter">C</span>A database that stores shared information between two companies</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',1)"><span class="quiz-opt-letter">D</span>A file transfer system that runs on a schedule</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb1">✅ Correct! An API enforces rules on every interaction — it's a governed contract, not a passive pipe. This mental model is what separates people who truly understand APIs from those who just use them.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(1)">✓ Mark Module 1 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 2 — STATELESSNESS
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch2">
+    <div class="chapter-header">
+      <div class="chapter-num">02</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 2</div>
+        <h2>Statelessness — APIs Remember Nothing</h2>
+      </div>
+    </div>
+
+    <p class="lead">APIs are purposefully stateless. Think of talking to a goldfish — there is no "last time," no "we already talked," and no "you were here before." Every single request must stand completely on its own.</p>
+
+    <div class="callout-key callout">
+      <div class="callout-label">🔑 Core Concept</div>
+      <p>Statelessness means every API request must fully re-establish identity, permission, and intent. The server does not retain anything from previous requests. Authentication and authorization happen fresh on every call.</p>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">Why is this by design?</h3>
+    <p>Partners often push back: <em>"But we already authenticated earlier — why do we need to do it again?"</em> The answer is that statelessness isn't a bug. It's what makes APIs work reliably at scale.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card green-card">
+        <h4>Scalability</h4>
+        <ul>
+          <li>Any server can handle any request</li>
+          <li>No shared memory required between servers</li>
+          <li>Systems grow without complexity exploding</li>
+        </ul>
+      </div>
+      <div class="compare-card blue-card">
+        <h4>Security</h4>
+        <ul>
+          <li>Less sensitive data stored server-side</li>
+          <li>Access can be revoked at any time</li>
+          <li>Fewer attack surfaces to protect</li>
+        </ul>
+      </div>
+      <div class="compare-card green-card">
+        <h4>Predictability</h4>
+        <ul>
+          <li>Same input → same evaluation, every time</li>
+          <li>No hidden "session context" that surprises you</li>
+          <li>Easier to debug and reproduce issues</li>
+        </ul>
+      </div>
+      <div class="compare-card blue-card">
+        <h4>Access Tokens</h4>
+        <ul>
+          <li>Tokens exist to mitigate the burden of re-auth</li>
+          <li>Short-lived credentials that prove identity</li>
+          <li>Partners obtain them once, use for a window</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠️ Common Partner Misconception</div>
+      <p>When a partner says "We already authenticated," the correct response is: <strong>there is no "already" in a stateless API.</strong> Their token may still be valid, but every request must include it. If a call fails with a 401, their token has expired and they need to re-authenticate to get a new one.</p>
+    </div>
+
+    <!-- QUIZ 2 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner says "We authenticated 10 minutes ago — why is the API returning 401 Unauthorized?" What is the most likely explanation?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',2)"><span class="quiz-opt-letter">A</span>The API remembered their previous session but the server restarted</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',2)"><span class="quiz-opt-letter">B</span>They need to call the API from a different IP address</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',2)"><span class="quiz-opt-letter">C</span>Their access token has expired — APIs are stateless and every request must include a valid token</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',2)"><span class="quiz-opt-letter">D</span>The API is down and timing out</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb2">✅ Correct! APIs never remember prior sessions. Tokens are short-lived credentials — when they expire, a new one must be obtained. A 401 means the token is missing, invalid, or expired.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(2)">✓ Mark Module 2 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 3 — HTTP & PAYLOADS
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch3">
+    <div class="chapter-header">
+      <div class="chapter-num">03</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 3</div>
+        <h2>HTTP & Payloads — How APIs Talk</h2>
+      </div>
+    </div>
+
+    <p class="lead">HTTP is the language systems use to communicate over the web. It's not just about pushing data through a wire — every API call uses HTTP to express <em>what</em> someone is acting on, <em>what they want to do</em>, how they're allowed to do it, and what data is involved.</p>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:24px 0 14px">The 5 HTTP Methods You Need to Know</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Plain English</th><th>Example at EN</th><th>Risk Level</th></tr></thead>
+        <tbody>
+          <tr><td class="td-method">GET</td><td>"Show me"</td><td>Fetch an employee's demographic data</td><td><span class="badge badge-low">Low</span></td></tr>
+          <tr><td class="td-method">POST</td><td>"Create this"</td><td>Add a new employee deduction</td><td><span class="badge badge-high">High</span></td></tr>
+          <tr><td class="td-method">PUT</td><td>"Replace this entirely"</td><td>Replace a full employee profile</td><td><span class="badge badge-high">High</span></td></tr>
+          <tr><td class="td-method">PATCH</td><td>"Change part of this"</td><td>Update only an employee's deduction amount</td><td><span class="badge badge-med">Medium</span></td></tr>
+          <tr><td class="td-method">DELETE</td><td>"Remove this"</td><td>Delete a deduction record</td><td><span class="badge badge-vhigh">Very High</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">Anatomy of an API Request</h3>
+    <p>Every API request has four components working together. Here's a real EN example — fetching agency management data:</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n" style="background:#2e4158;color:var(--green-light)">URL</div><div class="step-content"><h5>What you're acting on</h5><p><code style="font-family:'DM Mono',monospace;font-size:12px;background:#f1f5f9;padding:2px 7px;border-radius:4px">https://qa.employeenavigator.net/api/companies/AMS123/agency-management</code> — this is the address of the specific resource.</p></div></div>
+      <div class="step"><div class="step-n" style="background:#2e4158;color:var(--green-light)">MTH</div><div class="step-content"><h5>What you want to do</h5><p><code style="font-family:'DM Mono',monospace;font-size:12px;background:#f1f5f9;padding:2px 7px;border-radius:4px">GET</code> — we're reading data, not writing it.</p></div></div>
+      <div class="step"><div class="step-n" style="background:#2e4158;color:var(--green-light)">HDR</div><div class="step-content"><h5>How you're allowed to do it</h5><p>Headers carry the access token and other metadata that prove identity and intent. We cover these in the Authentication module.</p></div></div>
+      <div class="step"><div class="step-n" style="background:#2e4158;color:var(--green-light)">BDY</div><div class="step-content"><h5>What data is involved</h5><p>For a GET request, the body is blank — we're just asking for something to be returned. For a POST or PATCH, the body contains the data being sent.</p></div></div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">JSON — The Shared Language</h3>
+    <p>APIs use JSON (JavaScript Object Notation) to structure the data they exchange. It's a format of key-value pairs that both systems understand.</p>
+
+    <div class="code-block">
+      <div class="code-label">Example JSON Payload — Employee Deduction</div>
+      <pre>{
+  "employeeId": "EMP-10042",
+  "companyId": "AMS123",
+  "deductionCode": "MDCL",
+  "effectiveDate": "2025-01-01",
+  "perPayAmount": 142.50,
+  "taxStatus": "PreTax"
+}</pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">💡 Key → Field Mapping</div>
+      <p>In JSON, each key corresponds to a field in both systems. When EN sends <code style="font-family:'DM Mono',monospace;font-size:12px">firstName</code>, the payroll partner maps that key to their own first name field. If the key is missing or misspelled, the payload fails validation — which is why exact field matching matters in every integration.</p>
+    </div>
+
+    <!-- QUIZ 3 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner is sending updated deduction amounts to Employee Navigator. Which HTTP method should they use?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">A</span>GET — to retrieve the current deduction amount first</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">B</span>DELETE — to remove the old amount before adding the new one</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',3)"><span class="quiz-opt-letter">C</span>POST or PATCH — POST to create a new deduction, PATCH to update part of an existing one</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',3)"><span class="quiz-opt-letter">D</span>PUT — to replace the entire employee record including the deduction</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb3">✅ Correct! POST creates new data, PATCH updates part of existing data. GET is read-only and never changes data. Choosing the wrong method is a common integration mistake.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(3)">✓ Mark Module 3 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 4 — AUTH & AUTHORIZATION
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch4">
+    <div class="chapter-header">
+      <div class="chapter-num">04</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 4</div>
+        <h2>Authentication vs. Authorization</h2>
+      </div>
+    </div>
+
+    <p class="lead">These two words are used interchangeably all the time — but they are completely separate concepts that happen at different times for very different reasons. Mixing them up is one of the most common sources of confusion in API troubleshooting.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card green-card">
+        <h4>Authentication — "Who are you?"</h4>
+        <ul>
+          <li>Happens <strong>once</strong> — when a token is issued</li>
+          <li>Proves identity (credentials, MFA, SSO)</li>
+          <li>Result: an <strong>access token</strong></li>
+          <li>Knowing who you are doesn't mean you can do anything yet</li>
+        </ul>
+      </div>
+      <div class="compare-card blue-card">
+        <h4>Authorization — "What can you do?"</h4>
+        <ul>
+          <li>Happens on <strong>every API call</strong></li>
+          <li>Evaluates permission for this specific resource</li>
+          <li>Contextual — same identity may be allowed Plan A but not Plan B</li>
+          <li>Checked even if you've been authenticated 100 times before</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="analogy-card">
+      <div class="analogy-header">
+        <span class="analogy-icon">🎤</span>
+        <span class="analogy-label">Analogy — The Concert</span>
+      </div>
+      <div class="analogy-body">
+        <p><strong>Authentication:</strong> You show your ticket at the gate. Security confirms it's real. You're authenticated — you've proven your identity.</p>
+        <p><strong>Authorization:</strong> Once inside, security checks: Is this ticket for today? For this venue? For floor seats or balcony? Even though you're authenticated, your <em>specific permissions</em> are evaluated at every door.</p>
+        <p>Authentication gets you in the building. Authorization decides how far you can go.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">The API's Decision Tree</h3>
+    <p>Every API call runs through a layered set of checks. Here's what EN (or any partner system) evaluates on every request:</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-content"><h5>Is there authentication information?</h5><p>If no token is present → <strong style="color:#dc2626">401 Unauthorized</strong>. The request is rejected immediately.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-content"><h5>Is the token valid?</h5><p>If the token is expired, forged, or malformed → <strong style="color:#dc2626">401 Unauthorized</strong>. Identity could not be confirmed.</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-content"><h5>Is this identity allowed to call this endpoint?</h5><p>If the identity doesn't have permission for this endpoint → <strong style="color:#d97706">403 Forbidden</strong>. "We know who you are, but you can't do this."</p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-content"><h5>Is this identity allowed to act on this specific resource?</h5><p>Even if the endpoint is allowed, access to a specific company or employee may not be → <strong style="color:#d97706">403 Forbidden</strong>.</p></div></div>
+    </div>
+
+    <!-- QUIZ 4 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner receives a 403 Forbidden response when trying to fetch plan data. What does this tell you?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',4)"><span class="quiz-opt-letter">A</span>Their token is expired and they need to re-authenticate</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',4)"><span class="quiz-opt-letter">B</span>The API is down or unavailable right now</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',4)"><span class="quiz-opt-letter">C</span>They are authenticated (EN knows who they are) but they don't have permission to access this specific resource</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',4)"><span class="quiz-opt-letter">D</span>Their JSON payload is malformed or missing required fields</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb4">✅ Correct! 403 means identity is confirmed but permission is denied. A 401 would indicate an authentication problem. Knowing the difference lets you direct partners to the right fix immediately.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(4)">✓ Mark Module 4 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 5 — IDENTITY CONTEXT
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch5">
+    <div class="chapter-header">
+      <div class="chapter-num">05</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 5</div>
+        <h2>Identity Context — System vs. User</h2>
+      </div>
+    </div>
+
+    <p class="lead">Before diving in, ask yourself: <em>"Who is actually performing this action?"</em> Is it a system acting on its own, or a system acting on behalf of a specific user? That distinction changes the risk profile of every API interaction.</p>
+
+    <div class="callout-key callout">
+      <div class="callout-label">🔑 The Bottom Line</div>
+      <p><strong>Client Credentials = "the system decided" this was OK.</strong><br>
+      <strong>Authorization Code = "a person decided" this was OK.</strong><br>
+      Both flows exist because identity context changes risk.</p>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">Flow 1: Client Credentials — System Acting Independently</h3>
+    <p>Used when two systems need to sync data automatically, with no user involved. EN's payroll integrations use this flow — a partner system authenticates itself and EN issues a token representing the application.</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-content"><h5>Partner system authenticates itself</h5><p>Uses its client ID and secret — no browser, no login screen, no user.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-content"><h5>EN issues a token representing the application</h5><p>One token for the whole application. Broad, consistent permissions.</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-content"><h5>Application uses that token to call APIs</h5><p>All calls are made as the application itself. No individual user is accountable.</p></div></div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠️ Common Misuse</div>
+      <p>"Why don't we just use Client Credentials for everything?" — Because there is no user accountability and it risks over-permissioning. A system acting independently has broad access. If that token is compromised, the blast radius is large. Reserve this for true background/sync jobs.</p>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">Flow 2: Authorization Code — System Acting on Behalf of a User</h3>
+    <p>Used when user consent and accountability matter. EN's AMS (Agency Management System) integrations use this — a broker explicitly authorizes access to their book of business.</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-content"><h5>The user authenticates with EN</h5><p>They log in and confirm their identity.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-content"><h5>User consents to the access</h5><p>"Yes, I authorize this system to act on my behalf."</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-content"><h5>EN issues an authorization code on the user's behalf</h5><p>The system exchanges that code for a token representing user-delegated authority.</p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-content"><h5>The token represents user-delegated authority</h5><p>If the user can't do it in the UI, the API won't allow it either. The permissions are bounded by what that user is allowed to do.</p></div></div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">Side-by-Side Comparison</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>Client Credentials</th><th>Authorization Code</th></tr></thead>
+        <tbody>
+          <tr><td>Who is acting?</td><td>Application itself</td><td>User via application</td></tr>
+          <tr><td>User involved?</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Permissions based on</td><td>App configuration</td><td>User's own rights</td></tr>
+          <tr><td>Audit trail</td><td>System activity</td><td>User activity</td></tr>
+          <tr><td>Best for</td><td>Background jobs, payroll sync</td><td>UI-driven actions, AMS access</td></tr>
+          <tr><td>Risk if misused</td><td>Overreach / over-permissioning</td><td>Leakage of user authority</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- QUIZ 5 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner asks: "Why can't our system automatically pull broker data without requiring the broker to log in?" What is the correct explanation?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',5)"><span class="quiz-opt-letter">A</span>EN's systems don't support automated access at all</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',5)"><span class="quiz-opt-letter">B</span>Accessing a broker's book of business requires the Authorization Code flow, which requires user intent and consent — the broker must actively authorize it</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',5)"><span class="quiz-opt-letter">C</span>The Client Credentials flow could be used instead if they have the right scope</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',5)"><span class="quiz-opt-letter">D</span>They need a higher-tier API subscription to enable automated access</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb5">✅ Correct! The Authorization Code flow exists because some actions require user intent. A person must actively decide to grant access. You can't automate that away — and you shouldn't want to, because it protects the broker's data.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(5)">✓ Mark Module 5 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 6 — SCOPES
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch6">
+    <div class="chapter-header">
+      <div class="chapter-num">06</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 6</div>
+        <h2>Scopes — Asking for Permission</h2>
+      </div>
+    </div>
+
+    <p class="lead">Scopes don't grant access — they ask for it. A scope says "I would like to do this kind of thing." The API still decides whether to allow it. Think of them as permission requests, not permission grants.</p>
+
+    <div class="callout-key callout">
+      <div class="callout-label">🔑 Core Concept</div>
+      <p>Scopes solve three problems: they <strong>limit risk</strong> (a compromised token can only do specific things), they <strong>express intent clearly</strong> (the API knows what kind of access is being requested), and they <strong>enable layered authorization</strong> (scopes are checked in addition to identity).</p>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">A Real EN Example</h3>
+    <p>The endpoint <code style="font-family:'DM Mono',monospace;font-size:13px;background:#f1f5f9;padding:2px 8px;border-radius:4px">/companies/{companyId}/agency-management</code> returns highly sensitive data: employee demographics, dependents, eligible benefits, and enrolled plans.</p>
+    <p>Because of that sensitivity, EN requires a scope of <code style="font-family:'DM Mono',monospace;font-size:13px;background:#f1f5f9;padding:2px 8px;border-radius:4px">AgencyManagementApi</code>. A partner must explicitly include this scope to communicate their intent. Without it — even with a valid token — the call will be rejected.</p>
+
+    <div class="analogy-card">
+      <div class="analogy-header">
+        <span class="analogy-icon">🎤</span>
+        <span class="analogy-label">Analogy — Concert Wristbands (Building on Module 4)</span>
+      </div>
+      <div class="analogy-body">
+        <p><strong>Authentication:</strong> You show your ticket at the gate. "Yes, this ticket is real." You're in.</p>
+        <p><strong>Scopes:</strong> Security puts a wristband on you. Different wristbands = different access: General Admission, VIP, or Backstage. The wristband says "this person <em>may request</em> access to these areas." It doesn't automatically open every door.</p>
+        <p><strong>Authorization:</strong> At each door, staff checks: Is this ticket for today? Does this wristband cover this section? Each check is independent.</p>
+      </div>
+    </div>
+
+    <!-- QUIZ 6 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner has a valid access token but receives a 403 when calling the agency-management endpoint. What is the most likely cause?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',6)"><span class="quiz-opt-letter">A</span>Their token has expired and they need to re-authenticate</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',6)"><span class="quiz-opt-letter">B</span>Their token was issued without the AgencyManagementApi scope — they didn't request that permission when authenticating</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',6)"><span class="quiz-opt-letter">C</span>The endpoint URL is wrong</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',6)"><span class="quiz-opt-letter">D</span>The JSON payload is missing required fields</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb6">✅ Correct! A valid token isn't enough for sensitive endpoints. The token must have been issued with the correct scope. The partner needs to re-authenticate and explicitly request the AgencyManagementApi scope.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(6)">✓ Mark Module 6 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 7 — READS VS WRITES
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch7">
+    <div class="chapter-header">
+      <div class="chapter-num">07</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 7</div>
+        <h2>Reads vs. Writes — One Observes, One Changes Reality</h2>
+      </div>
+    </div>
+
+    <p class="lead">Reading data is observational. Writing data is authoritative. A GET request describes what exists right now. A POST, PUT, or PATCH attempts to <em>change</em> what exists — and payroll reality has consequences.</p>
+
+    <div class="callout-key callout">
+      <div class="callout-label">🔑 Why This Matters at EN</div>
+      <p>When EN sends a POST to a payroll partner for a deduction update, that partner's system will run that deduction on an employee's next paycheck. Bad writes create lasting, real-world damage. EN enforces correctness up-front — we'd rather stop a bad POST than clean up bad payroll data after the fact.</p>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">What Happens When a Write Request Arrives</h3>
+    <p>When EN sends a POST deduction update to a payroll partner, the partner's system checks four layers of validity:</p>
+
+    <div class="step-list">
+      <div class="step"><div class="step-n">1</div><div class="step-content"><h5>Structural Validity</h5><p>Is the JSON well-formed? Are all required fields present? Are values the correct data types? → If not: <strong style="color:#dc2626">400 Bad Request</strong></p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-content"><h5>Referential Validity</h5><p>Does the referenced resource actually exist? Does this employee exist in payroll? Does this deduction code exist? → If not: <strong style="color:#dc2626">400 or 404</strong></p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-content"><h5>Business Validity</h5><p>Is this deduction allowed for this employee? Does the employee's plan support this code? → If not: <strong style="color:#dc2626">400 Bad Request</strong></p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-content"><h5>System Stability</h5><p>Is the payroll system available and able to process this right now? → If not: <strong style="color:#db2777">500–504 Server Error</strong></p></div></div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠️ The Asymmetry of Reads and Writes</div>
+      <p>A failed GET is a minor inconvenience — the data simply wasn't returned. A failed write that <em>partially</em> succeeds can corrupt data. A write that succeeds with wrong values causes real financial harm (incorrect paycheck deductions). This is why write operations carry much higher risk levels and are validated far more strictly.</p>
+    </div>
+
+    <!-- QUIZ 7 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner successfully sends a POST deduction update to payroll (receives a 200 response), but the deduction appears on the employee's next check with the wrong amount. What is the most likely cause?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">A</span>The API was down and cached a previous response</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',7)"><span class="quiz-opt-letter">C</span>The POST was accepted but the payload contained the wrong perPayAmount value — a 200 means the structure was valid, not that the values were correct</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">B</span>The payroll system recalculated the deduction on its own</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',7)"><span class="quiz-opt-letter">D</span>The deduction code was mapped to the wrong plan in EN</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb7">✅ Correct! A 200 response confirms the structure was valid and accepted — not that the values were correct. Always verify the payload values match the expected amounts before investigating other causes.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(7)">✓ Mark Module 7 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 8 — WEBHOOKS
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch8">
+    <div class="chapter-header">
+      <div class="chapter-num">08</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 8</div>
+        <h2>Webhooks — Don't Keep Asking, We'll Tell You</h2>
+      </div>
+    </div>
+
+    <p class="lead">APIs are how you ask questions. Webhooks are how systems notify you that something changed. It's the same mechanism — an HTTP call — but with the roles reversed.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card green-card">
+        <h4>Without Webhooks (Polling)</h4>
+        <ul>
+          <li>Partners must repeatedly call EN asking "did anything change?"</li>
+          <li>High volume of unnecessary API calls</li>
+          <li>Delays — you only know about changes when you ask</li>
+          <li>Wastes compute on both sides</li>
+        </ul>
+      </div>
+      <div class="compare-card blue-card">
+        <h4>With Webhooks (Push)</h4>
+        <ul>
+          <li>EN proactively notifies partners when something changes</li>
+          <li>Real-time — the partner is told immediately</li>
+          <li>Efficient — only fires when there's something to report</li>
+          <li>Partner then uses their API to fetch full details</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">💡 How Webhooks Fit Into EN's Payroll Integrations</div>
+      <p>When an employee's address changes in a payroll system, payroll sends EN a webhook: "something changed for this employee at this company." EN validates the webhook, authenticates with payroll, then uses a GET call to fetch the full updated record. The webhook is just the notification — the actual data transfer still uses standard API calls.</p>
+    </div>
+
+    <!-- QUIZ 8 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A payroll partner says "We sent EN a webhook notification 2 hours ago when an employee was terminated, but EN still shows them as active." What should you check first?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',8)"><span class="quiz-opt-letter">A</span>Whether the employee's deduction code is mapped correctly</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',8)"><span class="quiz-opt-letter">B</span>Whether the partner's API subscription is still active</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',8)"><span class="quiz-opt-letter">C</span>Whether EN received and processed the webhook — check the Integration Health Dashboard for an incoming demographics change for that employee around that time</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',8)"><span class="quiz-opt-letter">D</span>Whether the employee's open enrollment was completed</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb8">✅ Correct! The webhook is just a notification. EN may have received it but failed to process the subsequent GET call, or the webhook may not have arrived at all. The Integration Health Dashboard is your first diagnostic tool.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(8)">✓ Mark Module 8 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 9 — ERRORS & DEBUGGING
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch9">
+    <div class="chapter-header">
+      <div class="chapter-num">09</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 9</div>
+        <h2>Errors & Debugging — The System Is Telling You Exactly What Went Wrong</h2>
+      </div>
+    </div>
+
+    <p class="lead">API errors aren't mysteries. They're the system telling you precisely which rule was violated. Your job is to interpret them correctly, not just read the message — but classify the failure layer, collect the right evidence, and either fix it or route it correctly.</p>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:24px 0 14px">The Error Layer Reference</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Status Code</th><th>Layer</th><th>Plain English</th><th>Typical Action</th></tr></thead>
+        <tbody class="status-row">
+          <tr><td class="s-401">401</td><td>Authentication</td><td>"I don't know who you are" — token missing, expired, or invalid</td><td>Partner re-authenticates and gets a new token</td></tr>
+          <tr><td class="s-403">403</td><td>Authorization</td><td>"I know who you are, but you're not allowed to do this" — wrong scope or permission</td><td>Check scopes; verify the identity has access to this resource</td></tr>
+          <tr><td class="s-400">400</td><td>Request Validity</td><td>"I can't understand or safely process what you sent" — bad JSON, missing fields, wrong data types</td><td>Fix the payload structure; check required fields</td></tr>
+          <tr><td class="s-400">404</td><td>Not Found</td><td>"This resource doesn't exist" — wrong ID or the record was deleted</td><td>Verify the resource ID exists in the target system</td></tr>
+          <tr><td class="s-400" style="color:#7c3aed">409</td><td>Conflict</td><td>"This conflicts with existing data or state" — duplicate record or invalid transition</td><td>Check for duplicates; review the current state of the resource</td></tr>
+          <tr><td class="s-500">500</td><td>Server Error</td><td>"Something went wrong while I was processing this" — unexpected internal error</td><td>Retry later; escalate if persistent</td></tr>
+          <tr><td class="s-500" style="color:#9333ea">503</td><td>Unavailable</td><td>"I'm not able to handle requests right now" — system down or throttled</td><td>Wait and retry with backoff; check partner status page</td></tr>
+          <tr><td class="s-500" style="color:#b91c1c">504</td><td>Timeout</td><td>"I didn't finish processing this in time"</td><td>Retry; investigate if the operation is consistently slow</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:28px 0 12px">What to Ask Partners for Every Failure</h3>
+    <p>Standardize what you ask for. This eliminates back-and-forth and gets to root cause faster.</p>
+
+    <div class="callout callout-tip">
+      <div class="callout-label">✅ Required Evidence Checklist</div>
+      <p>
+        1. <strong>Endpoint + method</strong> — the full URL and whether it was GET, POST, PATCH, etc.<br>
+        2. <strong>Timestamp with timezone</strong> — exact time the call was made<br>
+        3. <strong>Company ID + Employee ID</strong> — the identifiers used<br>
+        4. <strong>Request headers</strong> — especially api-version, auth token, and any custom headers<br>
+        5. <strong>Full request body</strong> — the complete JSON payload that was sent<br>
+        6. <strong>Full response</strong> — status code AND the full response body (ProblemDetails if present)
+      </p>
+    </div>
+
+    <!-- QUIZ 9 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Check Your Understanding</div>
+      <h4>A partner receives a 400 Bad Request when posting a deduction update. They say "the payload looks fine to us." What is the correct next step?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">A</span>Tell them to re-authenticate and try again</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">B</span>Check if the payroll system is experiencing downtime</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',9)"><span class="quiz-opt-letter">C</span>Request the full request body and response body — 400 indicates a structural or validation issue that will be described in the response body</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',9)"><span class="quiz-opt-letter">D</span>Escalate to Tier 2 immediately without further investigation</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb9">✅ Correct! A 400 always means the request body failed validation. The response body will contain the specific reason — missing field, wrong data type, etc. Always get the full response before escalating.</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(9)">✓ Mark Module 9 Complete</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ══════════════════════════════════════════
+       CHAPTER 10 — PUTTING IT TOGETHER
+  ══════════════════════════════════════════ -->
+  <div class="chapter" id="ch10">
+    <div class="chapter-header">
+      <div class="chapter-num">10</div>
+      <div class="chapter-meta">
+        <div class="chapter-label">Module 10</div>
+        <h2>Putting It All Together</h2>
+      </div>
+    </div>
+
+    <p class="lead">This training built a foundation — not a manual for using EN's APIs yet. That's the next step. Before you get there, let's make sure all the pieces connect.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Concept</th><th>The One-Sentence Version</th></tr></thead>
+        <tbody>
+          <tr><td><strong>What an API is</strong></td><td>A governed contract that enforces rules on every call — not a data pipe.</td></tr>
+          <tr><td><strong>Statelessness</strong></td><td>APIs remember nothing. Every request must fully prove its own identity and intent.</td></tr>
+          <tr><td><strong>HTTP & payloads</strong></td><td>Methods express intent (GET/POST/PATCH), status codes explain outcomes, JSON is the shared language.</td></tr>
+          <tr><td><strong>Authentication vs. Authorization</strong></td><td>Auth = "who are you?" (happens once). Authorization = "what can you do right now?" (happens every call).</td></tr>
+          <tr><td><strong>Identity context</strong></td><td>Client Credentials = system decided. Authorization Code = a person decided. Context changes risk.</td></tr>
+          <tr><td><strong>Scopes</strong></td><td>Scopes ask for permission. APIs decide whether to grant it. Sensitive endpoints require explicit scope.</td></tr>
+          <tr><td><strong>Reads vs. Writes</strong></td><td>Reads describe reality. Writes attempt to change it — and carry real consequences when wrong.</td></tr>
+          <tr><td><strong>Webhooks</strong></td><td>Notifications that something changed. EN uses them to know when to go fetch updates from partners.</td></tr>
+          <tr><td><strong>Errors</strong></td><td>The system is telling you which rule was broken. Classify the layer, get the evidence, fix the cause.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;color:var(--navy);margin:32px 0 14px">Your Next Steps</h3>
+    <div class="step-list">
+      <div class="step"><div class="step-n">→</div><div class="step-content"><h5>Install Postman</h5><p>This is the standard tool for testing API calls across EN and our partners. Download it at <strong>postman.com</strong>. You'll use it to make live API calls and see real responses.</p></div></div>
+      <div class="step"><div class="step-n">→</div><div class="step-content"><h5>Read the OAuth 2.0 Professional Guide</h5><p>The guide linked in your training materials (and included with this document) goes deeper on identity flows, tokens, and the history of why these protocols exist. Read Chapters 1 and 4 first.</p></div></div>
+      <div class="step"><div class="step-n">→</div><div class="step-content"><h5>Shadow API discussions</h5><p>Sit in on partner troubleshooting calls and payroll integration reviews. The vocabulary you've built here will make those conversations immediately more navigable.</p></div></div>
+      <div class="step"><div class="step-n">→</div><div class="step-content"><h5>Dive into EN's AMS + Payroll APIs specifically</h5><p>Now that you have the foundation, the next training will go into how these exact concepts apply to EN's specific integration patterns.</p></div></div>
+    </div>
+
+    <!-- QUIZ 10 -->
+    <div class="quiz-card">
+      <div class="quiz-label">✏️ Final Check-In</div>
+      <h4>A partner calls in: "We're trying to pull employee data for our client, we're getting 401, and we already authenticated this morning." What do you tell them?</h4>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',10)"><span class="quiz-opt-letter">A</span>"That shouldn't happen — your session should last 24 hours. Let me escalate this."</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'correct',10)"><span class="quiz-opt-letter">B</span>"APIs are stateless — there's no session that persists. Your access token has expired. You'll need to re-authenticate to get a new one and include it on every request."</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',10)"><span class="quiz-opt-letter">C</span>"A 401 means you don't have the right scope for this endpoint."</div>
+        <div class="quiz-opt" onclick="checkQuiz(this,'wrong',10)"><span class="quiz-opt-letter">D</span>"Try sending the request again — it might have been a temporary network issue."</div>
+      </div>
+      <div class="quiz-feedback correct-fb" id="qfb10">🎉 Excellent! You've correctly applied statelessness (no sessions), authentication (token expired), and error classification (401 = identity problem). That's everything from Modules 2 and 4 working together. Training complete!</div>
+    </div>
+
+    <button class="chapter-done-btn" onclick="markDone(10)" style="background:var(--green-dark)">🎓 Complete Training</button>
+  </div>
+
+  </div><!-- /content-wrap -->
+</main>
+</div><!-- /layout -->
+
+<script>
+const done = new Set();
+
+function markDone(n) {
+  done.add(n);
+  const navItem = document.querySelector(`.nav-item[data-ch="${n}"]`);
+  if (navItem) {
+    navItem.classList.add('done');
+    navItem.classList.remove('active');
+    navItem.querySelector('.nav-num').textContent = '✓';
+  }
+  // update progress
+  const pct = (done.size / 10 * 100).toFixed(0);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = done.size + ' of 10 complete';
+}
+
+function checkQuiz(el, result, qNum) {
+  const card = el.closest('.quiz-card');
+  if (card.dataset.answered) return;
+  card.dataset.answered = '1';
+  const opts = card.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  if (result === 'correct') {
+    el.classList.add('correct');
+    const fb = document.getElementById('qfb' + qNum);
+    if (fb) { fb.classList.add('show', 'correct-fb'); }
+  } else {
+    el.classList.add('wrong');
+    // highlight correct
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes("'correct'")) {
+        o.classList.add('correct');
+      }
+    });
+    const fb = document.getElementById('qfb' + qNum);
+    if (fb) {
+      fb.classList.remove('correct-fb');
+      fb.classList.add('show', 'wrong-fb');
+      fb.textContent = '❌ Not quite. The correct answer is highlighted above. Review the module content and try to understand why before moving on.';
+    }
+  }
+}
+
+// Intersection observer for chapter fade-in
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // update active nav
+      const ch = entry.target.id.replace('ch','');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navItem = document.querySelector(`.nav-item[data-ch="${ch}"]`);
+      if (navItem && !done.has(parseInt(ch))) navItem.classList.add('active');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '-60px 0px -40% 0px' });
+
+document.querySelectorAll('.chapter').forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>
