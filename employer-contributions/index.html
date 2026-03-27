@@ -1,0 +1,618 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employer Contributions & W-2 Reporting · Employee Navigator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#1e2d3d; --navy-mid:#263545; --navy-light:#2e4158;
+  --green:#4caf50; --green-dark:#2e7d32; --green-light:#a5d6a7; --green-pale:#e8f5e9;
+  --amber:#f59e0b; --amber-pale:#fffbeb; --amber-dark:#92400e;
+  --red:#ef4444; --red-pale:#fef2f2; --red-dark:#991b1b;
+  --blue:#3b82f6; --blue-pale:#eff6ff;
+  --purple:#7c3aed; --purple-pale:#f5f3ff;
+  --cream:#fafaf8; --white:#fff; --border:#e2e8f0;
+  --text:#1a2332; --muted:#64748b;
+  --shadow:0 4px 16px rgba(0,0,0,.07); --shadow-lg:0 12px 40px rgba(0,0,0,.1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);line-height:1.7;font-size:16px}
+
+/* SIDEBAR */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:268px;flex-shrink:0;background:var(--navy);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--navy-light);border-radius:2px}
+.sb-brand{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-eye{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-light);margin-bottom:6px}
+.sb-title{font-family:'DM Serif Display',serif;font-size:16px;color:#fff;line-height:1.35}
+.sb-nav{padding:14px 0;flex:1}
+.sb-section{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);padding:12px 24px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 24px;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;border-left:3px solid transparent;text-decoration:none;transition:all .18s;cursor:pointer}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-item.active{color:#fff;border-left-color:var(--green);background:rgba(76,175,80,.1)}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;transition:all .18s}
+.nav-item.active .nav-dot{background:var(--green)}
+.sb-footer{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.3);line-height:1.6}
+
+/* MAIN */
+.main{margin-left:268px;flex:1}
+
+/* HERO */
+.hero{background:var(--navy);padding:68px 60px 60px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;bottom:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(76,175,80,.12) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);color:var(--green-light);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:24px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,4vw,48px);color:#fff;line-height:1.15;margin-bottom:14px}
+.hero h1 em{color:var(--green-light);font-style:italic}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.62);max-width:580px;line-height:1.7;margin-bottom:30px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* CONTENT */
+.content{padding:52px 60px;max-width:900px}
+.section{margin-bottom:72px;opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.section.visible{opacity:1;transform:none}
+.sec-header{display:flex;align-items:flex-start;gap:18px;margin-bottom:28px}
+.sec-num{width:44px;height:44px;border-radius:13px;flex-shrink:0;background:var(--navy);color:var(--green);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid rgba(76,175,80,.2)}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green-dark);margin-bottom:4px}
+.section h2{font-family:'DM Serif Display',serif;font-size:clamp(20px,2.5vw,27px);color:var(--navy);line-height:1.2}
+p{margin-bottom:16px;color:#374151;line-height:1.75}
+.lead{font-size:17px;color:#1f2937;line-height:1.75;margin-bottom:26px;padding-left:18px;border-left:3px solid var(--green)}
+h3{font-size:16px;font-weight:700;color:var(--navy);margin:26px 0 12px}
+
+/* CALLOUTS */
+.callout{border-radius:12px;padding:18px 22px;margin:22px 0;border:1px solid}
+.callout-lbl{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.callout p{margin:0;font-size:14px;line-height:1.65}
+.callout-key{background:var(--navy);border-color:var(--navy)}
+.callout-key .callout-lbl{color:var(--green-light)}
+.callout-key p{color:rgba(255,255,255,.82)}
+.callout-warn{background:var(--amber-pale);border-color:#fde68a}
+.callout-warn .callout-lbl{color:var(--amber-dark)}
+.callout-warn p{color:#78350f}
+.callout-tip{background:var(--green-pale);border-color:#bbf7d0}
+.callout-tip .callout-lbl{color:#166534}
+.callout-tip p{color:#14532d}
+.callout-info{background:var(--blue-pale);border-color:#bfdbfe}
+.callout-info .callout-lbl{color:#1d4ed8}
+.callout-info p{color:#1e3a5f}
+.callout-danger{background:var(--red-pale);border-color:#fecaca}
+.callout-danger .callout-lbl{color:var(--red-dark)}
+.callout-danger p{color:#7f1d1d}
+
+/* TWO-COL GRID */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.col-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.col-card h4{font-size:13px;font-weight:700;margin-bottom:8px}
+.col-card ul{padding-left:16px}
+.col-card li{font-size:13px;color:#374151;margin-bottom:6px;line-height:1.5}
+.col-card.yes-card{border-top:3px solid var(--green)}
+.col-card.yes-card h4{color:var(--green-dark)}
+.col-card.no-card{border-top:3px solid var(--red)}
+.col-card.no-card h4{color:var(--red-dark)}
+
+/* STEP LIST */
+.steps{display:flex;flex-direction:column;gap:12px;margin:20px 0}
+.step{display:flex;align-items:flex-start;gap:16px;background:#fff;border-radius:12px;padding:16px 18px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.step-n{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:var(--navy);color:var(--green);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step h5{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.step p{font-size:13px;color:#64748b;margin:0;line-height:1.55}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;margin:20px 0;border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+table{width:100%;border-collapse:collapse;background:#fff}
+thead{background:var(--navy)}
+thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.65)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8fafc}
+tbody td{padding:12px 16px;font-size:13px;color:#374151;vertical-align:top;line-height:1.55}
+.code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;background:#f1f5f9;padding:1px 6px;border-radius:4px}
+.badge{display:inline-flex;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-yes{background:var(--green-pale);color:var(--green-dark)}
+.b-no{background:var(--red-pale);color:var(--red-dark)}
+.b-partner{background:#ede9fe;color:#5b21b6}
+.b-irs{background:#fef3c7;color:#92400e}
+
+/* W2 BOX HIGHLIGHT */
+.w2-box{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--green-light);font-family:'DM Mono',monospace;font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0}
+
+/* FLOW DIAGRAM */
+.flow{display:flex;align-items:stretch;gap:0;margin:22px 0;flex-wrap:wrap}
+.flow-step{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;flex:1;min-width:140px;box-shadow:0 1px 4px rgba(0,0,0,.05);text-align:center}
+.flow-step .flow-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--green);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.flow-step h5{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.flow-step p{font-size:11px;color:#64748b;margin:0;line-height:1.45}
+.flow-arrow{display:flex;align-items:center;padding:0 8px;color:var(--green);font-size:20px;font-weight:700;flex-shrink:0}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{width:240px}.main{margin-left:240px}
+  .content{padding:36px 28px}.hero{padding:44px 28px 36px}
+  .two-col{grid-template-columns:1fr}
+  .flow{flex-direction:column}.flow-arrow{transform:rotate(90deg);padding:6px 0;justify-content:center}
+}
+@media(max-width:640px){
+  .sidebar{display:none}.main{margin-left:0}
+  .content{padding:24px 16px}.hero{padding:36px 18px 28px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-eye">Employee Navigator</div>
+    <div class="sb-title">Employer Contributions<br>& W-2 Reporting</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Sections</div>
+    <a href="#s1" class="nav-item active" data-s="s1"><span class="nav-dot"></span>What Are ER Contributions?</a>
+    <a href="#s2" class="nav-item" data-s="s2"><span class="nav-dot"></span>What EN Supports</a>
+    <a href="#s3" class="nav-item" data-s="s3"><span class="nav-dot"></span>The W-2 Connection</a>
+    <a href="#s4" class="nav-item" data-s="s4"><span class="nav-dot"></span>How EN Sends ER Data</a>
+    <a href="#s5" class="nav-item" data-s="s5"><span class="nav-dot"></span>Setup Steps</a>
+    <a href="#s6" class="nav-item" data-s="s6"><span class="nav-dot"></span>Codes That Must Never Be Mapped</a>
+    <a href="#s7" class="nav-item" data-s="s7"><span class="nav-dot"></span>Who Does What</a>
+    <a href="#s8" class="nav-item" data-s="s8"><span class="nav-dot"></span>Quick Reference</a>
+  </div>
+  <div class="sb-footer">
+    Based on 2026 IRS W-2 Instructions<br>
+    + EN Help Center documentation
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<div class="hero">
+  <div class="hero-badge">💰 Reference Guide</div>
+  <h1>Employer Contributions —<br><em>What they are and how they move</em></h1>
+  <p class="hero-sub">A plain-language guide to employer contributions in EN's payroll integrations: what they represent, how they connect to W-2 reporting, which partners support them, and exactly how to configure the exchange.</p>
+  <div class="hero-chips">
+    <div class="chip"><span class="chip-dot"></span>Based on 2026 IRS W-2 instructions</div>
+    <div class="chip"><span class="chip-dot"></span>Paylocity · Paycor · Paychex · UKG Ready</div>
+    <div class="chip"><span class="chip-dot"></span>EN Help Center sourced</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════
+     S1 — WHAT ARE ER CONTRIBUTIONS
+════════════════════════ -->
+<div class="section visible" id="s1">
+  <div class="sec-header">
+    <div class="sec-num">01</div>
+    <div>
+      <div class="sec-label">The Foundation</div>
+      <h2>What Are Employer Contributions?</h2>
+    </div>
+  </div>
+
+  <p class="lead">An employer contribution is the portion of a benefit's cost that the employer pays on behalf of an employee — separate from what the employee pays themselves through a paycheck deduction. In EN's payroll integration, these are tracked using what are called <strong>employer memo codes</strong> (also called earning codes) in payroll.</p>
+
+  <p>Think of it this way: when an employee enrolls in Medical, there are typically two costs — the employee's share (deducted from their paycheck) and the employer's share (paid by the company). Employee Navigator handles sending the employee's deduction to payroll automatically. Employer contributions are an additional, opt-in layer that tracks the company's side of that cost.</p>
+
+  <div class="callout callout-key">
+    <div class="callout-lbl">🔑 The Key Distinction</div>
+    <p>Employee deductions flow from EN to payroll to reduce the employee's gross pay. Employer contributions are <strong>memo amounts</strong> — they track what the company is spending per pay period on benefits, but they do not come out of the employee's paycheck. They exist in payroll purely for tracking and W-2 reporting purposes.</p>
+  </div>
+
+  <h3>Why Do Employer Contributions Need to Be in Payroll?</h3>
+  <p>The IRS requires certain employer contributions to appear on the employee's Form W-2. The most significant example is <strong>employer-sponsored health coverage</strong> — the total cost of the employer's share of health insurance premiums must be reported in <span class="w2-box">Box 12, Code DD</span> on the W-2. Payroll is the system of record for this. EN sends the per-pay-period amounts to payroll so that payroll can accumulate them accurately across the year and report the correct W-2 figure.</p>
+
+  <p>Beyond the W-2 requirement, many employers also use these codes to track their HR and benefits spend internally — even for benefit types where IRS reporting isn't mandatory.</p>
+
+  <div class="callout callout-info">
+    <div class="callout-lbl">💡 Who Is Required to Track This?</div>
+    <p>Under the Affordable Care Act, employers with <strong>250 or more full-time equivalents (FTEs)</strong> are required to report the cost of employer-sponsored health coverage on the W-2 (Box 12, Code DD). For employers under 250 FTEs, this reporting is currently transitional relief — optional but increasingly expected. For other benefit types (Dental, Vision, etc.), employer contribution tracking is generally optional but useful for reporting.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S2 — WHAT EN SUPPORTS
+════════════════════════ -->
+<div class="section" id="s2">
+  <div class="sec-header">
+    <div class="sec-num">02</div>
+    <div>
+      <div class="sec-label">Scope</div>
+      <h2>What EN Supports — and What It Doesn't</h2>
+    </div>
+  </div>
+
+  <p class="lead">Employer contribution exchange is currently supported for <strong>Paylocity, Paycor, Paychex, and UKG Ready</strong> only. Not all benefit types are supported, and some are intentionally excluded due to complexity or partner limitations.</p>
+
+  <div class="two-col">
+    <div class="col-card yes-card">
+      <h4>✅ Supported — EN Can Send These</h4>
+      <ul>
+        <li>ER cost of <strong>Medical</strong></li>
+        <li>ER cost of <strong>Dental</strong></li>
+        <li>ER cost of <strong>Vision</strong></li>
+        <li>ER cost of <strong>Hospital Indemnity</strong> when the employee pays pre-tax</li>
+      </ul>
+    </div>
+    <div class="col-card no-card">
+      <h4>🚫 Not Supported — EN Will Not Send</h4>
+      <ul>
+        <li>Employer <strong>HSA contributions</strong></li>
+        <li>Employer <strong>Group Life</strong> contributions</li>
+        <li>Employer <strong>Group AD&D</strong> contributions</li>
+        <li>Combined <strong>Group Life/AD&D</strong> plans</li>
+        <li>Employees with <strong>imputed income</strong> or domestic partners</li>
+        <li>Employer contributions for <strong>Commuter benefits</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-lbl">💡 Why Are HSA, Group Life, and AD&D Excluded?</div>
+    <p>The IRS treats these differently. HSA employer contributions are reported in <span class="w2-box">Box 12, Code W</span> — a separate mechanism with IRS limits and specific tax treatment that payroll systems manage directly. Group Life and AD&D employer contributions involve imputed income calculations (especially for coverage over $50,000) that are too complex for a simple memo code approach. These plan types have the Earning section auto-greyed out in EN and are permanently set to "Never Send."</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-lbl">⚠️ Codes Can Still Be Mapped for Unsupported Types — But No Data Will Send</div>
+    <p>A broker or HR can map earning codes for unsupported benefit types (HSA, Group Life, etc.) within EN for internal reporting purposes — but EN will <strong>not</strong> transmit any data to payroll for these. The code sits in the system as a placeholder only. Do not expect payroll to receive or reflect these values.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S3 — THE W-2 CONNECTION
+════════════════════════ -->
+<div class="section" id="s3">
+  <div class="sec-header">
+    <div class="sec-num">03</div>
+    <div>
+      <div class="sec-label">IRS Context</div>
+      <h2>The W-2 Connection — Why This Matters at Tax Time</h2>
+    </div>
+  </div>
+
+  <p class="lead">The reason employer contributions need to flow accurately through payroll all year is simple: payroll is what generates the W-2. If the employer contribution amounts weren't tracked in payroll throughout the year, the W-2 figures will be wrong — and that has IRS consequences.</p>
+
+  <h3>The Key W-2 Boxes Affected by Employer Contributions</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>W-2 Box</th><th>What It Reports</th><th>Benefit Type</th><th>Required For</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="w2-box">Box 12 · DD</span></td>
+          <td>Total cost of employer-sponsored health coverage (employer + employee combined premium)</td>
+          <td>Medical / Health</td>
+          <td><span class="badge b-irs">250+ FTE employers</span></td>
+        </tr>
+        <tr>
+          <td><span class="w2-box">Box 12 · W</span></td>
+          <td>Employer contributions to an employee's HSA (including employee contributions through a cafeteria plan)</td>
+          <td>HSA</td>
+          <td><span class="badge b-irs">All employers with HSA</span></td>
+        </tr>
+        <tr>
+          <td><span class="w2-box">Box 12 · C</span></td>
+          <td>Taxable cost of group-term life insurance over $50,000</td>
+          <td>Group Life</td>
+          <td><span class="badge b-irs">When coverage exceeds $50K</span></td>
+        </tr>
+        <tr>
+          <td><span class="w2-box">Box 1</span></td>
+          <td>Wages, tips, other compensation — affected when employer pays employee's share of FICA or provides taxable fringe benefits</td>
+          <td>Various</td>
+          <td><span class="badge b-irs">All employers</span></td>
+        </tr>
+        <tr>
+          <td><span class="w2-box">Box 14a · Other</span></td>
+          <td>Optional reporting — employer may include contribution amounts here for employee reference (union dues, health premiums deducted, etc.)</td>
+          <td>Various</td>
+          <td><span class="badge b-irs">Optional</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key">
+    <div class="callout-lbl">🔑 Code DD — The Most Important One for EN Customers</div>
+    <p>Box 12, Code DD reports the <strong>total cost</strong> of employer-sponsored health coverage — both the employer's share AND the employee's share combined. This is not taxable income, but it must be reported on the W-2 for employers with 250+ FTEs. The value in payroll's DD code accumulates from every pay period's employer contribution transmission. If EN's employer contribution exchange isn't configured and running correctly, this number will be off at year-end, creating a W-2 correction situation (Form W-2c).</p>
+  </div>
+
+  <h3>What Happens If These Amounts Are Wrong on the W-2?</h3>
+  <p>The IRS treats W-2 errors seriously. Per the 2026 IRS instructions, the penalty for filing an incorrect W-2 is <strong>$60–$340 per form</strong> depending on how late the correction is made, with maximums up to $4.19M per year for large employers. Errors in employer-reported amounts — especially Code DD — require filing a corrected Form W-2c with the SSA and re-furnishing it to the employee. That's why getting the employer contribution data flowing accurately from EN to payroll all year is far easier than correcting it after the fact.</p>
+
+  <div class="callout callout-warn">
+    <div class="callout-lbl">⚠️ W-2c Is the Fix — But Prevention Is Better</div>
+    <p>If employer contribution amounts were tracked incorrectly all year and the W-2 is wrong, the employer must file Form W-2c (Corrected Wage and Tax Statement) with the SSA and provide a corrected copy to each affected employee. The IRS only grants one 30-day extension to file W-2s, and only in extraordinary circumstances. Configuring EN's ER contribution exchange at the start of the plan year prevents this entirely.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S4 — HOW EN SENDS ER DATA
+════════════════════════ -->
+<div class="section" id="s4">
+  <div class="sec-header">
+    <div class="sec-num">04</div>
+    <div>
+      <div class="sec-label">The Mechanism</div>
+      <h2>How EN Sends Employer Contribution Data to Payroll</h2>
+    </div>
+  </div>
+
+  <p class="lead">EN sends employer contributions the same way it sends employee deductions — as a POST API call to the payroll partner containing the employer memo code and the per-pay-period amount. The key difference is that these are <em>earning codes</em> in payroll, not deduction codes.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <h5>Employee Enrolls</h5>
+      <p>Employee completes enrollment in EN. Their per-pay cost is calculated.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <h5>EN Calculates ER Cost</h5>
+      <p>EN determines the employer's per-pay-period share based on plan rates and the mapped ER earning code.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <h5>EN Sends to Payroll</h5>
+      <p>EN POSTs the ER earning code + per-pay amount to the partner's API. Same transmission as employee deductions.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <h5>Payroll Accumulates</h5>
+      <p>Payroll adds the amount each pay period. Year-end total populates the W-2 (e.g., Code DD for health coverage).</p>
+    </div>
+  </div>
+
+  <h3>When Does EN Send ER Contributions?</h3>
+  <p>EN sends employer contribution data under the same triggers as employee deductions. Once the ER code is mapped and the plan is set to "Always Send," EN will:</p>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">→</div><div><h5>Immediately on configuration</h5><p>When you save the ER code mapping and hit Confirm, EN instantly writes and sends all employer contributions for that plan to payroll for every currently enrolled employee.</p></div></div>
+    <div class="step"><div class="step-n">→</div><div><h5>On new enrollment</h5><p>When a new employee enrolls in the plan — during New Hire, Open Enrollment, or a Qualifying Life Event — EN sends both the employee deduction and the employer contribution together.</p></div></div>
+    <div class="step"><div class="step-n">→</div><div><h5>When cost changes</h5><p>If plan rates change (e.g., after OE), EN recalculates and re-sends the updated employer contribution amount just as it does for employee deductions.</p></div></div>
+    <div class="step"><div class="step-n">→</div><div><h5>On termination</h5><p>When an employee's coverage ends, EN sends a deactivation/end date for the employer contribution record — stopping the accumulation in payroll.</p></div></div>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-lbl">💡 Same RDR Logic as Deductions</div>
+    <p>Employer contributions follow the exact same Recurring Deduction Record (RDR) logic as employee deductions. They live in the employee's Data Sheet alongside their deduction records. EN only re-sends them when the cost or effective date changes — not on every payroll cycle. The payroll system handles the recurring application on each pay date.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S5 — SETUP STEPS
+════════════════════════ -->
+<div class="section" id="s5">
+  <div class="sec-header">
+    <div class="sec-num">05</div>
+    <div>
+      <div class="sec-label">Configuration</div>
+      <h2>How to Configure the Exchange of Employer Contributions</h2>
+    </div>
+  </div>
+
+  <p class="lead">Setup is a one-time configuration per plan type. Once done, EN handles the rest automatically. Before starting, confirm with the partner that the ER earning codes are set up correctly in payroll — this must happen in payroll first.</p>
+
+  <div class="callout callout-danger">
+    <div class="callout-lbl">🚫 Critical — HR Must Map These Codes, Not the Broker</div>
+    <p>A broker should <strong>not</strong> be mapping ER codes on a customer's behalf. Only HR or the client's payroll admin should map these codes — they are the only ones who truly know what each earning code represents in their payroll system. Incorrect mappings directly impact upcoming payrolls and can be very difficult to undo quickly. If there are questions, direct them to the partner first.</p>
+  </div>
+
+  <h3>Step-by-Step: Adding an ER Code for Medical</h3>
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><div><h5>Go to Payroll tab → Deduction Codes → View</h5><p>Select the relevant Payroll Group and click "View Codes" to see the deduction code list for that group.</p></div></div>
+    <div class="step"><div class="step-n">2</div><div><h5>Click "Vendor Payroll Codes" → Refresh Codes</h5><p>This sends a GET call to the partner's API to pull in all available codes — both deduction and earning codes. This only works for partners that support the Vendor Payroll Codes endpoint (Paylocity, Paycor, Paychex, UKG Ready all do).</p></div></div>
+    <div class="step"><div class="step-n">3</div><div><h5>Click the Edit pencil icon for the Medical plan</h5><p>This opens the deduction code configuration for that specific plan within the payroll group.</p></div></div>
+    <div class="step"><div class="step-n">4</div><div><h5>Set Transmission Option to "Always Send"</h5><p>Under Earning Transmission Options, select "Always Send." This tells EN to transmit the employer contribution for every enrolled employee.</p></div></div>
+    <div class="step"><div class="step-n">5</div><div><h5>Set Employer Code to "Yes"</h5><p>Under Earnings Code → Employer Code, check "Yes." This designates this as an employer-side earning code, not an employee deduction.</p></div></div>
+    <div class="step"><div class="step-n">6</div><div><h5>HR selects the correct ER memo code from the dropdown</h5><p>HR must choose the earning code that corresponds to their Medical employer contribution in payroll. This is the code that will appear on the W-2 accumulation for Code DD purposes.</p></div></div>
+    <div class="step"><div class="step-n">7</div><div><h5>Save → Review the Confirm prompt → Hit Confirm</h5><p>EN will display a prompt stating it will sync employer costs to payroll for this plan. By confirming, the customer acknowledges: (a) EN will auto-send all ER costs for enrolled employees, and (b) if the code is later changed or replaced, they are responsible for manually removing costs associated with the original code in payroll.</p></div></div>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-lbl">✅ What Happens Immediately After Confirm</div>
+    <p>EN instantly writes and sends employer contribution records to payroll for every employee currently enrolled in that plan. You don't need to run a separate job or audit — it fires automatically on save. Future enrollments will also trigger the ER contribution send alongside the employee deduction, with no additional action needed.</p>
+  </div>
+
+  <h3>Partner Contacts for Questions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Partner</th><th>Supports ER Contributions</th><th>Contact for Questions</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Paylocity</strong></td><td><span class="badge b-yes">✓ Yes</span></td><td><span class="code">Service@paylocity.com</span></td></tr>
+        <tr><td><strong>Paycor</strong></td><td><span class="badge b-yes">✓ Yes</span></td><td><span class="code">CS-integrations@paycor.com</span></td></tr>
+        <tr><td><strong>Paychex</strong></td><td><span class="badge b-yes">✓ Yes</span></td><td>Create a support case via Paychex directly</td></tr>
+        <tr><td><strong>UKG Ready</strong></td><td><span class="badge b-yes">✓ Yes</span></td><td>Create a support case via UKG Community</td></tr>
+        <tr><td><strong>ADP (WFN/RUN)</strong></td><td><span class="badge b-no">✗ Not supported</span></td><td>Not available at this time</td></tr>
+        <tr><td><strong>isolved</strong></td><td><span class="badge b-no">✗ Not supported</span></td><td>Not available at this time</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S6 — CODES TO NEVER MAP
+════════════════════════ -->
+<div class="section" id="s6">
+  <div class="sec-header">
+    <div class="sec-num">06</div>
+    <div>
+      <div class="sec-label">Critical Warning</div>
+      <h2>Earning Codes That Must Never Be Mapped Into EN</h2>
+    </div>
+  </div>
+
+  <p class="lead">EN's ER contribution integration is designed for <strong>memo tracking codes only</strong> — codes that record the employer's contribution amount without affecting net pay calculations. There is a specific set of earning code types in payroll that, if mapped into EN, will cause immediate and serious payroll errors.</p>
+
+  <div class="callout callout-danger">
+    <div class="callout-lbl">🚫 Never Map These Code Types</div>
+    <p>EN maintains a specific list of ER codes that should <strong>never</strong> be mapped into the system. These are available in the downloadable file referenced in the EN Help Center article (<em>ER codes that should never be mapped.xlsx</em>). Mapping any of these will negatively impact the client's payroll — specifically by affecting taxable wage calculations, FICA withholding, or other payroll processing logic that payroll manages independently of EN.</p>
+  </div>
+
+  <h3>The General Rule: Memo Codes Only</h3>
+  <p>The only earning codes that should ever be mapped into EN for employer contributions are <strong>pure memo codes</strong> — codes that exist solely to track a dollar amount on the employee's pay record without triggering any payroll calculation logic. Ask the HR admin or payroll provider to confirm that the code they're using is a memo/informational code before mapping it.</p>
+
+  <div class="two-col">
+    <div class="col-card yes-card">
+      <h4>✅ Safe to Map</h4>
+      <ul>
+        <li>Memo earning codes used purely to track ER contribution amounts</li>
+        <li>Codes labeled "ERMED," "ERDENT," "ERVIS," or similar informational codes</li>
+        <li>Codes confirmed by HR/payroll admin as non-calculating memo codes</li>
+      </ul>
+    </div>
+    <div class="col-card no-card">
+      <h4>🚫 Never Map</h4>
+      <ul>
+        <li>Codes that trigger tax calculations or withholding adjustments</li>
+        <li>Codes that affect gross pay or net pay directly</li>
+        <li>Codes used for direct deposit or HSA funding mechanisms</li>
+        <li>Any code the HR admin cannot confirm is a pure memo/informational code</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-lbl">⚠️ If the Wrong Code Is Mapped — Act Fast</div>
+    <p>Because EN immediately sends ER contributions to payroll upon saving the configuration, a wrong code will begin affecting payroll right away. If an incorrect code is discovered after saving: (1) immediately remove or change the code in EN, (2) contact the partner to manually reverse any amounts that were sent under the wrong code, and (3) confirm the next payroll cycle reflects the corrected amounts. The customer is responsible for cleaning up the original code in payroll — EN cannot reverse what was already sent.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S7 — WHO DOES WHAT
+════════════════════════ -->
+<div class="section" id="s7">
+  <div class="sec-header">
+    <div class="sec-num">07</div>
+    <div>
+      <div class="sec-label">Roles & Responsibilities</div>
+      <h2>Who Does What — Roles in the ER Contribution Process</h2>
+    </div>
+  </div>
+
+  <p class="lead">This is one of the few areas in EN's payroll integration where the broker should step back and let HR lead. The configuration requires knowledge of the specific earning codes in the client's payroll system — knowledge that only HR or their payroll admin has.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Task</th><th>Who Does It</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Set up ER earning codes in payroll</td>
+          <td><strong>HR / Payroll Admin + Partner</strong></td>
+          <td>Codes must be created in payroll first, before they can appear in EN's dropdown</td>
+        </tr>
+        <tr>
+          <td>Confirm the correct code to use for each benefit type</td>
+          <td><strong>HR / Payroll Admin</strong></td>
+          <td>Only they know which code in payroll corresponds to the correct ER memo for Medical, Dental, etc.</td>
+        </tr>
+        <tr>
+          <td>Map codes into EN (Payroll tab → Deduction Codes)</td>
+          <td><strong>HR / Payroll Admin</strong></td>
+          <td>Broker should not map ER codes. Incorrect mapping immediately impacts payroll</td>
+        </tr>
+        <tr>
+          <td>Answer questions about specific code types</td>
+          <td><strong>Payroll Partner</strong></td>
+          <td>Contact the partner directly (see contact list above) — EN support cannot advise on partner-specific code setup</td>
+        </tr>
+        <tr>
+          <td>Confirm the integration sent correctly after setup</td>
+          <td><strong>EN Support / Broker</strong></td>
+          <td>Check the Integration Health Dashboard to confirm ER contributions are showing In Sync for enrolled employees</td>
+        </tr>
+        <tr>
+          <td>Verify W-2 Code DD amounts at year-end</td>
+          <td><strong>HR / Payroll Admin</strong></td>
+          <td>HR must reconcile the accumulated ER contribution amounts in payroll against expected W-2 figures before filing</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════
+     S8 — QUICK REFERENCE
+════════════════════════ -->
+<div class="section" id="s8">
+  <div class="sec-header">
+    <div class="sec-num">08</div>
+    <div>
+      <div class="sec-label">Quick Reference</div>
+      <h2>Everything on One Page</h2>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Topic</th><th>The Answer</th></tr></thead>
+      <tbody>
+        <tr><td><strong>What are ER contributions in EN?</strong></td><td>Employer memo codes that track what the company pays per pay period toward employee benefits — sent from EN to payroll via API</td></tr>
+        <tr><td><strong>Which partners support this?</strong></td><td>Paylocity, Paycor, Paychex, UKG Ready only</td></tr>
+        <tr><td><strong>Which benefit types are supported?</strong></td><td>Medical, Dental, Vision, Hospital Indemnity (employee pre-tax). HSA, Group Life, Group AD&D, Commuter = not supported</td></tr>
+        <tr><td><strong>Why does this matter for W-2s?</strong></td><td>Employer health coverage costs must appear on W-2 Box 12, Code DD for 250+ FTE employers. Payroll accumulates these from EN's transmissions all year</td></tr>
+        <tr><td><strong>When does EN send ER data?</strong></td><td>Immediately on setup (for all current enrollees), on new enrollment, on cost change, and on termination — same triggers as employee deductions</td></tr>
+        <tr><td><strong>Who should map codes?</strong></td><td>HR or the client's payroll admin — never the broker. They must know which payroll code is the correct memo code</td></tr>
+        <tr><td><strong>What if the wrong code is mapped?</strong></td><td>Contact the partner immediately to reverse the sent amounts. EN cannot undo what was transmitted — manual cleanup in payroll is required</td></tr>
+        <tr><td><strong>Where is the "never map" list?</strong></td><td>EN Help Center → Employer Contributions article → "ER codes that should never be mapped.xlsx" download</td></tr>
+        <tr><td><strong>What happens when you hit Confirm?</strong></td><td>EN instantly writes and sends ER contribution records to payroll for all currently enrolled employees in that plan</td></tr>
+        <tr><td><strong>Can codes be mapped for unsupported types?</strong></td><td>Yes, for reporting in EN only — but no data will be sent to payroll for HSA, Group Life, AD&D, or Commuter</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key">
+    <div class="callout-lbl">🔑 The One-Line Version</div>
+    <p>EN sends employer contribution memo amounts to payroll the same way it sends employee deductions — via API, triggered by enrollment events, using earning codes that HR maps from their payroll system. These accumulate in payroll all year so the W-2 Code DD (and other required fields) reflect the correct employer-paid amounts at year-end. Get the codes right upfront, and the W-2 takes care of itself.</p>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<script>
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      const id = e.target.id;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const nav = document.querySelector(`.nav-item[data-s="${id}"]`);
+      if (nav) nav.classList.add('active');
+    }
+  });
+}, { threshold: 0.08, rootMargin: '-60px 0px -40% 0px' });
+document.querySelectorAll('.section').forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
