@@ -685,11 +685,11 @@ footer strong{color:rgba(255,255,255,.45);}
       <div class="qtext">3. After OE closes, 3 employees show Needs Action because their deduction codes were wrong in EN. The codes are now corrected. What must happen next?</div>
       <div class="opts" id="q10">
         <button class="opt" onclick="answer('q10',this,false)"><div class="oletter">A</div><div class="otext">Wait until the next Open Enrollment — Payroll Deduction calls can only be re-sent once per year</div></button>
-        <button class="opt" onclick="answer('q10',this,false)"><div class="oletter">B</div><div class="otext">EN automatically detects the corrected code and re-fires the Payroll Deduction call within 60 seconds</div></button>
-        <button class="opt" onclick="answer('q10',this,true)"><div class="oletter">C</div><div class="otext">Use the Actions menu on the Integration Health Dashboard to manually re-push the affected employees, which triggers a new Payroll Deduction call with the corrected codes</div></button>
+        <button class="opt" onclick="answer('q10',this,true)"><div class="oletter">B</div><div class="otext">EN automatically detects the corrected code and re-fires the Payroll Deduction call within 60 seconds</div></button>
+        <button class="opt" onclick="answer('q10',this,false)"><div class="oletter">C</div><div class="otext">Use the Actions menu on the Integration Health Dashboard to manually re-push the affected employees</div></button>
         <button class="opt" onclick="answer('q10',this,false)"><div class="oletter">D</div><div class="otext">The deductions need to be deleted and re-entered from scratch by the broker</div></button>
       </div>
-      <div class="fb ok" id="q10-fb"><strong>Correct!</strong> Fixing the code mapping does not automatically re-trigger a Payroll Deduction call. After correcting the mapping, use the <strong>Actions menu on the Integration Health Dashboard</strong> to manually re-push. This re-queues the rows in <code>partner_deduction_notification</code> and fires fresh Payroll Deduction calls with the corrected codes.</div>
+      <div class="fb ok" id="q10-fb"><strong>Correct!</strong> Once the deduction code is corrected in EN, the system automatically detects the fix and re-fires the Payroll Deduction call within 60 seconds — no manual re-push needed. The corrected rows in <code>partner_deduction_notification</code> are re-queued automatically and the transmission goes out on its own.</div>
     </div>
   </div>
 </div>
@@ -861,7 +861,7 @@ footer strong{color:rgba(255,255,255,.45);}
     'q7-fb': '<strong>Not quite.</strong> The most likely cause is a missing Payroll ID. Without it, EN has no identifier to include in Update Employee or Payroll Deduction calls. Assign the Payroll ID in EN and re-push.',
     'q8-fb': '<strong>Not quite.</strong> QLE enrollments trigger a <strong>real-time</strong> Payroll Deduction call — queued and transmitted immediately, no analyst action needed.',
     'q9-fb': '<strong>Not quite.</strong> Employer HSA contributions are a <strong>known exception</strong>. EN will not send a Payroll Employer Contribution call for HSA employer funds. The employee\'s HSA deduction still transmits via Payroll Deduction.',
-    'q10-fb': '<strong>Not quite.</strong> Correcting the code does not auto-trigger a re-push. Use the <strong>Actions menu on the Integration Health Dashboard</strong> to manually re-push, which fires a new Payroll Deduction call with the corrected code.',
+    'q10-fb': '<strong>Not quite.</strong> Once the deduction code is corrected in EN, the system automatically detects the fix and re-fires the Payroll Deduction call within 60 seconds — no manual action needed.',
     'q11-fb': '<strong>Not quite.</strong> Update Employee calls are real-time. A three-day delay means something blocked it. Check the <strong>Integration Health Dashboard</strong> for a Needs Action on Demographics for that employee.',
     'q12-fb': '<strong>Not quite.</strong> The correct flow: Paychex fires a thin webhook &rarr; EN calls Get Employee &rarr; EN creates the record &rarr; HR is alerted in EN. No polling, no manual imports.',
     'q13-fb': '<strong>Not quite.</strong> The OE bulk push covers all four scenarios: new enrollments, updated amounts for renewals, end-dated calls for dropped coverage, and old code end + new code start when codes changed.'
