@@ -1,0 +1,936 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EN Support Training: Needs Action — Deduction Code Missing in Company ID</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --en-blue: #1a56db;
+    --en-blue-light: #e8f0fe;
+    --en-green: #057a55;
+    --en-green-light: #def7ec;
+    --en-yellow: #c27803;
+    --en-yellow-light: #fdf6b2;
+    --en-red: #c81e1e;
+    --en-red-light: #fde8e8;
+    --en-gray: #374151;
+    --en-gray-light: #f9fafb;
+    --en-border: #e5e7eb;
+    --bg: #f3f4f6;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--en-gray); min-height: 100vh; }
+
+  .training-banner {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1a56db 100%);
+    color: white; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .training-banner h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; display: flex; align-items: center; gap: 8px; }
+  .training-banner .badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+  .progress-bar-wrap { display: flex; align-items: center; gap: 10px; font-size: 12px; color: rgba(255,255,255,0.8); }
+  .progress-bar { width: 160px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #34d399; border-radius: 999px; transition: width 0.5s ease; }
+
+  .scenario-panel { background: white; border-bottom: 2px solid var(--en-border); padding: 18px 32px; display: flex; gap: 24px; align-items: flex-start; }
+  .scenario-icon { width: 44px; height: 44px; background: var(--en-yellow-light); border: 2px solid #f6c640; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .scenario-text h2 { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+  .scenario-text p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+  .scenario-text strong { color: #1f2937; }
+
+  .main-layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; min-height: calc(100vh - 130px); }
+
+  .steps-sidebar { background: white; border-right: 1px solid var(--en-border); padding: 20px 0; overflow-y: auto; position: sticky; top: 0; height: calc(100vh - 130px); }
+  .steps-sidebar h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; padding: 0 20px 12px; border-bottom: 1px solid var(--en-border); margin-bottom: 8px; }
+
+  .step-item { padding: 12px 20px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.18s ease; }
+  .step-item:hover { background: var(--en-gray-light); }
+  .step-item.active { background: var(--en-blue-light); border-left-color: var(--en-blue); }
+  .step-header { display: flex; align-items: flex-start; gap: 10px; }
+  .step-num { width: 22px; height: 22px; background: #9ca3af; color: white; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: background 0.2s; }
+  .step-item.active .step-num { background: var(--en-blue); }
+  .step-label { font-size: 12.5px; font-weight: 600; color: #374151; line-height: 1.4; }
+  .step-item.active .step-label { color: var(--en-blue); }
+  .step-sublabel { font-size: 11px; color: #9ca3af; margin-top: 2px; padding-left: 32px; }
+  .step-connector { width: 2px; height: 12px; background: #e5e7eb; margin: 0 20px 0 30px; }
+  .step-connector.done { background: var(--en-green); }
+
+  .main-content { padding: 28px 32px; overflow-y: auto; }
+  .screen { display: none; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .screen-title { font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+  .screen-subtitle { font-size: 13px; color: #6b7280; margin-bottom: 22px; line-height: 1.5; }
+
+  /* EN UI mockup */
+  .en-window { background: white; border: 1px solid var(--en-border); border-radius: 10px; box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+  .en-topnav { background: #1a1a2e; padding: 0 20px; display: flex; align-items: center; height: 42px; }
+  .en-logo { font-size: 13px; font-weight: 800; color: white; margin-right: 24px; letter-spacing: -0.5px; }
+  .en-logo span { color: #ef4444; }
+  .en-nav-items { display: flex; height: 100%; }
+  .en-nav-item { padding: 0 14px; font-size: 12px; color: rgba(255,255,255,0.7); display: flex; align-items: center; height: 100%; border-bottom: 2px solid transparent; cursor: pointer; }
+  .en-nav-item:hover { color: white; }
+  .en-nav-item.active { color: white; border-bottom-color: #f97316; font-weight: 600; }
+
+  .en-body { display: flex; min-height: 300px; }
+  .en-sidebar { width: 200px; border-right: 1px solid var(--en-border); padding: 14px 0; flex-shrink: 0; background: #fafafa; }
+  .en-sidebar-section { padding: 0 14px; margin-bottom: 10px; }
+  .en-sidebar-title { font-size: 12px; font-weight: 700; color: #374151; padding: 4px 0 8px; border-bottom: 1px solid var(--en-border); margin-bottom: 6px; }
+  .en-sidebar-link { display: block; padding: 5px 8px; font-size: 12px; color: #6b7280; border-radius: 4px; cursor: pointer; transition: all 0.12s; }
+  .en-sidebar-link:hover { background: var(--en-blue-light); color: var(--en-blue); }
+  .en-sidebar-link.active { color: var(--en-blue); font-weight: 600; }
+  .en-sidebar-link.active::before { content: '→ '; }
+  .en-main { flex: 1; padding: 18px; }
+  .en-page-title { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 14px; }
+
+  .health-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .health-card { border: 1.5px solid var(--en-border); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+  .health-card:hover { border-color: var(--en-blue); box-shadow: var(--shadow); }
+  .health-card-label { font-size: 12px; color: #6b7280; margin-bottom: 6px; font-weight: 500; }
+  .health-card-num { font-size: 26px; font-weight: 700; }
+  .health-card-num.green { color: #057a55; }
+  .health-card-num.yellow { color: #c27803; }
+  .health-card-num.blue { color: #1a56db; }
+
+  /* Tables */
+  .en-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .en-table th { background: #f9fafb; border-bottom: 2px solid var(--en-border); padding: 8px 10px; text-align: left; font-weight: 600; color: #374151; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .en-table td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .en-table tr:hover td { background: #f9fafb; }
+  .en-table tr.highlight-row td { background: #fef9c3 !important; }
+  .en-table tr.success-row td { background: #f0fdf4; }
+  .en-table tr.fail-row td { background: #fff7ed; }
+
+  .status-badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .status-success { background: var(--en-green-light); color: var(--en-green); }
+  .status-na { background: var(--en-yellow-light); color: var(--en-yellow); }
+  .status-insync { background: var(--en-green-light); color: var(--en-green); }
+  .status-woi { background: #ede9fe; color: #5b21b6; }
+
+  .en-link { color: var(--en-blue); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .en-link:hover { text-decoration: underline; }
+
+  /* Callouts */
+  .info-callout { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; font-size: 12.5px; color: #1e40af; margin-bottom: 14px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .info-callout .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .warn-callout { background: var(--en-yellow-light); border: 1px solid #fcd34d; border-radius: 8px; padding: 12px 16px; font-size: 12.5px; color: #78350f; margin-bottom: 14px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .warn-callout .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Decisions */
+  .decision-box { background: white; border: 1px solid var(--en-border); border-radius: 10px; padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow); }
+  .decision-box h3 { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .decision-box h3 .q-icon { width: 26px; height: 26px; background: var(--en-blue); color: white; border-radius: 50%; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .option-btns { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn { padding: 11px 16px; border: 1.5px solid var(--en-border); border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; text-align: left; background: white; transition: all 0.18s; display: flex; align-items: flex-start; gap: 10px; color: #374151; }
+  .option-btn:hover { border-color: var(--en-blue); color: var(--en-blue); background: var(--en-blue-light); }
+  .option-btn.correct { border-color: var(--en-green); background: var(--en-green-light); color: var(--en-green); }
+  .option-btn.incorrect { border-color: var(--en-red); background: var(--en-red-light); color: var(--en-red); }
+  .option-btn.selected { pointer-events: none; }
+  .option-btn.dimmed { opacity: 0.4; pointer-events: none; }
+  .option-btn .opt-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .feedback-box { display: none; padding: 14px 16px; border-radius: 8px; font-size: 13px; margin-top: 12px; line-height: 1.6; border-left: 4px solid; }
+  .feedback-box.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback-correct { background: var(--en-green-light); border-color: var(--en-green); color: #065f46; }
+  .feedback-incorrect { background: var(--en-red-light); border-color: var(--en-red); color: #7f1d1d; }
+  .feedback-info { background: var(--en-blue-light); border-color: var(--en-blue); color: #1e3a5f; }
+
+  /* Action cards */
+  .action-card { background: white; border: 1px solid var(--en-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .action-card-title { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .action-steps { list-style: none; }
+  .action-steps li { padding: 6px 0 6px 20px; font-size: 13px; line-height: 1.5; position: relative; color: #374151; border-bottom: 1px solid #f3f4f6; }
+  .action-steps li:last-child { border-bottom: none; }
+  .action-steps li::before { content: '→'; position: absolute; left: 0; color: var(--en-blue); font-weight: 700; }
+
+  /* Nav buttons */
+  .nav-btns { display: flex; gap: 10px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--en-border); }
+  .btn-primary { background: var(--en-blue); color: white; border: none; padding: 10px 22px; border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.18s; display: flex; align-items: center; gap: 6px; }
+  .btn-primary:hover { background: #1648c0; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary { background: white; color: var(--en-gray); border: 1.5px solid var(--en-border); padding: 10px 18px; border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.18s; }
+  .btn-secondary:hover { background: var(--en-gray-light); border-color: #9ca3af; }
+
+  /* Tri-dot */
+  .actions-menu { position: relative; display: inline-block; }
+  .tri-dot-btn { width: 28px; height: 28px; border: 1px solid var(--en-border); border-radius: 5px; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; }
+  .tri-dot-btn:hover { background: var(--en-gray-light); border-color: #9ca3af; }
+  .dropdown-menu { display: none; position: absolute; right: 0; top: 32px; background: white; border: 1px solid var(--en-border); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 100; min-width: 180px; overflow: hidden; }
+  .dropdown-menu.open { display: block; animation: fadeIn 0.15s ease; }
+  .dropdown-item { padding: 9px 14px; font-size: 12.5px; cursor: pointer; color: #374151; transition: background 0.12s; display: flex; align-items: center; gap: 8px; }
+  .dropdown-item:hover { background: var(--en-blue-light); color: var(--en-blue); }
+
+  /* Annotations */
+  .annotation { display: inline-flex; align-items: center; gap: 5px; background: #1a56db; color: white; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; vertical-align: middle; margin-left: 6px; }
+  .annotation.look { background: #f97316; }
+  .annotation.good { background: #057a55; }
+
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--en-border); }
+
+  code { font-family: 'DM Mono', monospace; background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 11.5px; color: #1a56db; }
+
+  /* Company ID badge */
+  .company-badge { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .company-a { background: #dbeafe; color: #1d4ed8; }
+  .company-b { background: #fce7f3; color: #9d174d; }
+
+  /* Summary / score */
+  .score-display { text-align: center; padding: 28px; background: linear-gradient(135deg, #1e3a5f, #1a56db); border-radius: 12px; color: white; margin-bottom: 20px; }
+  .score-display .score-num { font-size: 60px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+  .score-display .score-label { font-size: 14px; opacity: 0.85; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .summary-card { background: white; border: 1px solid var(--en-border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+  .summary-card h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #9ca3af; margin-bottom: 10px; }
+  .summary-card ul { list-style: none; }
+  .summary-card ul li { font-size: 12.5px; padding: 4px 0; color: #374151; display: flex; align-items: flex-start; gap: 6px; }
+  .summary-card ul li::before { content: '•'; color: var(--en-blue); font-weight: 900; flex-shrink: 0; }
+
+  /* Two-cause comparison grid */
+  .cause-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .cause-card { border-radius: 10px; overflow: hidden; border: 1.5px solid var(--en-border); }
+  .cause-card-header { padding: 11px 14px; font-size: 12.5px; font-weight: 700; }
+  .cause-card-header.red { background: var(--en-red-light); color: var(--en-red); }
+  .cause-card-header.orange { background: #fff7ed; color: #c2410c; border-bottom: 1.5px solid #fed7aa; }
+  .cause-card-body { padding: 12px 14px; font-size: 12px; color: #4b5563; line-height: 1.6; background: white; }
+
+  /* Instruction box */
+  .instruction-box { background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #78350f; line-height: 1.7; }
+  .instruction-box strong { color: #92400e; }
+</style>
+</head>
+<body>
+
+<!-- Training Banner -->
+<div class="training-banner">
+  <h1>🎓 EN Support Training <span class="badge">Interactive Demo</span></h1>
+  <div class="progress-bar-wrap">
+    <span id="progressLabel">Step 1 of 5</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+  </div>
+</div>
+
+<!-- Scenario Panel -->
+<div class="scenario-panel">
+  <div class="scenario-icon">🏷️</div>
+  <div class="scenario-text">
+    <h2>Scenario: "Needs Action" for a deduction code — but it works fine for other employees</h2>
+    <p>A customer notices <strong>Needs Action failures for a deduction code</strong> for certain employees, but other employees with the same code are syncing successfully. Walk through why this happens and how to guide the customer to resolve it.</p>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- Sidebar -->
+  <div class="steps-sidebar">
+    <h3>Troubleshooting Steps</h3>
+
+    <div class="step-item active" id="nav-step-1" onclick="goToStep(1)">
+      <div class="step-header">
+        <div class="step-num" id="snum-1">1</div>
+        <div>
+          <div class="step-label">Spot the Pattern</div>
+          <div class="step-sublabel">Same code — mixed results</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-connector" id="conn-1"></div>
+
+    <div class="step-item" id="nav-step-2" onclick="goToStep(2)">
+      <div class="step-header">
+        <div class="step-num" id="snum-2">2</div>
+        <div>
+          <div class="step-label">Understand Why</div>
+          <div class="step-sublabel">Multi-EIN & company IDs</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-connector" id="conn-2"></div>
+
+    <div class="step-item" id="nav-step-3" onclick="goToStep(3)">
+      <div class="step-header">
+        <div class="step-num" id="snum-3">3</div>
+        <div>
+          <div class="step-label">Read the Instructions</div>
+          <div class="step-sublabel">Needs Action dashboard</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-connector" id="conn-3"></div>
+
+    <div class="step-item" id="nav-step-4" onclick="goToStep(4)">
+      <div class="step-header">
+        <div class="step-num" id="snum-4">4</div>
+        <div>
+          <div class="step-label">Knowledge Check</div>
+          <div class="step-sublabel">Test your understanding</div>
+        </div>
+      </div>
+    </div>
+    <div class="step-connector" id="conn-4"></div>
+
+    <div class="step-item" id="nav-step-5" onclick="goToStep(5)">
+      <div class="step-header">
+        <div class="step-num" id="snum-5">5</div>
+        <div>
+          <div class="step-label">Summary</div>
+          <div class="step-sublabel">Resolution guide</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content">
+
+    <!-- ───────── STEP 1 ───────── -->
+    <div class="screen active" id="screen-1">
+      <div class="screen-title">Step 1: Spot the Pattern — Same Code, Mixed Results</div>
+      <div class="screen-subtitle">The customer opens their Integration Health dashboard and notices something confusing: deduction code <code>ACC (just an example)</code> is succeeding for some employees but showing "Needs Action" for others. Before jumping to conclusions, look at the data carefully.</div>
+
+      <div class="info-callout">
+        <div class="icon">💡</div>
+        <div><strong>Key observation:</strong> When the same deduction code succeeds for one employee but fails for another, the issue is almost never with the code mapping itself — it's about <em>where</em> that code exists in payroll.</div>
+      </div>
+
+      <!-- Integration Health mockup -->
+      <div class="en-window">
+        <div class="en-topnav">
+          <div class="en-logo"><span>not</span>real</div>
+          <div class="en-nav-items">
+            <div class="en-nav-item">Home</div>
+            <div class="en-nav-item">Employees</div>
+            <div class="en-nav-item">Reports</div>
+            <div class="en-nav-item active">Payroll</div>
+            <div class="en-nav-item">Documents</div>
+            <div class="en-nav-item">Settings</div>
+          </div>
+        </div>
+        <div class="en-body">
+          <div class="en-sidebar">
+            <div class="en-sidebar-section">
+              <div class="en-sidebar-title">Payroll ▾</div>
+              <a class="en-sidebar-link active">Dashboard</a>
+              <a class="en-sidebar-link">Integrations</a>
+            </div>
+          </div>
+          <div class="en-main">
+            <div class="en-page-title">Payroll Dashboard</div>
+            <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:10px;">Integration Health</div>
+            <div class="health-cards">
+              <div class="health-card">
+                <div class="health-card-label">In Sync</div>
+                <div class="health-card-num green">412</div>
+              </div>
+              <div class="health-card" style="border-color:#c27803;box-shadow:0 0 0 2px rgba(194,120,3,0.15);" onclick="showNADrilldown()">
+                <div class="health-card-label">Needs Action</div>
+                <div class="health-card-num yellow">3</div>
+                <div style="font-size:10px;color:#c27803;margin-top:5px;font-weight:600;">▶ Click to explore</div>
+              </div>
+              <div class="health-card">
+                <div class="health-card-label">We're On It</div>
+                <div class="health-card-num blue">0</div>
+              </div>
+            </div>
+
+            <div id="na-drilldown" style="display:none;">
+              <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">
+                Employee Sync Status — <span style="color:#c27803;">Needs Action</span>
+                <span style="font-weight:400;color:#9ca3af;font-size:11px;margin-left:6px;">3 unique employees</span>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="en-table">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox"></th>
+                      <th>Employee</th>
+                      <th>Transmission</th>
+                      <th>Category</th>
+                      <th>Code</th>
+                      <th>Status</th>
+                      <th>Instructions</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="highlight-row">
+                      <td><input type="checkbox"></td>
+                      <td><a class="en-link">Torres, Maria</a></td>
+                      <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:02 AM</td>
+                      <td>Deductions (Outbound)</td>
+                      <td><code>ACC</code> <span class="annotation look">👀</span></td>
+                      <td><span class="status-badge status-na">Needs Action</span></td>
+                      <td style="font-size:11px;color:#78350f;max-width:200px;">Code does not exist or is inactive in this company ID.</td>
+                      <td><div class="actions-menu"><button class="tri-dot-btn" onclick="toggleMenu('m1a')">⋮</button><div class="dropdown-menu" id="m1a"><div class="dropdown-item">📤 Push to Payroll</div><div class="dropdown-item">🚫 Ignore</div></div></div></td>
+                    </tr>
+                    <tr class="highlight-row">
+                      <td><input type="checkbox"></td>
+                      <td><a class="en-link">Nguyen, David</a></td>
+                      <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:08 AM</td>
+                      <td>Deductions (Outbound)</td>
+                      <td><code>ACC</code> <span class="annotation look">👀</span></td>
+                      <td><span class="status-badge status-na">Needs Action</span></td>
+                      <td style="font-size:11px;color:#78350f;max-width:200px;">Code does not exist or is inactive in this company ID.</td>
+                      <td><div class="actions-menu"><button class="tri-dot-btn" onclick="toggleMenu('m1b')">⋮</button><div class="dropdown-menu" id="m1b"><div class="dropdown-item">📤 Push to Payroll</div><div class="dropdown-item">🚫 Ignore</div></div></div></td>
+                    </tr>
+                    <tr class="highlight-row">
+                      <td><input type="checkbox"></td>
+                      <td><a class="en-link">Okafor, Blessing</a></td>
+                      <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:15 AM</td>
+                      <td>Deductions (Outbound)</td>
+                      <td><code>ACC</code> <span class="annotation look">👀</span></td>
+                      <td><span class="status-badge status-na">Needs Action</span></td>
+                      <td style="font-size:11px;color:#78350f;max-width:200px;">Code does not exist or is inactive in this company ID.</td>
+                      <td><div class="actions-menu"><button class="tri-dot-btn" onclick="toggleMenu('m1c')">⋮</button><div class="dropdown-menu" id="m1c"><div class="dropdown-item">📤 Push to Payroll</div><div class="dropdown-item">🚫 Ignore</div></div></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-top:14px;font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">
+                Now check "In Sync" for the same code — <span style="color:#057a55;">it works for other employees</span>:
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="en-table">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Category</th>
+                      <th>Code</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="success-row">
+                      <td><a class="en-link">Hoffman, Ian</a></td>
+                      <td>Deductions (Outbound)</td>
+                      <td><code>ACC</code></td>
+                      <td><span class="status-badge status-insync">In Sync</span></td>
+                    </tr>
+                    <tr class="success-row">
+                      <td><a class="en-link">Poepping, Christopher</a></td>
+                      <td>Deductions (Outbound)</td>
+                      <td><code>ACC</code></td>
+                      <td><span class="status-badge status-insync">In Sync</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="margin-top:10px;" class="feedback-box feedback-info show">
+                🔍 <strong>Same code <code>ACC</code> — two very different outcomes.</strong> Hoffman and Poepping are "In Sync" while Torres, Nguyen, and Okafor are "Needs Action." This pattern is the clue: something is different about where these employees live in payroll.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="decision-box">
+        <h3><span class="q-icon">?</span> The same deduction code <code>ACC</code> succeeds for some employees but fails for others. What is the most likely explanation?</h3>
+        <div class="option-btns" id="q1-opts">
+          <button class="option-btn" onclick="answerQ(1,'a')"><span class="opt-icon">🏢</span> The failing employees belong to a different company ID in payroll where code ACC does not exist or is inactive</button>
+          <button class="option-btn" onclick="answerQ(1,'b')"><span class="opt-icon">👤</span> Those specific employees have a different benefit plan that uses a different code</button>
+          <button class="option-btn" onclick="answerQ(1,'c')"><span class="opt-icon">🔌</span> The integration was briefly disconnected for those employees</button>
+        </div>
+        <div class="feedback-box feedback-correct" id="q1-feedback-a">
+          ✅ <strong>Correct!</strong> When the same code works for some employees and fails for others, the employees are almost certainly split across multiple company IDs (EINs) in payroll — and the code only exists or is active in <em>some</em> of those company IDs.
+        </div>
+        <div class="feedback-box feedback-incorrect" id="q1-feedback-b">
+          ❌ If the issue were a different benefit plan, you'd expect a different deduction code, not the same code failing. The fact that it's the exact same code <code>ACC</code> for all affected employees points to a company ID issue in payroll.
+        </div>
+        <div class="feedback-box feedback-incorrect" id="q1-feedback-c">
+          ❌ A disconnected integration would affect all employees equally, not just a subset. The selective failure pattern points to a company ID configuration issue on the payroll side.
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-primary" id="btn-step1-next" onclick="goToStep(2)" disabled>Next: Understand why this happens →</button>
+      </div>
+    </div>
+
+    <!-- ───────── STEP 2 ───────── -->
+    <div class="screen" id="screen-2">
+      <div class="screen-title">Step 2: Understand Why — Multi-EIN Connections & Company IDs</div>
+      <div class="screen-subtitle">This customer has a <strong>multi-EIN (subscriber group) setup</strong> — meaning their EN integration is linked to more than one company ID in payroll. Deduction codes must exist and be active in <em>every</em> company ID linked to EN, or employees in that company will fail.</div>
+
+      <div class="info-callout">
+        <div class="icon">🏢</div>
+        <div><strong>How multi-EIN works:</strong> A single EN group can be connected to multiple company IDs in Paycor (or another partner). Think of it as one EN account talking to two or more separate payroll companies. A code set up in Company A doesn't automatically exist in Company B.</div>
+      </div>
+
+      <!-- Visual: Company A vs Company B -->
+      <div style="background:white;border:1px solid var(--en-border);border-radius:10px;padding:20px;margin-bottom:18px;box-shadow:var(--shadow);">
+        <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:16px;text-align:center;">Why code <code>ACC</code> succeeds in one company but fails in another</div>
+        <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:start;">
+
+          <!-- Company A -->
+          <div style="border:2px solid #3b82f6;border-radius:10px;overflow:hidden;">
+            <div style="background:#1d4ed8;color:white;padding:10px 14px;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <span>🏢 Company A</span>
+              <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.2);padding:1px 7px;border-radius:4px;">EIN: 12-3456789</span>
+            </div>
+            <div style="padding:12px 14px;font-size:12px;line-height:1.8;">
+              <div style="margin-bottom:6px;font-weight:600;color:#374151;">Deduction Codes:</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#dcfce7;color:#15803d;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">ACC</span> <span style="color:#057a55;font-weight:600;">✅ Active</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#dcfce7;color:#15803d;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">DEN</span> <span style="color:#057a55;font-weight:600;">✅ Active</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#dcfce7;color:#15803d;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">MDCL</span> <span style="color:#057a55;font-weight:600;">✅ Active</span></div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;font-weight:600;">Employees: Hoffman, Poepping</div>
+              <div style="font-size:11px;background:#dcfce7;color:#15803d;border-radius:5px;padding:4px 8px;margin-top:6px;font-weight:600;">✅ Code ACC sends successfully</div>
+            </div>
+          </div>
+
+          <!-- Arrow -->
+          <div style="display:flex;align-items:center;justify-content:center;padding-top:60px;font-size:22px;color:#9ca3af;">⟷</div>
+
+          <!-- Company B -->
+          <div style="border:2px solid #f43f5e;border-radius:10px;overflow:hidden;">
+            <div style="background:#be123c;color:white;padding:10px 14px;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <span>🏢 Company B</span>
+              <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.2);padding:1px 7px;border-radius:4px;">EIN: 98-7654321</span>
+            </div>
+            <div style="padding:12px 14px;font-size:12px;line-height:1.8;">
+              <div style="margin-bottom:6px;font-weight:600;color:#374151;">Deduction Codes:</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">ACC</span> <span style="color:#c81e1e;font-weight:600;">❌ Missing / Inactive</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#dcfce7;color:#15803d;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">DEN</span> <span style="color:#057a55;font-weight:600;">✅ Active</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><span style="background:#dcfce7;color:#15803d;padding:1px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">MDCL</span> <span style="color:#057a55;font-weight:600;">✅ Active</span></div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:11px;color:#6b7280;font-weight:600;">Employees: Torres, Nguyen, Okafor</div>
+              <div style="font-size:11px;background:#fee2e2;color:#9f1239;border-radius:5px;padding:4px 8px;margin-top:6px;font-weight:600;">❌ Code ACC fails → Needs Action</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#78350f;line-height:1.6;">
+          <strong>EN's perspective:</strong> EN has one deduction code mapped to <code>ACC</code> and sends it to all linked company IDs. It doesn't know that Company B is missing that code — it just gets an error back from payroll when it tries to push it there.
+        </div>
+      </div>
+
+      <!-- Two causes -->
+      <div class="section-label">The two specific reasons this happens (both are I&amp;I ACC error type)</div>
+      <div class="cause-grid">
+        <div class="cause-card">
+          <div class="cause-card-header red">❌ Cause 1: Code doesn't exist in all company IDs</div>
+          <div class="cause-card-body">The deduction code <code>ACC</code> was created in Company A's payroll setup but was never added to Company B. EN tries to send it to both — Company B rejects it because the code isn't there at all.</div>
+        </div>
+        <div class="cause-card">
+          <div class="cause-card-header orange">⚠️ Cause 2: Code exists but is inactive in some company IDs</div>
+          <div class="cause-card-body">The code <code>ACC</code> exists in Company B's payroll system but has been marked <strong>inactive</strong>. EN sends the deduction, payroll rejects it because the code isn't currently active for that company.</div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+        <button class="btn-primary" onclick="goToStep(3)">Next: Read the Instructions on the dashboard →</button>
+      </div>
+    </div>
+
+    <!-- ───────── STEP 3 ───────── -->
+    <div class="screen" id="screen-3">
+      <div class="screen-title">Step 3: Read the "Needs Action" Instructions — and Resolve</div>
+      <div class="screen-subtitle">The Integration Health dashboard provides specific instructions for each failure. The customer can fully self-resolve this — no Support call needed. Walk through what the instructions say and how to action them.</div>
+
+      <!-- Needs Action mockup with full instruction text -->
+      <div class="en-window">
+        <div style="padding:12px 16px;background:#f9fafb;border-bottom:1px solid var(--en-border);display:flex;align-items:center;gap:10px;">
+          <div style="font-size:13px;font-weight:700;color:#111827;">Employee Sync Status</div>
+          <span style="background:var(--en-yellow-light);color:var(--en-yellow);font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px;">Needs Action</span>
+          <span style="font-size:11px;color:#9ca3af;margin-left:auto;">3 unique employees</span>
+          <button style="background:var(--en-blue);color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;">Push &amp; Pull</button>
+        </div>
+        <div style="padding:14px 16px;overflow-x:auto;">
+          <table class="en-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="select-all" onchange="toggleAll(this)"></th>
+                <th>Employee</th>
+                <th>Transmission</th>
+                <th>Category</th>
+                <th>Code</th>
+                <th>Status</th>
+                <th>Instructions</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="highlight-row">
+                <td><input type="checkbox" class="row-check"></td>
+                <td><a class="en-link">Torres, Maria</a></td>
+                <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:02 AM</td>
+                <td>Deductions (Outbound)</td>
+                <td><code>ACC</code></td>
+                <td><span class="status-badge status-na">Needs Action</span></td>
+                <td>
+                  <div class="instruction-box">
+                    <strong>⚠️ Instructions:</strong><br>
+                    If this code is valid, then ensure this specific deduction code is <strong>Active and exists in every company ID</strong> that you have in payroll → Use the Actions icon → <strong>"Push to Payroll"</strong> to retry this successfully.
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-menu">
+                    <button class="tri-dot-btn" onclick="toggleMenu('m3a')">⋮</button>
+                    <div class="dropdown-menu" id="m3a">
+                      <div class="dropdown-item" onclick="showPushConfirm('m3a')">📤 Push to Payroll</div>
+                      <div class="dropdown-item">🚫 Ignore this transmission</div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr class="highlight-row">
+                <td><input type="checkbox" class="row-check"></td>
+                <td><a class="en-link">Nguyen, David</a></td>
+                <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:08 AM</td>
+                <td>Deductions (Outbound)</td>
+                <td><code>ACC</code></td>
+                <td><span class="status-badge status-na">Needs Action</span></td>
+                <td>
+                  <div class="instruction-box">
+                    <strong>⚠️ Instructions:</strong><br>
+                    If this code is valid, then ensure this specific deduction code is <strong>Active and exists in every company ID</strong> that you have in payroll → Use the Actions icon → <strong>"Push to Payroll"</strong> to retry this successfully.
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-menu">
+                    <button class="tri-dot-btn" onclick="toggleMenu('m3b')">⋮</button>
+                    <div class="dropdown-menu" id="m3b">
+                      <div class="dropdown-item" onclick="showPushConfirm('m3b')">📤 Push to Payroll</div>
+                      <div class="dropdown-item">🚫 Ignore this transmission</div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr class="highlight-row">
+                <td><input type="checkbox" class="row-check"></td>
+                <td><a class="en-link">Okafor, Blessing</a></td>
+                <td style="font-size:11px;color:#6b7280;">03/25/2026 9:14:15 AM</td>
+                <td>Deductions (Outbound)</td>
+                <td><code>ACC</code></td>
+                <td><span class="status-badge status-na">Needs Action</span></td>
+                <td>
+                  <div class="instruction-box">
+                    <strong>⚠️ Instructions:</strong><br>
+                    If this code is valid, then ensure this specific deduction code is <strong>Active and exists in every company ID</strong> that you have in payroll → Use the Actions icon → <strong>"Push to Payroll"</strong> to retry this successfully.
+                  </div>
+                </td>
+                <td>
+                  <div class="actions-menu">
+                    <button class="tri-dot-btn" onclick="toggleMenu('m3c')">⋮</button>
+                    <div class="dropdown-menu" id="m3c">
+                      <div class="dropdown-item" onclick="showPushConfirm('m3c')">📤 Push to Payroll</div>
+                      <div class="dropdown-item">🚫 Ignore this transmission</div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div id="push-confirm" style="display:none;margin-top:10px;" class="feedback-box feedback-correct show">
+            ✅ <strong>Push to Payroll triggered!</strong> EN is re-sending deduction code <code>ACC</code> for this employee. If the code has been correctly added/activated in Company B's payroll, this will now succeed and the employee will move to "In Sync."
+          </div>
+          <div id="bulk-tip" style="margin-top:10px;" class="feedback-box feedback-info show">
+            💡 <strong>Bulk tip:</strong> Select all three employees using the checkbox in the header, then click <strong>Push &amp; Pull</strong> to retry all of them at once — no need to do them one by one.
+          </div>
+        </div>
+      </div>
+
+      <div class="action-card">
+        <div class="action-card-title">📋 Step-by-step resolution for the customer</div>
+        <ul class="action-steps">
+          <li><strong>Log into payroll</strong> (Paycor or the relevant partner) and navigate to the deduction code setup for each company ID linked to EN.</li>
+          <li><strong>Find code <code>ACC</code></strong> in the company ID where employees are failing (Company B in this example).</li>
+          <li>If the code is <strong>missing</strong>: create it with the same code value as it exists in the working company ID.</li>
+          <li>If the code is <strong>inactive</strong>: re-activate it in that company ID.</li>
+          <li>Repeat this for <strong>every</strong> company ID linked to EN — not just the one that's currently failing.</li>
+          <li>Return to Integration Health → "Needs Action" → select the failed employees → tri-dot icon → <strong>Push to Payroll</strong> (or use the bulk Push &amp; Pull button).</li>
+          <li>Employees should move to "In Sync" once the push succeeds.</li>
+        </ul>
+      </div>
+
+      <div class="warn-callout">
+        <div class="icon">⚠️</div>
+        <div><strong>Important:</strong> The customer must fix the code in payroll <em>before</em> retrying. Simply clicking "Push to Payroll" without fixing the underlying issue will result in the same failure again.</div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-secondary" onclick="goToStep(2)">← Back</button>
+        <button class="btn-primary" onclick="goToStep(4)">Next: Knowledge Check →</button>
+      </div>
+    </div>
+
+    <!-- ───────── STEP 4 ───────── -->
+    <div class="screen" id="screen-4">
+      <div class="screen-title">Step 4: Knowledge Check</div>
+      <div class="screen-subtitle">Answer all three questions to complete the training.</div>
+
+      <!-- Q1 -->
+      <div class="decision-box">
+        <h3><span class="q-icon">1</span> A customer says code <code>ACC</code> is failing for some employees but not others. What's the most likely root cause?</h3>
+        <div class="option-btns" id="kq1-opts">
+          <button class="option-btn" onclick="answerKQ(1,'a')"><span class="opt-icon">🏢</span> The code exists or is active in some payroll company IDs but not all of them</button>
+          <button class="option-btn" onclick="answerKQ(1,'b')"><span class="opt-icon">🔁</span> The integration needs to be restarted</button>
+          <button class="option-btn" onclick="answerKQ(1,'c')"><span class="opt-icon">👤</span> Those employees have a different benefit enrollment than the others</button>
+        </div>
+        <div class="feedback-box feedback-correct" id="kq1-feedback-a">✅ <strong>Correct!</strong> Selective failure on a single code almost always indicates a multi-company ID issue. The code is valid — it just doesn't exist or isn't active in every linked company.</div>
+        <div class="feedback-box feedback-incorrect" id="kq1-feedback-b">❌ Restarting the integration would affect all employees, not just a subset. The selective pattern points to a company ID configuration gap.</div>
+        <div class="feedback-box feedback-incorrect" id="kq1-feedback-c">❌ If it were a different benefit enrollment, you'd expect different codes. The same code <code>ACC</code> failing for some and not others is a company ID issue, not an enrollment difference.</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="decision-box">
+        <h3><span class="q-icon">2</span> The customer has fixed code <code>ACC</code> in Company B's payroll. What should they do next to get these employees to "In Sync"?</h3>
+        <div class="option-btns" id="kq2-opts">
+          <button class="option-btn" onclick="answerKQ(2,'a')"><span class="opt-icon">⏳</span> Wait for the nightly sync to pick them up automatically</button>
+          <button class="option-btn" onclick="answerKQ(2,'b')"><span class="opt-icon">📤</span> Go to Integration Health → Needs Action → select the employees → Push to Payroll</button>
+          <button class="option-btn" onclick="answerKQ(2,'c')"><span class="opt-icon">📞</span> Call EN Support to manually clear the Needs Action items</button>
+        </div>
+        <div class="feedback-box feedback-correct" id="kq2-feedback-b">✅ <strong>Correct!</strong> After fixing the code in payroll, the customer can immediately retry using the Actions icon → <strong>Push to Payroll</strong>, or select all affected employees and use the bulk <strong>Push &amp; Pull</strong> button. No waiting or Support call needed.</div>
+        <div class="feedback-box feedback-incorrect" id="kq2-feedback-a">❌ "Needs Action" items won't auto-resolve — they require a manual action from the customer. After fixing the code in payroll, the customer must use Push to Payroll to retry.</div>
+        <div class="feedback-box feedback-incorrect" id="kq2-feedback-c">❌ The customer can self-resolve entirely from the Integration Health dashboard. The Instructions column and Actions menu are specifically designed to eliminate the need for a Support call.</div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="decision-box">
+        <h3><span class="q-icon">3</span> The customer asks: "I fixed the code in Company B — is that enough?" What do you tell them?</h3>
+        <div class="option-btns" id="kq3-opts">
+          <button class="option-btn" onclick="answerKQ(3,'a')"><span class="opt-icon">✅</span> Yes, fixing one company ID is sufficient — EN will automatically apply it to the others</button>
+          <button class="option-btn" onclick="answerKQ(3,'b')"><span class="opt-icon">🏢</span> Not necessarily — they should verify the code is active and exists in every company ID linked to EN, not just the one currently failing</button>
+          <button class="option-btn" onclick="answerKQ(3,'c')"><span class="opt-icon">🔄</span> Yes, and they should also re-map the code in EN's payroll group settings</button>
+        </div>
+        <div class="feedback-box feedback-correct" id="kq3-feedback-b">✅ <strong>Correct!</strong> The instructions specifically say "every company ID that you have in payroll." If they have three linked company IDs and only fix two, the third will still fail. They need to audit all linked company IDs.</div>
+        <div class="feedback-box feedback-incorrect" id="kq3-feedback-a">❌ EN doesn't automatically propagate code setup between company IDs — that's managed entirely within the payroll system. The customer must ensure the code is correct in <em>each</em> company ID individually.</div>
+        <div class="feedback-box feedback-incorrect" id="kq3-feedback-c">❌ The code mapping in EN itself isn't the issue — the code is correctly mapped. The problem is the code's existence/status in the payroll company IDs, which is fixed in payroll, not in EN.</div>
+      </div>
+
+      <div id="kc-complete" style="display:none;" class="feedback-box feedback-correct show">
+        🎉 <strong>All questions answered!</strong> Head to the summary for the full resolution guide.
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-secondary" onclick="goToStep(3)">← Back</button>
+        <button class="btn-primary" id="btn-step4-next" onclick="goToStep(5)" disabled>View Summary →</button>
+      </div>
+    </div>
+
+    <!-- ───────── STEP 5 ───────── -->
+    <div class="screen" id="screen-5">
+      <div class="screen-title">Summary: Deduction Code Needs Action — Full Resolution Guide</div>
+      <div class="screen-subtitle">Use this as your reference for any case where the same deduction code succeeds for some employees but fails for others.</div>
+
+      <div class="score-display">
+        <div class="score-num" id="final-score-num">—</div>
+        <div class="score-label" id="final-score-label">Knowledge Check Score</div>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="en-window" style="padding:20px;margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:16px;text-align:center;">Resolution Flowchart: Same Code, Selective Failures</div>
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="display:inline-block;background:#1a56db;color:white;border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:600;">Customer reports: code <code style="background:rgba(255,255,255,0.2);color:white;">ACC</code> fails for some employees, works for others</div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;font-size:20px;color:#9ca3af;">↓</div>
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="display:inline-block;background:#f3f4f6;border:1.5px solid var(--en-border);border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:600;color:#374151;">Check Integration Health → Needs Action — confirm code <code>ACC</code> is the failing code</div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;font-size:20px;color:#9ca3af;">↓</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px;">
+          <div style="background:var(--en-red-light);border:1.5px solid #fca5a5;border-radius:8px;padding:12px;font-size:12px;color:#7f1d1d;">
+            <strong>Root Cause A:</strong><br>Code <code>ACC</code> doesn't exist in Company B's payroll<br><br>
+            <strong>Fix:</strong> Create code <code>ACC</code> in Company B in payroll
+          </div>
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:12px;font-size:12px;color:#7c2d12;">
+            <strong>Root Cause B:</strong><br>Code <code>ACC</code> exists but is inactive in Company B<br><br>
+            <strong>Fix:</strong> Re-activate code <code>ACC</code> in Company B in payroll
+          </div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;font-size:20px;color:#9ca3af;">↓ after fixing in payroll</div>
+        <div style="text-align:center;margin-bottom:8px;">
+          <div style="display:inline-block;background:#f3f4f6;border:1.5px solid var(--en-border);border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:600;color:#374151;">Verify the code exists &amp; is active in <em>ALL</em> company IDs linked to EN</div>
+        </div>
+        <div style="text-align:center;margin-bottom:8px;font-size:20px;color:#9ca3af;">↓</div>
+        <div style="text-align:center;">
+          <div style="display:inline-block;background:#057a55;color:white;border-radius:8px;padding:10px 20px;font-size:12.5px;font-weight:600;">Integration Health → Needs Action → Select employees → Push to Payroll → employees move to "In Sync"</div>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <h4>🔍 How to identify this issue</h4>
+          <ul>
+            <li>Same deduction code succeeds for some employees, fails for others</li>
+            <li>Failing employees are in a different company ID / EIN in payroll</li>
+            <li>Integration Health → Needs Action shows the code in the "Code" column</li>
+            <li>Instructions column confirms the code is missing/inactive in payroll</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h4>🛠 The two root causes (both I&amp;I ACC)</h4>
+          <ul>
+            <li>Code doesn't exist in all linked company IDs</li>
+            <li>Code exists but is inactive in some company IDs</li>
+            <li>Both are fixed the same way: add/activate in payroll, then Push to Payroll</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h4>📋 Customer resolution steps</h4>
+          <ul>
+            <li>Log into payroll → find each linked company ID</li>
+            <li>Ensure code is present AND active in every company ID</li>
+            <li>Return to Integration Health → Needs Action</li>
+            <li>Select affected employees → Push to Payroll (or bulk Push &amp; Pull)</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h4>💬 What to tell the customer</h4>
+          <ul>
+            <li>No Support escalation needed — fully self-serviceable</li>
+            <li>The Instructions column on the dashboard tells them exactly what to do</li>
+            <li>Must fix in <em>all</em> company IDs, not just the one currently failing</li>
+            <li>After fixing: Push to Payroll to retry without waiting</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-secondary" onclick="goToStep(4)">← Back</button>
+        <button class="btn-primary" onclick="resetDemo()">🔄 Restart Demo</button>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /main-layout -->
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 5;
+  const completedSteps = new Set();
+  const kqAnswers = { 1: false, 2: false, 3: false };
+  const kqDone = { 1: false, 2: false, 3: false };
+  const kqCorrect = { 1: 'a', 2: 'b', 3: 'b' };
+
+  function goToStep(n) {
+    completedSteps.add(currentStep);
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + n).classList.add('active');
+    document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+    const navEl = document.getElementById('nav-step-' + n);
+    if (navEl) navEl.classList.add('active');
+    completedSteps.forEach(s => {
+      const snum = document.getElementById('snum-' + s);
+      if (snum && s !== n) { snum.textContent = '✓'; snum.style.background = '#057a55'; }
+      const conn = document.getElementById('conn-' + s);
+      if (conn) conn.classList.add('done');
+    });
+    currentStep = n;
+    const pct = Math.round((n / totalSteps) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = 'Step ' + n + ' of ' + totalSteps;
+    document.querySelector('.main-content').scrollTop = 0;
+    if (n === 5) computeFinalScore();
+  }
+
+  function showNADrilldown() {
+    const el = document.getElementById('na-drilldown');
+    if (el) { el.style.display = 'block'; el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  }
+
+  function toggleMenu(id) {
+    document.querySelectorAll('.dropdown-menu').forEach(m => { if (m.id !== id) m.classList.remove('open'); });
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.actions-menu')) {
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+    }
+  });
+
+  function showPushConfirm(menuId) {
+    document.getElementById(menuId).classList.remove('open');
+    document.getElementById('push-confirm').style.display = 'block';
+  }
+
+  function toggleAll(cb) {
+    document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+  }
+
+  // Step 1 quiz
+  function answerQ(qnum, choice) {
+    const correct = 'a';
+    const opts = document.querySelectorAll('#q1-opts .option-btn');
+    const letters = ['a','b','c'];
+    opts.forEach((btn, i) => {
+      const c = letters[i];
+      if (c === choice) btn.classList.add(c === correct ? 'correct' : 'incorrect');
+      else if (c === correct) btn.classList.add('correct');
+      else btn.classList.add('dimmed');
+      btn.classList.add('selected');
+    });
+    document.getElementById('q1-feedback-' + choice).classList.add('show');
+    if (choice === correct) document.getElementById('btn-step1-next').disabled = false;
+    else {
+      // allow proceed after seeing feedback even if wrong
+      setTimeout(() => { document.getElementById('btn-step1-next').disabled = false; }, 1200);
+    }
+  }
+
+  // Knowledge check
+  function answerKQ(qnum, choice) {
+    if (kqDone[qnum]) return;
+    kqDone[qnum] = true;
+    const correct = kqCorrect[qnum];
+    const opts = document.querySelectorAll('#kq' + qnum + '-opts .option-btn');
+    const letters = ['a','b','c'];
+    opts.forEach((btn, i) => {
+      const c = letters[i];
+      if (c === choice) btn.classList.add(c === correct ? 'correct' : 'incorrect');
+      else if (c === correct) btn.classList.add('correct');
+      else btn.classList.add('dimmed');
+      btn.classList.add('selected');
+    });
+    document.getElementById('kq' + qnum + '-feedback-' + choice).classList.add('show');
+    if (choice === correct) kqAnswers[qnum] = true;
+    if (kqDone[1] && kqDone[2] && kqDone[3]) {
+      document.getElementById('kc-complete').style.display = 'block';
+      document.getElementById('btn-step4-next').disabled = false;
+    }
+  }
+
+  function computeFinalScore() {
+    const correct = Object.values(kqAnswers).filter(Boolean).length;
+    const pct = Math.round((correct / 3) * 100);
+    document.getElementById('final-score-num').textContent = pct + '%';
+    const msg = pct === 100 ? '🏆 Perfect Score!' : pct >= 67 ? '👍 Good — review the missed question' : '📚 Review the material and try again';
+    document.getElementById('final-score-label').textContent = msg + '  (' + correct + '/3 correct)';
+  }
+
+  function resetDemo() {
+    completedSteps.clear();
+    Object.keys(kqAnswers).forEach(k => kqAnswers[k] = false);
+    Object.keys(kqDone).forEach(k => kqDone[k] = false);
+    for (let i = 1; i <= totalSteps; i++) {
+      const snum = document.getElementById('snum-' + i);
+      if (snum) { snum.textContent = i; snum.style.background = ''; }
+      const conn = document.getElementById('conn-' + i);
+      if (conn) conn.classList.remove('done');
+    }
+    document.getElementById('btn-step1-next').disabled = true;
+    document.getElementById('btn-step4-next').disabled = true;
+    document.querySelectorAll('.feedback-box').forEach(f => f.classList.remove('show'));
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('correct','incorrect','dimmed','selected'));
+    document.getElementById('kc-complete').style.display = 'none';
+    const nad = document.getElementById('na-drilldown');
+    if (nad) nad.style.display = 'none';
+    const pc = document.getElementById('push-confirm');
+    if (pc) pc.style.display = 'none';
+    // Re-show the persistent info box
+    document.getElementById('bulk-tip').classList.add('show');
+    goToStep(1);
+  }
+</script>
+</body>
+</html>
