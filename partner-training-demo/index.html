@@ -574,6 +574,14 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
         }
       }
     }
+    // Reset prs-2 sub-states whenever navigating to it
+    if(n===2){
+      var l=_g('prs2-list'),m=_g('prs2-modal'),d=_g('prs2-done'),nb=_g('prs2-next-btn');
+      if(l)l.style.display='';
+      if(m)m.style.display='none';
+      if(d)d.style.display='none';
+      if(nb)nb.style.display='none';
+    }
   }
   // ── MULTI-COMPANY MODAL ──
   var _multiCompany = false;
@@ -663,6 +671,23 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
   window.resetWizard=resetWizard;
 
   window.showCodeMapTab=showCodeMapTab;
+  function showPrs2Modal(){
+    var _g2=function(id){return document.getElementById(id);};
+    _g2('prs2-list').style.display='none';
+    _g2('prs2-modal').style.display='';
+  }
+  function hidePrs2Modal(){
+    var _g2=function(id){return document.getElementById(id);};
+    _g2('prs2-list').style.display='';
+    _g2('prs2-modal').style.display='none';
+  }
+  function savePrs2Modal(){
+    showPartnerStep(3);
+  }
+  window.showPrs2Modal=showPrs2Modal;
+  window.hidePrs2Modal=hidePrs2Modal;
+  window.savePrs2Modal=savePrs2Modal;
+
   window.showPartnerStep=showPartnerStep;
   window.showEl=showEl;window.hideEl=hideEl;window.showScreen=showScreen;
   window.setNav=setNav;window.updateRibbon=updateRibbon;window.jumpTo=jumpTo;
@@ -924,7 +949,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
             <tbody>
               <tr>
                 <td style="font-size:13.5px;font-weight:500;">Marc Garagliano (H)</td>
-                <td style="font-size:13px;color:var(--blue);">mgaragliano@employeenavigator.com</td>
+                <td style="font-size:13px;color:var(--blue);">payroll@employeenavigator.com</td>
                 <td style="font-size:13px;color:var(--red);font-style:italic;">Missing Phone</td>
                 <td><span style="color:#f59e0b;font-size:20px;">&#9733;</span></td>
                 <td>
@@ -934,7 +959,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
               </tr>
               <tr style="background:var(--gray-50);">
                 <td style="font-size:13.5px;font-weight:500;">Ryan Everett (L)</td>
-                <td style="font-size:13px;color:var(--blue);">REverett@employeenavigator.com</td>
+                <td style="font-size:13px;color:var(--blue);">payroll@employeenavigator.com</td>
                 <td style="font-size:13px;color:var(--red);font-style:italic;">Missing Phone</td>
                 <td><span style="color:var(--gray-300);font-size:20px;">&#9733;</span></td>
                 <td>
@@ -960,7 +985,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
                   <label class="form-label">Email</label>
                   <div style="display:flex;align-items:center;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;background:#fff;gap:10px;">
                     <span style="color:var(--gray-400);font-size:15px;">&#9993;</span>
-                    <span style="font-size:13px;color:var(--gray-700);">partner.admin@payrollcompany.com</span>
+                    <span style="font-size:13px;color:var(--gray-700);">payroll@employeenavigator.com</span>
                   </div>
                 </div>
                 <div style="display:flex;gap:12px;">
@@ -1346,30 +1371,93 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
 
     </div><!-- /prs-1 --><div id="prs-2" style="display:none;padding:20px 0;">
       <div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:6px;">Step <span class="step-label-2">3</span> — Partner Approves the Request &amp; Assigns the Client ID</div>
-      <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">The partner clicks into the <strong>Request Initiated</strong> workflow for your company. They enter the <strong>Client ID</strong> (the Company Code or Unique ID they just located) and click <strong>Mark as Complete</strong>.</div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;flex:1;min-width:260px;max-width:340px;box-shadow:var(--shadow-sm);">
-          <div style="background:var(--gray-50);padding:10px 16px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13.5px;font-weight:700;color:var(--gray-900);">Edit Subscription</span><span style="color:var(--gray-400);cursor:pointer;font-size:16px;">&#10005;</span></div>
-          <div style="padding:16px;font-size:13px;">
-            <div style="display:flex;margin-bottom:10px;"><span style="width:140px;color:var(--gray-500);">Product</span><span style="font-weight:600;">Test Vendor</span></div>
-            <div style="display:flex;margin-bottom:10px;"><span style="width:140px;color:var(--gray-500);">Company</span><span style="font-weight:600;">Employee Navigator Company</span></div>
-            <div style="display:flex;align-items:center;margin-bottom:10px;"><span style="width:140px;color:var(--gray-500);">Client ID</span><input style="border:1.5px solid var(--blue);border-radius:var(--radius-sm);padding:6px 10px;font-size:13px;width:130px;" id="step2-client-id-inp" value="ENC1" readonly></div>
-            <div style="display:flex;align-items:flex-start;"><span style="width:140px;color:var(--gray-500);">Contacts</span><div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;"><label style="display:flex;align-items:center;gap:7px;"><input type="checkbox"> Ryan Everett - H</label><label style="display:flex;align-items:center;gap:7px;"><input type="checkbox" checked> Marc Garagliano - H</label><label style="display:flex;align-items:center;gap:7px;"><input type="checkbox"> Dana Damenova - L</label><label style="display:flex;align-items:center;gap:7px;"><input type="checkbox" checked> Ryan Everett - L</label></div></div>
-            <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-green" style="font-size:13px;padding:6px 18px;">Save</button><a class="link-blue" style="display:flex;align-items:center;font-size:13px;">Cancel</a></div>
+      <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">The partner clicks into the <strong>Request Initiated</strong> queue, finds your company, and clicks <strong>Mark as Complete</strong> to open the subscription modal and enter the Client ID.</div>
+
+      <!-- Sub-state A: Mark as Complete UI (matching EN Vendor Portal style) -->
+      <div id="prs2-list">
+        <div style="border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;max-width:720px;box-shadow:var(--shadow-sm);">
+          <!-- Column headers -->
+          <div style="display:grid;grid-template-columns:2.2fr 1.2fr 1.3fr 0.8fr 1.1fr 0.6fr;background:#f8f9fa;border-bottom:1.5px solid var(--gray-200);padding:8px 14px;font-size:12px;font-weight:700;color:var(--gray-600);">
+            <div>Client Info</div><div>Identifiers</div><div>Status</div><div>Assigned</div><div>Date</div><div>Timeline</div>
           </div>
-        </div>
-        <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;flex:1;min-width:260px;max-width:360px;box-shadow:var(--shadow-sm);">
-          <div style="background:var(--gray-50);padding:10px 16px;border-bottom:1px solid var(--gray-200);font-size:13px;font-weight:700;color:var(--gray-900);">Workflow Subscription View</div>
-          <div style="padding:12px 14px;font-size:12.5px;">
-            <table style="width:100%;border-collapse:collapse;">
-              <thead><tr style="border-bottom:1px solid var(--gray-200);font-size:11px;color:var(--gray-500);"><th style="padding:5px 6px;text-align:left;">Client Info</th><th style="padding:5px 6px;text-align:left;">ID</th><th style="padding:5px 6px;text-align:left;">Status</th></tr></thead>
-              <tbody><tr><td style="padding:8px 6px;"><a class="link-blue" style="font-weight:600;">Employee Navigator Company</a><br><span style="font-size:11px;color:var(--gray-400);">SUBSCRIBER</span></td><td style="padding:8px 6px;"><span style="font-weight:700;font-size:13px;" id="step2-client-id-b">ENC1</span><br><span style="font-size:11px;color:var(--gray-400);">CLIENT ID</span></td><td style="padding:8px 6px;"><span style="font-weight:700;color:#fff;background:var(--orange);border-radius:4px;padding:3px 10px;font-size:12px;">Demographic Audit</span></td></tr></tbody>
-            </table>
-            <div style="margin-top:10px;" class="alert-success">&#10003; &nbsp;Partner moved company to <strong>Demographic Audit</strong> status</div>
+          <!-- Company row -->
+          <div style="display:grid;grid-template-columns:2.2fr 1.2fr 1.3fr 0.8fr 1.1fr 0.6fr;padding:11px 14px;background:#fff;align-items:start;border-bottom:1px solid var(--gray-100);">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:2px;">
+                <input type="checkbox" style="width:14px;height:14px;flex-shrink:0;">
+                <span style="color:var(--blue);font-size:13px;cursor:pointer;">&#9660;</span>
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--blue);font-size:13px;cursor:pointer;line-height:1.4;">Employee Navigator Company<br><span style="font-weight:400;font-size:11px;color:var(--gray-500);">(OE Demo)</span></div>
+                <div style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.07em;margin-top:3px;">SUBSCRIBER</div>
+                <div style="font-size:11.5px;color:var(--gray-600);margin-top:2px;">EN_Payroll_Demo</div>
+                <div style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.07em;">LICENSEE</div>
+              </div>
+            </div>
+            <div style="font-size:11px;font-weight:700;color:var(--orange);letter-spacing:.05em;padding-top:4px;">MISSING IDENTIFIER</div>
+            <div style="font-size:13px;color:var(--gray-700);padding-top:4px;">Request Initiated</div>
+            <div></div>
+            <div style="padding-top:4px;">
+              <div style="font-size:12.5px;color:var(--gray-700);">04/03/2026</div>
+              <div style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.07em;margin-top:2px;">LAST CHANGED</div>
+            </div>
+            <div style="display:flex;gap:7px;padding-top:4px;align-items:center;">
+              <span style="font-size:16px;cursor:pointer;">&#128197;</span>
+              <span style="font-size:16px;cursor:pointer;color:var(--gray-400);">&#8942;</span>
+            </div>
+          </div>
+          <!-- Action sub-row -->
+          <div style="background:#f0f4f8;border-top:1px solid var(--gray-200);">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:8px 14px 6px 40px;font-size:11.5px;font-weight:700;color:var(--gray-600);border-bottom:1px solid var(--gray-200);">
+              <div>Action</div><div>Assignee</div><div>Assigned</div>
+            </div>
+            <div style="display:flex;align-items:center;padding:10px 14px 12px 40px;gap:0;">
+              <div style="flex:2;font-size:13px;"><a class="link-blue" style="font-weight:500;">Enter Client ID</a></div>
+              <div style="flex:1;font-size:13px;color:var(--gray-700);">Partner</div>
+              <div style="flex:1;font-size:13px;color:var(--gray-700);">04/03/2026</div>
+              <div style="margin-left:auto;">
+                <button class="btn btn-blue" style="font-size:13px;padding:7px 20px;font-weight:600;" onclick="showPrs2Modal()">Mark as Complete</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(3)">Next: Group in Audit Status &rarr;</button></div>
+
+      <!-- Sub-state B: Edit Subscription modal inline -->
+      <div id="prs2-modal" style="display:none;">
+        <div style="font-size:13px;color:var(--gray-600);margin-bottom:12px;line-height:1.6;">The <strong>Edit Subscription</strong> panel opens. The Client ID field is pre-populated — the partner confirms and clicks <strong>Save</strong>.</div>
+        <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;max-width:400px;box-shadow:var(--shadow);">
+          <div style="background:var(--gray-50);padding:10px 16px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13.5px;font-weight:700;color:var(--gray-900);">Edit Subscription</span>
+            <span style="color:var(--gray-400);cursor:pointer;font-size:16px;" onclick="hidePrs2Modal()">&#10005;</span>
+          </div>
+          <div style="padding:18px;font-size:13px;">
+            <div style="display:flex;margin-bottom:12px;"><span style="width:110px;color:var(--gray-500);">Product</span><span style="font-weight:600;">Test Vendor</span></div>
+            <div style="display:flex;margin-bottom:12px;"><span style="width:110px;color:var(--gray-500);">Company</span><span style="font-weight:600;">Employee Navigator Company</span></div>
+            <div style="display:flex;align-items:center;margin-bottom:12px;">
+              <span style="width:110px;color:var(--gray-500);">Client ID</span>
+              <input style="border:1.5px solid var(--blue);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;flex:1;max-width:220px;font-weight:600;" id="step2-client-id-inp" readonly>
+            </div>
+            <div style="display:flex;align-items:flex-start;margin-bottom:16px;">
+              <span style="width:110px;color:var(--gray-500);padding-top:2px;">Contacts</span>
+              <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;">
+                <label style="display:flex;align-items:center;gap:7px;"><input type="checkbox"> Ryan Everett - H</label>
+                <label style="display:flex;align-items:center;gap:7px;"><input type="checkbox" checked> Marc Garagliano - H</label>
+                <label style="display:flex;align-items:center;gap:7px;"><input type="checkbox"> Dana Damenova - L</label>
+                <label style="display:flex;align-items:center;gap:7px;"><input type="checkbox" checked> Ryan Everett - L</label>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--gray-100);padding-top:12px;">
+              <a class="link-blue" style="display:flex;align-items:center;font-size:13px;cursor:pointer;" onclick="hidePrs2Modal()">Cancel</a>
+              <button class="btn btn-green" style="font-size:13px;padding:6px 20px;" onclick="savePrs2Modal()">Save &#10003;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;" id="prs2-next-btn" style="display:none;">
+        <button class="btn btn-blue" onclick="showPartnerStep(3)">Next: Group in Audit Status &rarr;</button>
+      </div>
     </div>
 
     <!-- ── STEP 3: Group in Demographic Audit ── -->
@@ -2222,6 +2310,8 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
   </div>
 </div>
 
+<!-- MODAL: Edit Plan Codes (pencil from All Plans Mapped) -->
+<!-- MODAL: Edit Plan Codes (pencil from All Plans Mapped) -->
 <!-- MODAL: Edit Plan Codes (pencil from All Plans Mapped) -->
 <div class="modal-overlay" id="edit-plan-modal-overlay" onclick="closeEditPlanModal(event)">
   <div class="modal-box" onclick="event.stopPropagation()" style="width:600px;">
