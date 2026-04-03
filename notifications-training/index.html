@@ -340,14 +340,14 @@ footer strong{color:rgba(255,255,255,.45);}
       <div class="fb ok" id="q1-fb"><strong>Correct!</strong> The thin webhook + Get Employee pattern is real-time. Paylocity fires a notification the moment the address changes, EN calls Get Employee to retrieve the full record, and the update is written to EN within about a minute. No human action is needed unless EN detects a conflict.</div>
     </div>
     <div class="qblock">
-      <div class="qtext">2. EN receives a webhook for an employee. The Get Employee response shows a different SSN than what EN has on file. What happens?</div>
+      <div class="qtext">2. EN receives a webhook for an employee with the same identifier they already have in place. The Get Employee response shows a different SSN than what EN has on file. What happens?</div>
       <div class="opts" id="q2">
-        <button class="opt" onclick="answer('q2',this,false)"><div class="oletter">A</div><div class="otext">EN automatically updates the SSN to match payroll — payroll is the system of record for all fields</div></button>
-        <button class="opt" onclick="answer('q2',this,true)"><div class="oletter">B</div><div class="otext">The change is blocked and flagged as a PII conflict for analyst review — EN will never silently overwrite PII</div></button>
+        <button class="opt" onclick="answer('q2',this,true)"><div class="oletter">A</div><div class="otext">EN automatically updates the SSN to match payroll — payroll is the system of record for SSN when the identifier already matches</div></button>
+        <button class="opt" onclick="answer('q2',this,false)"><div class="oletter">B</div><div class="otext">The change is blocked and flagged as a PII conflict for analyst review</div></button>
         <button class="opt" onclick="answer('q2',this,false)"><div class="oletter">C</div><div class="otext">EN sends an email to the employee asking them to confirm their SSN</div></button>
         <button class="opt" onclick="answer('q2',this,false)"><div class="oletter">D</div><div class="otext">EN deletes the employee record and creates a new one with the payroll SSN</div></button>
       </div>
-      <div class="fb ok" id="q2-fb"><strong>Correct!</strong> PII mismatches — name, SSN, DOB — are always blocked and surfaced for analyst review. This is a hard safety guard. EN will never silently overwrite sensitive identity fields. You'll see these flagged on the Integration Health Dashboard.</div>
+      <div class="fb ok" id="q2-fb"><strong>Correct!</strong> When the incoming webhook carries an identifier that already exists in EN, the systems have already established a trusted link for that employee. In this case EN accepts the SSN from payroll and updates it automatically — payroll is the system of record, and the matched identifier confirms this is the same person.</div>
     </div>
     <div class="qblock">
       <div class="qtext">3. Why does EN use the "thin webhook + Get Employee" pattern rather than having the partner embed all changed fields in the webhook itself?</div>
@@ -804,10 +804,10 @@ footer strong{color:rgba(255,255,255,.45);}
 
 <footer>
   <p><strong>Employee Navigator</strong> &middot; Payroll Analyst Training Guide &middot; For internal use only</p>
-  <p style="margin-top:6px;">Based on EN engineering documentation, partner implementation guides, and internal product specs. Questions? <strong>Payroll@employeenavigator.com</strong></p>
+  <p style="margin-top:6px;">Based on EN engineering documentation, partner implementation guides, and internal product specs. Questions? <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3363524a415c5f5f73565e435f5c4a56565d52455a5452475c411d505c5e">[email&#160;protected]</a></strong></p>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function() {
   var sections = document.querySelectorAll('.section');
   var sectionIds = ['s1','s2','s3','s4','s5'];
@@ -853,7 +853,7 @@ footer strong{color:rgba(255,255,255,.45);}
 
   var wrongFeedbacks = {
     'q1-fb': '<strong>Not quite.</strong> The thin webhook + Get Employee pattern is real-time. Paylocity fires a notification the moment the change happens, and EN calls Get Employee to fetch the full record within ~45–60 seconds.',
-    'q2-fb': '<strong>Not quite.</strong> PII mismatches (SSN, name, DOB) are always <strong>blocked and flagged</strong> for analyst review. EN never silently overwrites sensitive identity fields.',
+    'q2-fb': '<strong>Not quite.</strong> When the identifier already matches, EN treats payroll as the system of record and auto-updates the SSN. A PII conflict block applies in scenarios where the identifier itself is unrecognized or ambiguous — not when the employee link is already established.',
     'q3-fb': '<strong>Not quite.</strong> Get Employee guarantees EN receives the <em>complete, current</em> record — not just a partial snapshot of what changed at that moment.',
     'q4-fb': '<strong>Not quite.</strong> A null <code>processed_date</code> means the row is <strong>pending</strong> — queued and waiting for the push job to pick it up and transmit it.',
     'q5-fb': '<strong>Not quite.</strong> The table is a <strong>boolean switch</strong> — one row per endpoint type. EN only needs "push needed: yes or no" right now, so it overwrites. History lives in <code>partner_deduction_notification</code>.',
