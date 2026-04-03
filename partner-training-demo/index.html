@@ -318,13 +318,15 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
     });
     var inp=_g('step2-client-id-inp');
     if(inp)inp.value=clientId;
-    // Determine if this partner has a Find Client ID step
+    // prt-0 = Find Request (always shown for all partners)
+    // prt-1 = Find Client ID (only shown for UKG and isolved)
     var hasIDStep=(val==='ukg'||val==='isolved');
-    var prt0=_g('prt-0');if(prt0)prt0.style.display=hasIDStep?'':'none';
+    var prt1=_g('prt-1');if(prt1)prt1.style.display=hasIDStep?'':'none';
+    var prt0=_g('prt-0');if(prt0)prt0.style.display='';
     var ukgDiv=_g('prs-0-ukg'),isoDiv=_g('prs-0-iso');
     if(ukgDiv)ukgDiv.style.display=(val==='ukg')?'':'none';
     if(isoDiv)isoDiv.style.display=(val==='isolved')?'':'none';
-    showPartnerStep(hasIDStep?0:1);
+    showPartnerStep(0);
     showScreen('s-other-request');
   }
   function completedAuth(){
@@ -599,36 +601,30 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
 
   // ── WIZARD STEP MANAGEMENT ──
   var _wizStep=0;
-  var _wizTitles=['Partner Selection','Email Notifications','Company Info'];
+  var _wizTitles=['Partner Selection','Email Notifications'];
   function wizardStep(dir){
     if(dir===1 && _wizStep===0){
-      // Step 0 → 1: validate partner selected, then show email notifications
       var dd=_g('partnerDropdown');
       if(!dd||!dd.value)return;
     }
     if(dir===1 && _wizStep===1){
-      // Step 1 → final: go to auth flow
+      // Email Notifications → go directly to auth
       goToAuthScreen();
       return;
     }
-    _wizStep = Math.max(0, Math.min(2, _wizStep + dir));
-    // Update sidenav
-    for(var i=0;i<3;i++){
+    _wizStep = Math.max(0, Math.min(1, _wizStep + dir));
+    for(var i=0;i<2;i++){
       var sn=_g('wsn-'+i);
       if(sn)sn.className='wizard-sidenav-item'+(i===_wizStep?' active':'');
     }
-    // Update steps
-    for(var j=0;j<3;j++){
+    for(var j=0;j<2;j++){
       var st=_g('wstep-'+j);
       if(st)st.style.display=j===_wizStep?'':'none';
     }
-    // Update title
     var wt=_g('wizard-title');
     if(wt)wt.textContent=_wizTitles[_wizStep]||'';
-    // Update back button visibility
     var bb=_g('wizBackBtn');
     if(bb)bb.style.display=_wizStep>0?'':'none';
-    // Update save button
     var sb=_g('saveContBtn');
     if(sb){
       if(_wizStep===0){
@@ -636,10 +632,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
         var hasVal=dd2&&dd2.value;
         sb.disabled=!hasVal;
         sb.className=hasVal?'btn btn-blue':'btn btn-muted';
-        sb.textContent='Save and continue';
-      } else if(_wizStep===1){
-        sb.disabled=false;
-        sb.className='btn btn-blue';
         sb.textContent='Save and continue';
       } else {
         sb.disabled=false;
@@ -650,7 +642,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
   }
   function resetWizard(){
     _wizStep=0;
-    for(var i=0;i<3;i++){
+    for(var i=0;i<2;i++){
       var sn=_g('wsn-'+i);
       if(sn)sn.className='wizard-sidenav-item'+(i===0?' active':'');
       var st=_g('wstep-'+i);
@@ -868,7 +860,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
       <div class="wizard-sidenav">
         <div class="wizard-sidenav-item active" id="wsn-0">Partner Selection</div>
         <div class="wizard-sidenav-item" id="wsn-1">Email Notifications</div>
-        <div class="wizard-sidenav-item" id="wsn-2">Company Info</div>
       </div>
       <div class="wizard-content">
 
@@ -933,7 +924,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
             <tbody>
               <tr>
                 <td style="font-size:13.5px;font-weight:500;">Marc Garagliano (H)</td>
-                <td style="font-size:13px;color:var(--blue);">payroll@employeenavigator.com</td>
+                <td style="font-size:13px;color:var(--blue);">mgaragliano@employeenavigator.com</td>
                 <td style="font-size:13px;color:var(--red);font-style:italic;">Missing Phone</td>
                 <td><span style="color:#f59e0b;font-size:20px;">&#9733;</span></td>
                 <td>
@@ -943,7 +934,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
               </tr>
               <tr style="background:var(--gray-50);">
                 <td style="font-size:13.5px;font-weight:500;">Ryan Everett (L)</td>
-                <td style="font-size:13px;color:var(--blue);">payroll@employeenavigator.com</td>
+                <td style="font-size:13px;color:var(--blue);">REverett@employeenavigator.com</td>
                 <td style="font-size:13px;color:var(--red);font-style:italic;">Missing Phone</td>
                 <td><span style="color:var(--gray-300);font-size:20px;">&#9733;</span></td>
                 <td>
@@ -954,17 +945,58 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
             </tbody>
           </table>
           <div style="font-size:12.5px;color:var(--gray-500);margin-top:12px;line-height:1.6;">These contacts will receive email notifications from your payroll partner when the integration is set up, including the <strong>Getting Started</strong> email and any status updates throughout the setup process.</div>
-        </div>
 
-        <!-- STEP 2: Company Info (placeholder) -->
-        <div id="wstep-2" style="display:none;">
-          <h3>Company Info</h3>
-          <div class="alert-info"><div class="ai-icon">i</div><div>Review your company information below before finalizing the integration request.</div></div>
-          <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
-            <div><label class="form-label">Company Name</label><input class="form-input" value="Employee Navigator Company" readonly></div>
-            <div><label class="form-label">Company ID (EIN)</label><input class="form-input" value="ENC1" id="step2-client-id" readonly></div>
+          <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--gray-200);">
+            <div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:8px;">What happens when you save?</div>
+            <div style="font-size:13.5px;color:var(--gray-700);margin-bottom:16px;line-height:1.7;">Employee Navigator will automatically send an email notification to anyone on the payroll partner's team who has the following setting enabled in their user profile:</div>
+
+            <div style="border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;max-width:480px;box-shadow:var(--shadow-sm);margin-bottom:16px;">
+              <div style="background:linear-gradient(135deg,var(--navy),#1f4d72);padding:13px 20px;">
+                <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:2px;">Partner User</div>
+                <div style="font-size:12px;color:rgba(255,255,255,.6);">Payroll Partner Admin</div>
+              </div>
+              <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+                <div>
+                  <label class="form-label">Email</label>
+                  <div style="display:flex;align-items:center;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;background:#fff;gap:10px;">
+                    <span style="color:var(--gray-400);font-size:15px;">&#9993;</span>
+                    <span style="font-size:13px;color:var(--gray-700);">partner.admin@payrollcompany.com</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:12px;">
+                  <div style="flex:1;"><label class="form-label">First Name</label><div style="border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--gray-700);background:#fff;">Partner</div></div>
+                  <div style="flex:1;"><label class="form-label">Last Name</label><div style="border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--gray-700);background:#fff;">Admin</div></div>
+                </div>
+                <div>
+                  <label class="form-label">Phone Number</label>
+                  <div style="display:flex;align-items:center;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:9px 12px;background:#fff;gap:10px;">
+                    <span style="color:var(--gray-400);font-size:15px;">&#128222;</span>
+                    <span style="font-size:13px;color:var(--gray-700);">(555) 000-0000</span>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:10px;">Notification Settings</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--gray-700);cursor:pointer;">
+                      <input type="checkbox" style="margin-top:2px;"> Receive Enrollment Changes Wall Event Notifications
+                      <span style="display:inline-flex;width:16px;height:16px;background:var(--blue);border-radius:50%;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">i</span>
+                    </label>
+                    <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--gray-700);cursor:pointer;padding:8px 10px;background:var(--green-light);border:1px solid #a8d5b9;border-radius:var(--radius-sm);">
+                      <input type="checkbox" checked style="margin-top:2px;"> <span><strong>Receive new Data Exchange request/deactivation emails</strong><br><span style="font-size:12px;color:#166534;margin-top:2px;display:block;">&#10003; This setting must be enabled for the partner to receive your integration request notification.</span></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert-info" style="max-width:480px;margin-bottom:0;">
+              <div class="ai-icon">i</div>
+              <div style="line-height:1.7;">The partner will receive an email notifying them of your new integration request. They will then log into their EN Vendor Portal to find the request and begin the approval process.</div>
+            </div>
           </div>
         </div>
+
+
 
       </div>
     </div>
@@ -1046,8 +1078,8 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
 
     <!-- Step tabs — prt-0 is Find Client ID (UKG/isolved only), hidden for others -->
     <div style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--gray-200);overflow-x:auto;">
-      <div id="prt-0" onclick="showPartnerStep(0)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--blue);border-bottom:2.5px solid var(--blue);margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">1</span>Find Client ID</div>
-      <div id="prt-1" onclick="showPartnerStep(1)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-400);border-bottom:2.5px solid transparent;margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span id="prt-1-num" style="width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">2</span>Find Request</div>
+      <div id="prt-0" onclick="showPartnerStep(0)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--blue);border-bottom:2.5px solid var(--blue);margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">1</span>Find Request</div>
+      <div id="prt-1" onclick="showPartnerStep(1)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-400);border-bottom:2.5px solid transparent;margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span id="prt-1-num" style="width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">2</span>Find Client ID</div>
       <div id="prt-2" onclick="showPartnerStep(2)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-400);border-bottom:2.5px solid transparent;margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span id="prt-2-num" style="width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">3</span>Approve &amp; Enter ID</div>
       <div id="prt-3" onclick="showPartnerStep(3)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-400);border-bottom:2.5px solid transparent;margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span id="prt-3-num" style="width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">4</span>Group in Audit Status</div>
       <div id="prt-4" onclick="showPartnerStep(4)" style="padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray-400);border-bottom:2.5px solid transparent;margin-bottom:-2px;background:#fff;display:flex;align-items:center;gap:7px;white-space:nowrap;"><span id="prt-4-num" style="width:20px;height:20px;border-radius:50%;background:var(--gray-300);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">5</span>Getting Started Email</div>
@@ -1055,6 +1087,39 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
 
     <!-- ── STEP 0: FIND CLIENT ID (partner-specific, UKG or isolved) ── -->
     <div id="prs-0" style="padding:20px 0;">
+      <div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:6px;">Step <span class="step-label-1">2</span> — Partner Finds the Request in their EN Vendor Portal</div>
+      <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">The partner logs into their EN Vendor Portal. From the <strong>Partner Portal</strong> home screen they can see a summary of all companies by status. They click <strong>Request Initiated</strong> to find your company.</div>
+      <div style="border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;display:flex;max-width:700px;box-shadow:var(--shadow);">
+        <div style="width:190px;background:var(--gray-50);border-right:1px solid var(--gray-200);">
+          <div style="padding:12px 16px;font-weight:700;color:var(--gray-700);border-bottom:1px solid var(--gray-200);font-size:13.5px;">Home</div>
+          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">File Retrieval <span>&#8250;</span></div>
+          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">Marketing <span>&#8250;</span></div>
+          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">API <span>&#8250;</span></div>
+          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">Setup <span>&#8250;</span></div>
+        </div>
+        <div style="flex:1;padding:18px 20px;">
+          <div style="font-size:17px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">Partner Portal</div>
+          <div style="margin-bottom:12px;"><input style="width:100%;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;color:var(--gray-400);" placeholder="Search for Client ID or name..." readonly></div>
+          <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
+            <div style="background:var(--gray-50);padding:10px 16px;border-bottom:1px solid var(--gray-200);font-size:13.5px;font-weight:700;color:var(--gray-900);display:flex;justify-content:space-between;align-items:center;">Test Vendor <div style="display:flex;gap:8px;"><button class="btn btn-blue" style="font-size:12px;padding:4px 12px;">Export</button><button class="btn btn-blue" style="font-size:12px;padding:4px 12px;">Edit &#9998;</button></div></div>
+            <div style="padding:4px 0;">
+              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;cursor:pointer;background:var(--blue-light);"><a class="link-blue" style="font-weight:600;">&#8594; Request Initiated</a><span style="font-weight:700;color:var(--blue);">8</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographic Audit</a><span style="color:var(--gray-600);">4</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographics Live, Deduction Audit</a><span style="color:var(--gray-600);">4</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographics &amp; Deductions Live</a><span style="color:var(--gray-600);">20</span></div>
+              <div style="display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;"><a class="link-blue">Inactive</a><span style="color:var(--gray-600);">196</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(1)">Next: Find Client ID &rarr;</button></div>
+    </div>
+
+    <!-- ── STEP 2: Approve & Enter Client ID ── -->
+    
+
+    <!-- ── STEP 1: Find the Request (EN Vendor Portal) ── -->
+    <div id="prs-1" style="display:none;padding:20px 0;">
 
       <!-- UKG version -->
       <div id="prs-0-ukg">
@@ -1201,7 +1266,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
             <div class="alert-success mt12">&#10003; &nbsp;The highlighted Unique ID is what the partner enters as the <strong>Client ID</strong> in the EN Vendor Portal to complete the integration setup.</div>
           </div>
         </div>
-        <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(1)">Next: Partner Finds the Request &rarr;</button></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(2)">Next: Approve &amp; Enter ID &rarr;</button></div>
       </div>
 
       <!-- isolved version -->
@@ -1276,43 +1341,10 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;font-size
             <div class="alert-success mt12">&#10003; &nbsp;The <strong>Company Code</strong> (e.g. ISO-TEST-1) is the value the partner enters as the <strong>Client ID</strong> in the EN Vendor Portal.</div>
           </div>
         </div>
-        <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(1)">Next: Partner Finds the Request &rarr;</button></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(2)">Next: Approve &amp; Enter ID &rarr;</button></div>
       </div>
 
-    </div><!-- /prs-0 -->
-
-    <!-- ── STEP 1: Find the Request (EN Vendor Portal) ── -->
-    <div id="prs-1" style="display:none;padding:20px 0;">
-      <div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:6px;">Step <span class="step-label-1">2</span> — Partner Finds the Request in their EN Vendor Portal</div>
-      <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">The partner logs into their EN Vendor Portal. From the <strong>Partner Portal</strong> home screen they can see a summary of all companies by status. They click <strong>Request Initiated</strong> to find your company.</div>
-      <div style="border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;display:flex;max-width:700px;box-shadow:var(--shadow);">
-        <div style="width:190px;background:var(--gray-50);border-right:1px solid var(--gray-200);">
-          <div style="padding:12px 16px;font-weight:700;color:var(--gray-700);border-bottom:1px solid var(--gray-200);font-size:13.5px;">Home</div>
-          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">File Retrieval <span>&#8250;</span></div>
-          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">Marketing <span>&#8250;</span></div>
-          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">API <span>&#8250;</span></div>
-          <div style="padding:10px 16px;color:var(--gray-500);border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;font-size:13px;">Setup <span>&#8250;</span></div>
-        </div>
-        <div style="flex:1;padding:18px 20px;">
-          <div style="font-size:17px;font-weight:700;color:var(--gray-900);margin-bottom:4px;">Partner Portal</div>
-          <div style="margin-bottom:12px;"><input style="width:100%;border:1px solid var(--gray-300);border-radius:var(--radius-sm);padding:7px 11px;font-size:12.5px;color:var(--gray-400);" placeholder="Search for Client ID or name..." readonly></div>
-          <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;">
-            <div style="background:var(--gray-50);padding:10px 16px;border-bottom:1px solid var(--gray-200);font-size:13.5px;font-weight:700;color:var(--gray-900);display:flex;justify-content:space-between;align-items:center;">Test Vendor <div style="display:flex;gap:8px;"><button class="btn btn-blue" style="font-size:12px;padding:4px 12px;">Export</button><button class="btn btn-blue" style="font-size:12px;padding:4px 12px;">Edit &#9998;</button></div></div>
-            <div style="padding:4px 0;">
-              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;cursor:pointer;background:var(--blue-light);"><a class="link-blue" style="font-weight:600;">&#8594; Request Initiated</a><span style="font-weight:700;color:var(--blue);">8</span></div>
-              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographic Audit</a><span style="color:var(--gray-600);">4</span></div>
-              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographics Live, Deduction Audit</a><span style="color:var(--gray-600);">4</span></div>
-              <div style="display:flex;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--gray-100);font-size:13px;"><a class="link-blue">Demographics &amp; Deductions Live</a><span style="color:var(--gray-600);">20</span></div>
-              <div style="display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;"><a class="link-blue">Inactive</a><span style="color:var(--gray-600);">196</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:16px;display:flex;justify-content:flex-end;"><button class="btn btn-blue" onclick="showPartnerStep(2)">Next: Approve &amp; Enter ID &rarr;</button></div>
-    </div>
-
-    <!-- ── STEP 2: Approve & Enter Client ID ── -->
-    <div id="prs-2" style="display:none;padding:20px 0;">
+    </div><!-- /prs-1 --><div id="prs-2" style="display:none;padding:20px 0;">
       <div style="font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:6px;">Step <span class="step-label-2">3</span> — Partner Approves the Request &amp; Assigns the Client ID</div>
       <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">The partner clicks into the <strong>Request Initiated</strong> workflow for your company. They enter the <strong>Client ID</strong> (the Company Code or Unique ID they just located) and click <strong>Mark as Complete</strong>.</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;">
