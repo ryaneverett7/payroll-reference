@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EN Quoting Integration Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a1a;min-height:100vh;font-size:16px}
+html{font-size:16px}
+.app{max-width:1400px;margin:0 auto;padding:24px}
+.hbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #dde1e7}
+.htitle{font-size:24px;font-weight:700;color:#111}
+.hsub{font-size:13px;color:#666;margin-top:3px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.bdg{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+.bdg-blue{background:#dbeafe;color:#1e40af}.bdg-green{background:#dcfce7;color:#166534}
+.bdg-purple{background:#ede9fe;color:#5b21b6}.bdg-amber{background:#fef3c7;color:#92400e}
+.bdg-teal{background:#ccfbf1;color:#0f766e}
+.wf-band{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:7px;margin-bottom:10px;font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase}
+.wf-1{background:#dbeafe;color:#1e40af;border-left:3px solid #2563eb}
+.wf-2{background:#ccfbf1;color:#0f766e;border-left:3px solid #0d9488}
+.wf-3{background:#dcfce7;color:#166534;border-left:3px solid #16a34a}
+.prog-wrap{margin-bottom:16px}
+.prog-labels{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:5px}
+.prog-track{height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;transition:width 0.4s ease;border-radius:3px}
+.pfill-1{background:#2563eb}.pfill-2{background:#0d9488}.pfill-3{background:#16a34a}
+.fnav{display:grid;gap:5px;margin-bottom:14px}
+.fnav-row{display:flex;gap:4px;align-items:center}
+.tier-label{font-size:10px;font-weight:700;letter-spacing:0.04em;white-space:nowrap;padding:4px 8px;border-radius:4px;min-width:70px;text-align:center}
+.tlbl-1{background:#dbeafe;color:#1e40af}.tlbl-2{background:#ccfbf1;color:#0f766e}.tlbl-3{background:#dcfce7;color:#166534}
+.fstep{border:1px solid #e0e0e0;border-radius:7px;padding:7px 4px;cursor:pointer;text-align:center;background:#fff;transition:all 0.15s;flex:1}
+.fstep:hover{border-color:#93c5fd;background:#eff6ff}
+.fstep.active{border-color:#2563eb;background:#eff6ff}
+.fstep.active .snum{background:#2563eb;color:#fff}
+.fstep.done .snum{background:#16a34a;color:#fff}
+.fstep.done{border-color:#bbf7d0}
+.snum{width:20px;height:20px;border-radius:50%;background:#f3f4f6;font-size:10px;font-weight:700;color:#6b7280;display:flex;align-items:center;justify-content:center;margin:0 auto 4px}
+.slbl{font-size:9px;color:#6b7280;line-height:1.2}
+.fstep.active .slbl{color:#1d4ed8;font-weight:700}
+.ca{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid #e0e0e0;border-radius:11px;background:#fff;overflow:hidden;display:flex;flex-direction:column}
+.ph{padding:10px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:#fafafa;flex-shrink:0}
+.ph-title{font-size:11px;font-weight:700;color:#6b7280;letter-spacing:0.05em;text-transform:uppercase}
+.pb{padding:16px;overflow-y:auto;max-height:600px;flex:1}
+.sys-tag{display:inline-flex;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.sys-en{background:#dbeafe;color:#1e40af}.sys-q{background:#ccfbf1;color:#0f766e}.sys-both{background:#dcfce7;color:#166534}
+.info-strip{border-radius:7px;padding:9px 12px;margin-bottom:10px;font-size:13px;line-height:1.5}
+.info-blue{background:#dbeafe;border:1px solid #93c5fd;color:#1e40af}
+.info-teal{background:#ccfbf1;border:1px solid #5eead4;color:#0f766e}
+.info-amber{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
+.info-green{background:#dcfce7;border:1px solid #86efac;color:#166534}
+.info-purple{background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6}
+.info-label{font-size:10px;font-weight:700;margin-bottom:1px;opacity:0.75}
+.api-box{background:#f9fafb;border-radius:7px;padding:11px 13px;margin-bottom:9px;border:1px solid #e5e7eb}
+.api-mget{color:#1d4ed8;font-size:11px;font-weight:700;font-family:monospace}
+.api-mpost{color:#166534;font-size:11px;font-weight:700;font-family:monospace}
+.api-ep{font-size:11px;font-family:monospace;color:#111;margin:3px 0;word-break:break-all;line-height:1.5}
+.api-desc{font-size:13px;color:#555;margin-top:4px;line-height:1.5}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border-radius:7px;font-size:15px;font-weight:600;cursor:pointer;border:1px solid #d1d5db;background:#fff;color:#111;transition:all 0.12s;width:100%;margin-top:7px}
+.btn:hover{background:#f9fafb}.btn:disabled{opacity:0.5;cursor:default}
+.btn-primary{background:#2563eb;color:#fff;border-color:#2563eb}.btn-primary:hover:not(:disabled){background:#1d4ed8}
+.btn-teal{background:#0d9488;color:#fff;border-color:#0d9488}.btn-teal:hover:not(:disabled){background:#0f766e}
+.btn-success{background:#16a34a;color:#fff;border-color:#16a34a}
+.btn-green-en{background:#16a34a;color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-green-en:hover{background:#15803d}
+.btn-blue-en{background:#2563eb;color:#fff;border:none;border-radius:5px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-blue-en:hover{background:#1d4ed8}
+.btn-outline-en{background:#fff;color:#2563eb;border:1px solid #2563eb;border-radius:5px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.rbox{background:#1e1e2e;color:#cdd6f4;border-radius:7px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;max-height:220px;overflow-y:auto;display:none;white-space:pre-wrap;word-break:break-word;margin-top:7px}
+.rbox.vis{display:block}
+.rk{color:#94e2d5}.rs{color:#f9e2af}.rn{color:#a6e3a1}.rb{color:#fab387}
+.spl{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.sp200{background:#dcfce7;color:#166534}.sp-pend{background:#fef3c7;color:#92400e}
+.tl{display:flex;gap:8px;margin-bottom:9px}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.tl-title{font-size:14px;font-weight:600;color:#111}
+.tl-txt{font-size:12px;color:#6b7280;margin-top:1px;line-height:1.4}
+.plan-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6}
+.plan-row:last-child{border-bottom:none}
+.pr-name{font-size:13px;color:#111}.pr-meta{font-size:11px;color:#6b7280}
+.en-chrome{background:#fff;border-radius:11px;border:1px solid #d1d5db;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.en-topbar{background:#1a4480;padding:8px 13px;display:flex;align-items:center;justify-content:space-between}
+.en-logo-txt{font-size:13px;font-weight:700;color:#fff}
+.en-nav{display:flex;gap:12px}
+.en-nav-item{font-size:10px;color:rgba(255,255,255,0.65);cursor:pointer;padding:2px 0}
+.en-nav-item.act{color:#fff;border-bottom:2px solid #fff;padding-bottom:0}
+.en-body{padding:12px}
+.en-int-panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px}
+.en-int-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.en-int-title{font-size:15px;font-weight:700;color:#111}
+.en-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.en-stat{text-align:center}
+.en-stat-num{font-size:22px;font-weight:700;color:#2563eb}
+.en-stat-lbl{font-size:11px;color:#555;margin-top:2px;line-height:1.3}
+.en-stat-btn-wrap{margin-top:8px}
+.q-chrome{background:#f0fdf4;border-radius:11px;border:1px solid #86efac;overflow:hidden}
+.q-topbar{background:#0d9488;padding:8px 13px;display:flex;align-items:center;justify-content:space-between}
+.q-logo{font-size:13px;font-weight:700;color:#fff}
+.q-body{padding:12px}
+.en-table{width:100%;border-collapse:collapse;font-size:12px}
+.en-table th{background:#f9fafb;padding:6px 9px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb}
+.en-table td{padding:7px 9px;border-bottom:1px solid #f3f4f6;color:#111;vertical-align:middle}
+.en-table tr:last-child td{border-bottom:none}
+.en-table tr:hover td{background:#f9fafb}
+.en-link-btn{color:#2563eb;font-weight:600;cursor:pointer;font-size:12px;background:none;border:none;padding:0;text-decoration:underline}
+.wizard-step{display:none}.wizard-step.active{display:block}
+.en-select{width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;font-family:inherit;color:#111;margin-bottom:9px;background:#fff}
+.en-login-wrap{display:flex;align-items:center;justify-content:center;padding:16px;background:#f0f2f5;min-height:220px;border-radius:8px}
+.en-login-card{background:#fff;border-radius:10px;padding:22px;width:100%;max-width:290px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+.en-login-field-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:3px;display:block}
+.en-login-field{width:100%;padding:9px 11px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;font-family:inherit;color:#111;margin-bottom:11px}
+.en-login-field:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,0.15)}
+.en-login-btn{width:100%;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer}
+.en-login-btn:hover{background:#15803d}
+.redirect-screen{background:#f0f2f5;border-radius:8px;padding:22px;text-align:center;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.redirect-url-bar{background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:7px 11px;font-family:monospace;font-size:10px;color:#6b7280;word-break:break-all;text-align:left;margin:4px 0}
+.sold-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.sold-modal{background:#fff;border-radius:12px;padding:22px;width:400px;max-width:95vw;box-shadow:0 20px 50px rgba(0,0,0,0.2)}
+.sold-modal-title{font-size:16px;font-weight:700;color:#111;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sold-plan-row{border:1px solid #e5e7eb;border-radius:8px;padding:11px;margin-bottom:10px}
+.sold-plan-name{font-size:14px;font-weight:700;color:#111;margin-bottom:4px}
+.sold-plan-meta{font-size:11px;color:#6b7280;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.sold-check-row{display:flex;align-items:center;gap:7px;font-size:13px;color:#374151;margin-bottom:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc{background:#f9fafb;border-radius:7px;padding:9px;text-align:center}
+.sv{font-size:20px;font-weight:700;color:#111}.sl{font-size:11px;color:#6b7280;margin-top:2px}
+.navbtns{display:flex;gap:9px;margin-top:14px}
+.navbtns .btn{flex:1;margin-top:0}
+.step-desc{font-size:13px;color:#555;line-height:1.6;margin-bottom:9px}
+.highlight-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:7px;padding:8px 10px;margin-bottom:8px;font-size:12px;color:#92400e;line-height:1.5}
+code{font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 4px;border-radius:3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:14px;height:14px;border:2px solid #e5e7eb;border-top-color:#0d9488;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.35s ease forwards}
+.pii-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:12px;color:#92400e;margin-top:8px;line-height:1.5}
+@media(max-width:700px){.ca{grid-template-columns:1fr}.en-stats-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.fnav-row{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hbar">
+  <div>
+    <div class="htitle">EN Quoting Integration &mdash; Partner Technical Demo</div>
+    <div class="hsub">Interactive walkthrough &mdash; Quoting system initiates the connection, then data flows from EN to power the quote</div>
+    <div class="badges">
+      <span class="bdg bdg-blue">OAuth 2.0</span>
+      <span class="bdg bdg-teal">10 steps</span>
+      <span class="bdg bdg-green">6 APIs</span>
+      <span class="bdg bdg-amber">Interactive EN UI</span>
+    </div>
+  </div>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-labels"><span id="progLabel">Step 1</span><span id="progPct">10%</span></div>
+  <div class="prog-track"><div id="progFill" class="prog-fill pfill-1" style="width:10%"></div></div>
+</div>
+
+<div class="fnav" id="flowNav">
+  <div class="fnav-row">
+    <span class="tier-label tlbl-1">Workflow 1</span>
+    <div class="fstep active" data-s="0"><div class="snum">1</div><div class="slbl">Quoting Sys.</div></div>
+    <div class="fstep" data-s="1"><div class="snum">2</div><div class="slbl">POST Integ. Req</div></div>
+    <div class="fstep" data-s="2"><div class="snum">3</div><div class="slbl">EN Login</div></div>
+    <div class="fstep" data-s="3"><div class="snum">4</div><div class="slbl">Link Company</div></div>
+  </div>
+  <div class="fnav-row">
+    <span class="tier-label tlbl-2">Workflow 2</span>
+    <div class="fstep" data-s="4"><div class="snum">5</div><div class="slbl">Company List</div></div>
+    <div class="fstep" data-s="5"><div class="snum">6</div><div class="slbl">Company Detail</div></div>
+    <div class="fstep" data-s="6"><div class="snum">7</div><div class="slbl">Plan List</div></div>
+    <div class="fstep" data-s="7"><div class="snum">8</div><div class="slbl">Plan Details</div></div>
+    <div class="fstep" data-s="8"><div class="snum">9</div><div class="slbl">Quote Census</div></div>
+    <div style="flex:1"></div>
+  </div>
+  <div class="fnav-row">
+    <span class="tier-label tlbl-3">Workflow 3</span>
+    <div class="fstep" data-s="9"><div class="snum">10</div><div class="slbl">Push Plans</div></div>
+    <div style="flex:8"></div>
+  </div>
+</div>
+
+<div id="wfBand" class="wf-band wf-1">&#9654; Business Workflow 1 &mdash; Broker Establishes the Integration for Individual Companies with the Quoting System</div>
+
+<div class="ca">
+  <div class="panel"><div class="ph"><span class="ph-title" id="leftTitle">What&#39;s happening</span><span id="leftBadge"></span></div><div class="pb" id="leftBody"></div></div>
+  <div class="panel"><div class="ph"><span class="ph-title" id="rightTitle">System view</span><span id="rightSysTag"></span></div><div class="pb" id="rightBody"></div></div>
+</div>
+
+<div class="navbtns">
+  <button class="btn" id="backBtn" onclick="goTo(cur-1)" style="display:none">&#8592; Back</button>
+  <button class="btn btn-primary" id="nextBtn">Next step &#8594;</button>
+  <button class="btn" style="width:auto;margin-top:0;padding:9px 14px" onclick="resetDemo()">&#8635; Reset</button>
+</div>
+</div>
+
+<!-- Sold Plans Modal -->
+<div class="sold-modal-bg" id="soldModalBg" style="display:none" onclick="if(event.target===this)closeSoldModal()">
+  <div class="sold-modal">
+    <div class="sold-modal-title">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/><path d="M5 9l3 3 5-5" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Mark Quote as Sold &mdash; <span id="soldCoName" style="color:#0d9488"></span>
+    </div>
+    <div id="soldStep1">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:11px">Select quoted plans to mark as sold and send to Employee Navigator.</div>
+      <div class="sold-plan-row">
+        <div class="sold-plan-name">EN Blue PPO 1500 Renewal 2026</div>
+        <div class="sold-plan-meta"><span class="bdg bdg-teal" style="font-size:10px">Medical</span><span>Anthem BCBS</span><span>Effective 2026-01-01</span></div>
+        <div class="sold-check-row"><input type="checkbox" id="plan1check" checked style="accent-color:#0d9488"><label for="plan1check">Include in submission</label></div>
+        <div style="font-size:11px;font-family:monospace;color:#6b7280">EE: $595 &bull; EE+SP: $1,190 &bull; EE+CH: $1,050 &bull; Family: $1,680</div>
+      </div>
+      <div class="sold-plan-row" style="opacity:0.5">
+        <div class="sold-plan-name">Delta Dental Plus 2026</div>
+        <div class="sold-plan-meta"><span class="bdg bdg-blue" style="font-size:10px">Dental</span><span>Delta Dental</span></div>
+        <div class="sold-check-row"><input type="checkbox" style="accent-color:#0d9488"><label>Include in submission</label></div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:14px">
+        <button style="flex:2;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="soldConfirm()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Send Plans to Employee Navigator
+        </button>
+        <button style="flex:1;padding:10px;background:#fff;color:#555;border:1px solid #d1d5db;border-radius:7px;font-size:13px;cursor:pointer" onclick="closeSoldModal()">Cancel</button>
+      </div>
+    </div>
+    <div id="soldStep2" style="display:none">
+      <div style="background:#ccfbf1;border:1px solid #5eead4;border-radius:7px;padding:13px;text-align:center;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:700;color:#0f766e;margin-bottom:3px">&#10003; Plans sent to Employee Navigator</div>
+        <div style="font-size:13px;color:#0f766e">EN Blue PPO 1500 Renewal 2026 submitted. The broker can now Take Action in EN.</div>
+      </div>
+      <button style="width:100%;padding:9px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer" onclick="closeSoldModal();fireCall(9)">View API call &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var cur=0, fired=[], selCo=0;
+for(var i=0;i<10;i++) fired.push(false);
+
+var cos=[
+  {id:"efe6f11f-fda1-457d-904b-d2c0d8334daf",name:"Acme Corp",fein:"12-3456789",state:"CA",emp:87,agency:"Pacific Benefits Group"},
+  {id:"a3c72b18-9e4f-4d2a-bb31-7f1e8c903a55",name:"TechStart Solutions",fein:"55-4433221",state:"TX",emp:42,agency:"Pacific Benefits Group"},
+  {id:"9d481f3c-20a7-4e87-c912-0b5d6e72f844",name:"Blue Ridge Manufacturing",fein:"98-7654321",state:"NC",emp:234,agency:"Pacific Benefits Group"}
+];
+var plans=[
+  {id:"PL-8801",name:"EN Blue PPO 2000",benefit:"Medical",carrier:"Anthem BCBS"},
+  {id:"PL-8802",name:"Delta Dental Premier",benefit:"Dental",carrier:"Delta Dental"},
+  {id:"PL-8803",name:"VSP Vision Plus",benefit:"Vision",carrier:"VSP"},
+  {id:"PL-8804",name:"Group Term Life 2x",benefit:"GroupLife",carrier:"Principal"}
+];
+var emps=[
+  {init:"JM",name:"Jordan Martinez",title:"Sr. Engineer",av:"av-b",plans:3,deps:2,tobacco:false},
+  {init:"PT",name:"Priya Tanner",title:"Product Manager",av:"av-g",plans:2,deps:1,tobacco:false},
+  {init:"DK",name:"Derek Kim",title:"Sales Lead",av:"av-p",plans:3,deps:0,tobacco:true},
+  {init:"AL",name:"Aisha Lewis",title:"HR Manager",av:"av-a",plans:4,deps:3,tobacco:false}
+];
+
+var WF_STEPS=[0,0,0,0,1,1,1,1,1,2];
+var WF_NAMES=[
+  "Business Workflow 1 \u2014 Broker Establishes the Integration for Individual Companies with the Quoting System",
+  "Business Workflow 2 \u2014 Data Retrieval of Company Details, Plan and Census Data from Employee Navigator",
+  "Business Workflow 3 \u2014 Quoted Plan Push into Employee Navigator"
+];
+var WF_CLASSES=["wf-1","wf-2","wf-3"];
+var FILL_CLASSES=["pfill-1","pfill-2","pfill-3"];
+
+function hl(j){
+  return j.replace(/("[\w\s\-\.\/\:@\+#\|]*"(?=\s*:))/g,'<span class="rk">$1</span>')
+          .replace(/("[\w\s\-\.\/\:@\+#\|]*")(?!\s*:)/g,'<span class="rs">$1</span>')
+          .replace(/\b(\d+\.?\d*)\b/g,'<span class="rn">$1</span>')
+          .replace(/\b(true|false|null)\b/g,'<span class="rb">$1</span>');
+}
+
+var CENSUS_DATA = '{\n  "companyIdentifier": "efe6f11f-fda1-457d-904b-d2c0d8334daf",\n  "employees": [\n    {\n      "employeeIdentifier": "EMP-001-abc123",\n      "demographics": {\n        "firstName": "Jordan",\n        "firstInitialLastName": "J. M.",\n        "sex": "Male",\n        "birthDate": "1988-04-12",\n        "addresses": {\n          "homeAddress": {\n            "city": "San Francisco",\n            "state": "CA",\n            "postalCode": "94102",\n            "fipsCountyCode": "06075"\n          }\n        },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": {\n        "benefitHireDate": "2019-06-01",\n        "jobTitle": "Sr. Engineer",\n        "benefitWorkState": "California"\n      },\n      "employmentCompensation": {\n        "annualBenefitSalary": { "annualBenefitSalary": 145000, "effectiveDate": "2025-01-01" }\n      },\n      "companyStructureMapping": {\n        "eligibilityClass": "Full-Time",\n        "division": "Engineering",\n        "department": "Platform",\n        "officeLocation": "San Francisco HQ"\n      },\n      "dependents": [\n        {\n          "dependentIdentifier": "DEP-001a",\n          "demographics": {\n            "relationship": "Spouse",\n            "firstName": "Sarah",\n            "firstInitialLastName": "S. M.",\n            "sex": "Female",\n            "birthDate": "1990-09-15",\n            "tobaccoUseInformation": { "isTobaccoUser": false }\n          }\n        },\n        {\n          "dependentIdentifier": "DEP-001b",\n          "demographics": {\n            "relationship": "Child",\n            "firstName": "Lily",\n            "firstInitialLastName": "L. M.",\n            "sex": "Female",\n            "birthDate": "2018-03-22",\n            "tobaccoUseInformation": { "isTobaccoUser": false }\n          }\n        }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": {\n            "employeeBenefit": {\n              "effectiveDate": "2025-01-01",\n              "details": { "planIdentifier": "PL-8801", "carrierName": "Anthem BCBS", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 1240.00, "benefitDetails": { "benefitTier": "EmployeePlusSpouse", "isCOBRA": false } }\n            }\n          }\n        }\n      ]\n    },\n    {\n      "employeeIdentifier": "EMP-002-def456",\n      "demographics": {\n        "firstName": "Priya",\n        "firstInitialLastName": "P. T.",\n        "sex": "Female",\n        "birthDate": "1991-09-03",\n        "addresses": {\n          "homeAddress": { "city": "San Francisco", "state": "CA", "postalCode": "94105", "fipsCountyCode": "06075" }\n        },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": { "benefitHireDate": "2021-03-15", "jobTitle": "Product Manager", "benefitWorkState": "California" },\n      "employmentCompensation": { "annualBenefitSalary": { "annualBenefitSalary": 130000, "effectiveDate": "2025-01-01" } },\n      "companyStructureMapping": { "eligibilityClass": "Full-Time", "division": "Product", "department": "Core" },\n      "dependents": [\n        {\n          "dependentIdentifier": "DEP-002a",\n          "demographics": { "relationship": "Child", "firstName": "Rohan", "firstInitialLastName": "R. T.", "sex": "Male", "birthDate": "2020-07-11", "tobaccoUseInformation": { "isTobaccoUser": false } }\n        }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": {\n            "employeeBenefit": {\n              "effectiveDate": "2025-01-01",\n              "details": { "planIdentifier": "PL-8801", "carrierName": "Anthem BCBS", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 620.00, "benefitDetails": { "benefitTier": "Employee", "isCOBRA": false } }\n            }\n          }\n        }\n      ]\n    }\n  ]\n}';
+
+function getResp(s){
+  var c=cos[selCo];
+  if(s==1) return JSON.stringify({requests:cos.map(function(co){return {companyIdentifier:co.id,companyName:co.name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+co.id.slice(0,8)+"-2026"};})},null,2);
+  if(s==4) return JSON.stringify({companies:[
+    {benAdminCompanyIdentifier:"efe6f11f-fda1-457d-904b-d2c0d8334daf",benAdminCompanyName:"Acme Corp",federalEmployerIdentificationNumber:"12-3456789",state:"CA",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]},
+    {benAdminCompanyIdentifier:"a3c72b18-9e4f-4d2a-bb31-7f1e8c903a55",benAdminCompanyName:"TechStart Solutions",federalEmployerIdentificationNumber:"55-4433221",state:"TX",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]},
+    {benAdminCompanyIdentifier:"9d481f3c-20a7-4e87-c912-0b5d6e72f844",benAdminCompanyName:"Blue Ridge Manufacturing",federalEmployerIdentificationNumber:"98-7654321",state:"NC",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]}
+  ]},null,2);
+  if(s==5) return JSON.stringify({information:{companyIdentifier:c.id,demographic:{name:c.name,federalEmployerIdentificationNumber:c.fein,stateOfFormation:c.state,primaryAddress:{street1:"123 Market St",city:"San Francisco",state:"CA",postalCode:"94102"}},companyContact:{firstName:"Jane",lastName:"Smith",email:"jsmith@acmecorp.com"},agencyContact:{agencyName:c.agency,agentName:"Ryan Everett"},activeEmployeeCount:c.emp},openEnrollment:{effectiveDate:"2026-01-01",startDate:"2025-11-01",endDate:"2025-11-30",administrativeEndDate:"2025-12-05"},companyStructure:{divisions:["Engineering","Product","Sales","Operations"],departments:["Platform","Core","Growth","HR"]}},null,2);
+  if(s==6) return JSON.stringify({plans:plans.map(function(p){return{planIdentifier:p.id,benefit:p.benefit,name:p.name,startDate:"2025-01-01",endDate:"2025-12-31",carrierName:p.carrier,planDetailUrl:"/api/companies/"+c.id+"/plans/"+p.id+"/health-management"};})},null,2);
+  if(s==7) return JSON.stringify({companyIdentifier:c.id,plan:{planIdentifier:"PL-8801",configuration:{name:"EN Blue PPO 2000",startDate:"2025-01-01",endDate:"2025-12-31",situsState:"CA",carrierName:"Anthem BCBS",policyNumber:"GRP-00123",billOption:"SelfBill",isSelfFunded:false},eligibility:{newHireWaitingPeriodObject:{waitingPeriodType:"Days",waitingPeriodValue:30},newHireEntryDateObject:{entryDateRule:"FirstOfMonthAfter"},terminationDateObject:{terminationRule:"EndOfMonthOfTermination"}},rates:{compositeRates:{tierRates:[{tier:"Employee",rate:620.00},{tier:"EmployeePlusSpouse",rate:1240.00},{tier:"EmployeePlusChildren",rate:1100.00},{tier:"EmployeePlusFamily",rate:1750.00}]}},contributions:{contributionGroupings:[{contributionGroupingBasedOn:"Everyone",tierMonthlyContributions:[{contributionTier:"Employee",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:500.00},{contributionTier:"EmployeePlusSpouse",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:800.00},{contributionTier:"EmployeePlusChildren",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:750.00},{contributionTier:"EmployeePlusFamily",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:1200.00}]}]}}},null,2);
+  if(s==8) return CENSUS_DATA;
+  if(s==9) return JSON.stringify({companyIdentifier:c.id,plan:{planIdentifier:"PL-NEW-2026",configuration:{policyNumber:"GRP-00123",carrierName:"Anthem BCBS",planName:"EN Blue PPO 1500 Renewal 2026",startDate:"2026-01-01",endDate:"2026-12-31",nextRenewalDate:"2027-01-01",carrierPlanCode:"PPO1500",carrierPlanTypeCode:"PPO",planBillOption:"SelfBill",isSelfFunded:false,situsState:"CA",benefit:"Medical",originalPlanStartDate:"2020-01-01"},eligibilityOptions:[{eligibilityRules:{waitingPeriod:{waitingPeriodType:"Days",waitingPeriodValue:30},entryDateRule:"FirstOfMonthAfter",terminationRule:"EndOfMonthOfTermination",rehirePeriod:{periodType:"Days",periodValue:90},rehireEntryDateRule:"HireDate"}}],rates:{compositeRates:{tierRates:[{tier:"Employee",rate:595.00},{tier:"EmployeePlusSpouse",rate:1190.00},{tier:"EmployeePlusChildren",rate:1050.00},{tier:"EmployeePlusFamily",rate:1680.00}]}},contributions:{contributionGroupings:[{contributionGroupingBasedOn:"Everyone",tierMonthlyContributions:[{contributionTier:"Employee",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:485.00},{contributionTier:"EmployeePlusSpouse",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:780.00},{contributionTier:"EmployeePlusChildren",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:730.00},{contributionTier:"EmployeePlusFamily",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:1160.00}]}]}}},null,2);
+  return "{}";
+}
+
+function getReq1(){
+  return JSON.stringify({requests:[
+    {companyIdentifier:cos[selCo].id,companyName:cos[selCo].name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+cos[selCo].id.slice(0,8)+"-2026"}
+  ]},null,2);
+}
+
+function fireCall(s){
+  if(fired[s]) return;
+  var btn=document.getElementById('fireBtn');
+  if(!btn) return;
+  btn.disabled=true; btn.textContent='Sending\u2026';
+  var rb=document.getElementById('rbox');
+  if(!rb) return;
+  rb.classList.add('vis');
+  rb.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><div class="spinner"></div>Awaiting response\u2026</div>';
+  setTimeout(function(){
+    if(s===1){
+      var reqBox=document.getElementById('reqBox');
+      if(reqBox){reqBox.innerHTML=hl(getReq1());reqBox.classList.add('vis');}
+    }
+    rb.innerHTML=hl(getResp(s));
+    btn.textContent='\u2713 Response received'; btn.className='btn btn-success';
+    fired[s]=true;
+    var lb=document.getElementById('leftBadge');
+    if(lb){lb.textContent='200 OK';lb.className='spl sp200';}
+    document.querySelectorAll('.fstep').forEach(function(el){
+      if(parseInt(el.getAttribute('data-s'))===s) el.classList.add('done');
+    });
+    showRightResult(s);
+  }, 800+Math.random()*500);
+}
+
+function showRightResult(s){
+  var el=document.getElementById('rightApiResult');
+  if(!el) return;
+  var c=cos[selCo];
+  if(s===1){
+    el.style.display='block';
+    var reqRows='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:9px">';
+    reqRows+='<div style="display:grid;grid-template-columns:1fr 110px;background:#f0fdf4;padding:6px 10px;font-size:11px;font-weight:700;color:#0f766e;border-bottom:1px solid #d1fae5"><span>Company sent to EN</span><span style="text-align:right">Status</span></div>';
+    cos.forEach(function(co){
+      reqRows+='<div class="fade-in" style="display:grid;grid-template-columns:1fr 110px;padding:8px 10px;border-bottom:1px solid #f3f4f6;align-items:center">'+
+        '<div><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div>'+
+        '<div style="font-size:10px;color:#6b7280;font-family:monospace">'+co.id.slice(0,22)+'&hellip; &bull; FEIN '+co.fein+'</div></div>'+
+        '<span class="spl sp-pend" style="font-size:11px;margin-left:auto">Received</span>'+
+        '</div>';
+    });
+    reqRows+='</div>';
+    el.innerHTML='<div class="info-strip info-teal" style="margin-top:0"><div class="info-label">Integration requests sent &mdash; EN received '+cos.length+' companies</div>Each company is now in <strong>Received</strong> status. The broker logs into EN next to link each one.</div>'+reqRows+
+    '<div class="info-strip info-amber" style="font-size:12px"><strong>Next step:</strong> The broker logs into EN and navigates to Pending Integrations to link each company. Until linked, the connection status remains Received.</div>';
+  }
+  if(s===4){
+    el.style.display='block';
+    var h='<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:6px">Companies returned &mdash; Quoting system matching</div>';
+    h+='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:9px">';
+    h+='<div style="display:grid;grid-template-columns:1fr 120px;background:#f0fdf4;padding:6px 10px;font-size:11px;font-weight:700;color:#0f766e;border-bottom:1px solid #d1fae5"><span>Company from EN (GUID &bull; FEIN)</span><span style="text-align:right">Quoting system action</span></div>';
+    cos.forEach(function(co,i){
+      var linked=(i===0);
+      h+='<div style="display:grid;grid-template-columns:1fr 120px;padding:8px 10px;border-bottom:1px solid #f3f4f6;align-items:center;cursor:pointer" onclick="selCompany('+i+')">';
+      h+='<div><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div>';
+      h+='<div style="font-size:10px;color:#6b7280;font-family:monospace">'+co.id.slice(0,22)+'&hellip; &bull; FEIN '+co.fein+' &bull; '+co.state+'</div>';
+      h+=(linked?'<div style="font-size:11px;color:#16a34a;margin-top:2px">&#10003; Already linked in Quoting system</div>':'<div style="font-size:11px;color:#f59e0b;margin-top:2px">&#9888; Not found &mdash; create new company shell</div>');
+      h+='</div>';
+      h+=(linked?'<span class="bdg bdg-green" style="font-size:10px;margin-left:auto">Linked &#10003;</span>':'<span class="bdg bdg-amber" style="font-size:10px;margin-left:auto">Create shell</span>');
+      h+='</div>';
+    });
+    h+='</div>';
+    h+='<div style="font-size:12px;color:#555;line-height:1.5">Match using <code>federalEmployerIdentificationNumber</code> or company name. For unlinked companies, the Quoting system creates a new company shell using the name and FEIN from this response. Click a company to use it for Steps 6&ndash;10.</div>';
+    el.innerHTML=h;
+  }
+  if(s===5){
+    el.style.display='block';
+    var c2=cos[selCo];
+    el.innerHTML=
+    '<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company information</div>'+
+    '<div class="plan-row"><span class="pr-name">companyIdentifier</span><span class="pr-meta" style="font-family:monospace;font-size:10px">'+c2.id.slice(0,22)+'&hellip;</span></div>'+
+    '<div class="plan-row"><span class="pr-name">name</span><span class="pr-meta">'+c2.name+'</span></div>'+
+    '<div class="plan-row"><span class="pr-name">FEIN</span><span class="pr-meta">'+c2.fein+'</span></div>'+
+    '<div class="plan-row"><span class="pr-name">stateOfFormation</span><span class="pr-meta">'+c2.state+'</span></div>'+
+    '<div class="plan-row"><span class="pr-name">activeEmployeeCount</span><span class="pr-meta">'+c2.emp+'</span></div>'+
+    '</div>'+
+    '<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Primary address</div>'+
+    '<div class="plan-row"><span class="pr-name">street1</span><span class="pr-meta">123 Market St</span></div>'+
+    '<div class="plan-row"><span class="pr-name">city</span><span class="pr-meta">San Francisco</span></div>'+
+    '<div class="plan-row"><span class="pr-name">state</span><span class="pr-meta">CA</span></div>'+
+    '<div class="plan-row"><span class="pr-name">postalCode</span><span class="pr-meta">94102</span></div>'+
+    '</div>'+
+    '<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Agency &amp; contacts</div>'+
+    '<div class="plan-row"><span class="pr-name">agencyName</span><span class="pr-meta">'+c2.agency+'</span></div>'+
+    '<div class="plan-row"><span class="pr-name">agentName</span><span class="pr-meta">Ryan Everett</span></div>'+
+    '<div class="plan-row"><span class="pr-name">contactName</span><span class="pr-meta">Jane Smith</span></div>'+
+    '<div class="plan-row"><span class="pr-name">contactEmail</span><span class="pr-meta">jsmith@company.com</span></div>'+
+    '</div>'+
+    '<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Open enrollment window</div>'+
+    '<div class="plan-row"><span class="pr-name">effectiveDate</span><span class="pr-meta">2026-01-01</span></div>'+
+    '<div class="plan-row"><span class="pr-name">startDate</span><span class="pr-meta">2025-11-01</span></div>'+
+    '<div class="plan-row"><span class="pr-name">endDate</span><span class="pr-meta">2025-11-30</span></div>'+
+    '<div class="plan-row"><span class="pr-name">administrativeEndDate</span><span class="pr-meta">2025-12-05</span></div>'+
+    '</div>'+
+    '<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company structure</div>'+
+    '<div class="plan-row"><span class="pr-name">divisions</span><span class="pr-meta">Engineering, Product, Sales, Operations</span></div>'+
+    '<div class="plan-row"><span class="pr-name">departments</span><span class="pr-meta">Platform, Core, Growth, HR</span></div>'+
+    '<div class="plan-row"><span class="pr-name">businessUnits</span><span class="pr-meta">US West, US East</span></div>'+
+    '<div class="plan-row"><span class="pr-name">officeLocations</span><span class="pr-meta">San Francisco HQ, Austin Office</span></div>'+
+    '</div>';
+  }
+  if(s===6){
+    el.style.display='block';
+    var h2='<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:8px">Plans returned &mdash; '+cos[selCo].name+'</div>';
+    plans.forEach(function(p){
+      h2+='<div class="plan-row"><div><div class="pr-name">'+p.name+'</div><div class="pr-meta">'+p.carrier+' &bull; '+p.id+'</div></div><span class="bdg bdg-blue" style="font-size:10px">'+p.benefit+'</span></div>';
+    });
+    h2+='<div class="info-strip info-teal" style="margin-top:9px;font-size:12px">Each <code>planDetailUrl</code> links directly to the benefit model endpoint &rarr; Step 8.</div>';
+    el.innerHTML=h2;
+  }
+  if(s===7){
+    el.style.display='block';
+    el.innerHTML='<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Configuration</div>'+
+    '<div class="plan-row"><span class="pr-name">name</span><span class="pr-meta">EN Blue PPO 2000</span></div>'+
+    '<div class="plan-row"><span class="pr-name">carrierName</span><span class="pr-meta">Anthem BCBS</span></div>'+
+    '<div class="plan-row"><span class="pr-name">policyNumber</span><span class="pr-meta">GRP-00123</span></div>'+
+    '<div class="plan-row"><span class="pr-name">situsState / billOption</span><span class="pr-meta">CA / SelfBill</span></div>'+
+    '<div class="plan-row"><span class="pr-name">isSelfFunded</span><span class="pr-meta">false</span></div>'+
+    '</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">ACA composite rates</div>'+
+    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$620.00 / mo</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$1,240.00 / mo</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusChildren</span><span class="pr-meta">$1,100.00 / mo</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,750.00 / mo</span></div>'+
+    '</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Employer contributions</div>'+
+    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$500 Employer FlatDollar</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$800 Employer FlatDollar</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,200 Employer FlatDollar</span></div>'+
+    '</div>';
+  }
+  if(s===8){
+    el.style.display='block';
+    var h3='<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:8px">Quote census &mdash; '+cos[selCo].name+' (PII redacted)</div>';
+    emps.forEach(function(e){
+      h3+='<div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#ccfbf1;color:#0f766e;flex-shrink:0">'+e.init+'</div>'+
+        '<div><div style="font-size:13px;font-weight:700;color:#111">'+e.name.split(' ')[0]+' '+e.name.split(' ')[1][0]+'. (redacted)</div>'+
+        '<div style="font-size:11px;color:#6b7280">'+e.title+' &bull; '+(e.tobacco?'Tobacco user':'Non-tobacco')+'</div></div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">'+
+        '<div style="color:#6b7280">Plans enrolled</div><div>'+e.plans+'</div>'+
+        '<div style="color:#6b7280">Dependents</div><div>'+e.deps+'</div>'+
+        '</div></div>';
+    });
+
+    el.innerHTML=h3;
+  }
+}
+
+function showLinkWizard(){
+  document.getElementById('linkWizardArea').style.display='block';
+  document.getElementById('linkWizardArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function lwNext(){
+  document.getElementById('lwDoneMsg').textContent='Linked to "'+cos[selCo].name+'" in Employee Navigator. Connection is now Active.';
+  document.getElementById('lwStep1').classList.remove('active');
+  document.getElementById('lwStep2').classList.add('active');
+}
+function lwCreateNew(){
+  document.getElementById('lwDoneMsg').textContent='"'+cos[selCo].name+'" created as a new company in Employee Navigator.';
+  document.getElementById('lwStep1').classList.remove('active');
+  document.getElementById('lwStep2').classList.add('active');
+}
+
+function selCompany(i){ selCo=i; showRightResult(4); }
+
+function openSoldModal(){
+  var c=cos[selCo];
+  document.getElementById('soldCoName').textContent=c.name;
+  document.getElementById('soldStep1').style.display='block';
+  document.getElementById('soldStep2').style.display='none';
+  document.getElementById('soldModalBg').style.display='flex';
+}
+function closeSoldModal(){document.getElementById('soldModalBg').style.display='none';}
+function soldConfirm(){
+  document.getElementById('soldStep1').style.display='none';
+  document.getElementById('soldStep2').style.display='block';
+}
+
+function revealTakeAction(){
+  var c=cos[selCo];
+  var el=document.getElementById('taReveal');
+  if(!el) return;
+  el.style.display='block';
+  el.innerHTML='<div class="en-chrome fade-in" style="margin-top:10px">'+
+  '<div class="en-topbar"><span class="en-logo-txt">Employee Navigator</span><div class="en-nav"><span class="en-nav-item act">Home</span></div></div>'+
+  '<div class="en-body"><div class="en-int-panel">'+
+  '<div class="en-int-header"><span class="en-int-title">Integrations</span></div>'+
+  '<div class="en-stats-grid">'+
+  '<div class="en-stat"><div class="en-stat-num" style="font-size:16px">141</div><div class="en-stat-lbl">Available Payrolls</div><div class="en-stat-btn-wrap"><button class="btn-outline-en" style="font-size:11px;padding:3px 9px">Learn More</button></div></div>'+
+  '<div class="en-stat"><div class="en-stat-num" style="font-size:16px">0</div><div class="en-stat-lbl">Needs Action</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:3px 9px">Take Action</button></div></div>'+
+  '<div class="en-stat"><div class="en-stat-num" style="font-size:16px">12</div><div class="en-stat-lbl">Pending Integrations</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:3px 9px">Manage</button></div></div>'+
+  '<div class="en-stat"><div class="en-stat-num" style="font-size:16px;color:#0d9488">1</div><div class="en-stat-lbl">Plan Notifications</div><div class="en-stat-btn-wrap"><button style="background:#0d9488;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer" onclick="showTaPanel()">Take Action</button></div></div>'+
+  '</div></div>'+
+  '<div id="taPanel" style="display:none;margin-top:10px">'+
+  '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:6px">Add Plan from Partner System &mdash; <span style="color:#0d9488">'+c.name+'</span></div>'+
+  '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:11px;margin-bottom:8px">'+
+  '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">EN Blue PPO 1500 Renewal 2026</div>'+
+  '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px;font-size:11px;color:#6b7280"><span class="bdg bdg-teal" style="font-size:10px">Medical</span><span>Anthem BCBS</span><span>2026-01-01 &rarr; 2026-12-31</span></div>'+
+  '<div style="font-size:10px;font-family:monospace;color:#6b7280;margin-bottom:9px">EE $595 &bull; EE+SP $1,190 &bull; EE+CH $1,050 &bull; Family $1,680</div>'+
+  '<div style="display:flex;gap:7px" id="taBtns">'+
+  '<button style="padding:5px 13px;background:#16a34a;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer" onclick="taDo(\'add\')">&#x2795; Add</button>'+
+  '<button style="padding:5px 13px;background:#fff;color:#2563eb;border:1px solid #2563eb;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer" onclick="taDo(\'renew\')">&#x21BA; Renew</button>'+
+  '<button style="padding:5px 13px;background:#fff;color:#dc2626;border:1px solid #dc2626;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer" onclick="taDo(\'dismiss\')">&#x2715; Dismiss</button>'+
+  '</div>'+
+  '<div id="taResult" style="display:none;margin-top:8px"></div>'+
+  '</div></div></div></div>';
+}
+function showTaPanel(){var p=document.getElementById('taPanel');if(p)p.style.display='block';}
+function taDo(action){
+  var msgs={
+    add:'<div style="background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:9px;font-size:13px;font-weight:600;color:#166534">&#10003; Plan Added &mdash; open enrollment can now begin for '+cos[selCo].name+'.</div>',
+    renew:'<div style="background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:9px;font-size:13px;font-weight:600;color:#166534">&#10003; Plan set as Renewal &mdash; enrollment window is open for '+cos[selCo].name+'.</div>',
+    dismiss:'<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:9px;font-size:13px;color:#991b1b">Notification dismissed &mdash; plan removed from Take Action queue.</div>'
+  };
+  document.getElementById('taBtns').style.display='none';
+  var r=document.getElementById('taResult');r.style.display='block';r.innerHTML=msgs[action];
+}
+
+function sendIntegrationRequests(){
+  // Navigate to step 1 first so the fire button and right panel exist
+  goTo(1);
+  // Then immediately fire the request after a short tick
+  setTimeout(function(){
+    var btn=document.getElementById('fireBtn');
+    if(btn) {
+      btn.disabled=true; btn.textContent='Sending…';
+      var rb=document.getElementById('rbox');
+      if(rb){
+        rb.classList.add('vis');
+        rb.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><div class="spinner"></div>Awaiting response…</div>';
+        setTimeout(function(){
+          rb.innerHTML=hl(getResp(1));
+          btn.textContent='✓ Response received'; btn.className='btn btn-success';
+          fired[1]=true;
+          var lb=document.getElementById('leftBadge');
+          if(lb){lb.textContent='200 OK';lb.className='spl sp200';}
+          document.querySelectorAll('.fstep').forEach(function(el){
+            if(parseInt(el.getAttribute('data-s'))===1) el.classList.add('done');
+          });
+          showRightResult(1);
+        }, 900+Math.random()*400);
+      }
+    }
+  }, 50);
+}
+function doEnLogin(){
+  var btn=document.getElementById('loginBtn');
+  if(!btn) return;
+  btn.disabled=true; btn.textContent='Logging in…';
+  var wrap=document.getElementById('loginWrap');
+  if(wrap){
+    setTimeout(function(){
+      wrap.innerHTML='<div class="redirect-screen fade-in">'+
+        '<div class="spinner" style="width:18px;height:18px;border-width:3px;border-top-color:#16a34a"></div>'+
+        '<div style="font-size:15px;font-weight:700;color:#374151">Logged in &mdash; loading Pending Integrations…</div>'+
+        '<div style="font-size:13px;color:#6b7280;max-width:280px;text-align:center;line-height:1.5">Taking you to Step 4 where the broker links the companies sent by the Quoting system.</div>'+
+        '</div>';
+      setTimeout(function(){ goTo(3); }, 1600);
+    }, 700);
+  }
+}
+function doLogin(){
+  var btn=document.getElementById('loginBtn');
+  if(!btn) return;
+  btn.disabled=true; btn.textContent='Logging in\u2026';
+  var wrap=document.getElementById('loginWrap');
+  if(wrap){
+    setTimeout(function(){
+      wrap.innerHTML='<div class="redirect-screen fade-in">'+
+        '<div class="spinner" style="width:18px;height:18px;border-width:3px;border-top-color:#16a34a"></div>'+
+        '<div style="font-size:15px;font-weight:700;color:#374151">Authenticated \u2014 redirecting back to Quoting system\u2026</div>'+
+        '<div class="redirect-url-bar">quoting-partner.com/callback?code=<span style="color:#0d9488">AUTH_CODE_xyz789</span>&state=abc123secure</div>'+
+        '<div style="font-size:13px;color:#6b7280;max-width:280px;text-align:center;line-height:1.5">EN has issued the authorization code. Your browser is being sent back to the Quoting system to complete the token exchange.</div>'+
+        '</div>';
+      setTimeout(function(){ goTo(3); }, 1600);
+    }, 700);
+  }
+}
+
+var stepMeta=[
+  {lt:"Quoting System \u2014 Select &amp; send companies to EN",rt:"Quoting System \u2014 Company selection",sys:"Q",pct:10,prog:"Step 1 \u2014 Quoting System"},
+  {lt:"POST Quoting Company Integration Request API",rt:"EN \u2014 Pending Integrations + Link",sys:"Q",pct:20,prog:"Step 2 \u2014 POST integration request"},
+  {lt:"Broker logs into EN",rt:"Employee Navigator \u2014 Login",sys:"EN",pct:30,prog:"Step 3 \u2014 EN Login"},
+  {lt:"Broker links companies in EN",rt:"Employee Navigator \u2014 Pending Integrations",sys:"EN",pct:40,prog:"Step 4 \u2014 Broker links companies"},
+  {lt:"Auth Code flow + GET Company List",rt:"Quoting System \u2014 Company list",sys:"Q",pct:50,prog:"Step 5 \u2014 Auth Code + Company list"},
+  {lt:"GET Company Management API \u2014 Company Detail",rt:"Quoting System \u2014 Company detail",sys:"Q",pct:60,prog:"Step 6 \u2014 Fetch company details"},
+  {lt:"GET Plan List Management API",rt:"Quoting System \u2014 Plan list",sys:"Q",pct:70,prog:"Step 7 \u2014 Fetch plan list"},
+  {lt:"GET Health Plan Management API",rt:"Quoting System \u2014 Plan details",sys:"Q",pct:78,prog:"Step 8 \u2014 Fetch plan details"},
+  {lt:"GET Quote Census API",rt:"Quoting System \u2014 PII-redacted census",sys:"Q",pct:88,prog:"Step 9 \u2014 Quote census (PII redacted)"},
+  {lt:"POST Quoting Company Benefits Notification API",rt:"EN + Quoting \u2014 Sold plan pushed",sys:"BOTH",pct:100,prog:"Step 10 \u2014 Push sold plan to EN"}
+];
+
+function renderLeft(s){
+  var h='', c=cos[selCo];
+  if(s===0){
+    h+='<p class="step-desc">The integration starts in the <strong>Quoting system</strong>. The broker selects one or more companies to connect to Employee Navigator and sends the integration requests. EN will then show these in the broker&#39;s Pending Integrations tab to be linked.</p>';
+    h+='<div class="info-strip info-teal"><div class="info-label">Action taken in</div>Quoting System &mdash; by the broker</div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#0d9488"></div><div><div class="tl-title">Broker selects companies in the Quoting system</div><div class="tl-txt">Choose one or more companies to connect to EN</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Quoting system sends integration requests to EN</div><div class="tl-txt">Uses OAuth 2.0 Authorization Code flow &mdash; broker must be logged in for this step</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#f59e0b"></div><div><div class="tl-title">Broker then goes to EN to link the companies</div><div class="tl-txt">After the POST, the broker logs into EN and links each company to complete the connection</div></div></div>';
+  }
+  if(s===1){
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; OAuth 2.0 Authorization Code Flow</div>';
+    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/integrations</div><div class="api-desc">Sends up to 100 company integration requests in a single call. Each includes the company identifier, name, and optional authorization key. Status begins as <strong>Received</strong> until the broker links each company in EN.</div></div>';
+    h+='<div class="highlight-box">This call uses the <strong>Authorization Code flow</strong> &mdash; the broker must be authenticated. Once received, EN shows the requests in the broker&#39;s Pending Integrations tab for linking.</div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(1)">POST &mdash; fire request</button>';
+    h+='<div style="font-size:13px;font-weight:700;color:#6b7280;margin:7px 0 3px">Request body &mdash; what you are sending to EN</div>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===2){
+    h+='<p class="step-desc">After the integration requests are sent, the broker logs into Employee Navigator. The demo auto-advances once login is complete &mdash; the broker will then link companies in the next step.</p>';
+    h+='<div class="info-strip info-blue"><div class="info-label">Action taken in</div>Employee Navigator &mdash; by the broker</div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker logs into Employee Navigator</div><div class="tl-txt">Click Login on the right to continue</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Auto-advances to Pending Integrations</div><div class="tl-txt">The broker lands on the EN homepage and navigates to link the companies sent by the Quoting system</div></div></div>';
+  }
+  if(s===3){
+    h+='<p class="step-desc">The broker is now in EN. They navigate to <strong>Pending Integrations</strong> and click <strong>Link</strong> on each company sent by the Quoting system. Click around the interactive EN UI on the right.</p>';
+    h+='<div class="info-strip info-blue"><div class="info-label">Action taken in</div>Employee Navigator &mdash; by the broker</div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker lands on EN homepage</div><div class="tl-txt">The Integrations panel shows 3 Pending Integrations &mdash; click Manage to proceed</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Navigates to Pending Integrations</div><div class="tl-txt">Finds the companies sent by the Quoting system, each with status "Received"</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Clicks Link &rarr; selects or creates company</div><div class="tl-txt">Once linked, the connection is Active &mdash; the Quoting system can now retrieve data from EN</div></div></div>';
+  }
+  if(s===4){
+    h+='<div class="info-strip info-blue" style="margin-bottom:8px"><div class="info-label">Auth flow &mdash; Authorization Code</div>The broker is authenticated via OAuth 2.0 Auth Code. Below is the redirect and token exchange before the GET is made.</div>';
+    h+='<details style="margin-bottom:8px;border:1px solid #e5e7eb;border-radius:7px;overflow:hidden"><summary style="padding:8px 11px;font-size:12px;font-weight:700;color:#6b7280;cursor:pointer;background:#f9fafb;list-style:none;display:flex;align-items:center;gap:6px"><span>&#9654;</span> OAuth redirect + token exchange (expand)</summary>'+
+    '<div style="padding:9px 11px;border-top:1px solid #e5e7eb">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">1. Redirect to EN login</div>'+
+    '<div style="font-family:monospace;font-size:10px;word-break:break-all;color:#555;line-height:1.7;background:#f3f4f6;padding:6px;border-radius:5px;margin-bottom:7px">'+
+    'https://employeenavigator.com/oauth/authorize?<br>client_id=<span style="color:#2563eb">QUOTING_CLIENT_ID</span>&amp;response_type=<span style="color:#2563eb">code</span>&amp;scope=<span style="color:#2563eb">EnApi%20QuotingCompanyIntegrationApi</span>&amp;redirect_uri=<span style="color:#2563eb">https://quoting-partner.com/callback</span>'+
+    '</div>'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">2. Token exchange (after broker logs in)</div>'+
+    '<div style="font-family:monospace;font-size:10px;line-height:1.7;color:#555;background:#f3f4f6;padding:6px;border-radius:5px">'+
+    'POST /identity/connect/token &mdash; grant_type=authorization_code &mdash; code=AUTH_CODE'+
+    '</div>'+
+    '</div></details>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/companies-list</div><div class="api-desc">Returns all EN companies for the broker&#39;s book of business. Each entry includes the EN GUID (<code>benAdminCompanyIdentifier</code>), company name, FEIN, state, agency, and agent name.</div></div>';
+    h+='<div class="highlight-box" style="font-size:12px">For each company: check if already linked in the Quoting system. If linked &rarr; ready to use. If not &rarr; create a new company shell using the name and FEIN.</div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(4)">GET &mdash; fire request</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===5){
+    h+='<div class="info-strip info-teal"><div class="info-label">Auth flow &mdash; Client Credentials for all remaining calls</div>No broker login required. Quoting system uses its own client_id + secret.</div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/company-management</div><div class="api-desc">Returns full company profile: demographics, FEIN, address, contact info, active employee count, open enrollment window, and company structure (divisions, departments). Used to create or update the company in the Quoting system.</div></div>';
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(5)">GET &mdash; fire request</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===6){
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans-list-management</div><div class="api-desc">Returns all active plans with <code>planIdentifier</code>, benefit type, carrier, dates, and <code>planDetailUrl</code>. Use the plan IDs to call the benefit model endpoint in Step 8.</div></div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(6)">GET &mdash; fire request</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===7){
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; using planIdentifier from Step 7</div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans/{planId}/health-management</div><div class="api-desc">Full plan record: configuration, eligibility rules, ACA composite rates, and employer contribution groupings. Called once per plan using the ID from Step 7. Same pattern for dental, vision, life, disability, medical savings.</div></div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(7)">GET &mdash; fire request</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===8){
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/quote-census</div><div class="api-desc">Returns the employee census for quoting purposes. Includes demographics (firstName, sex, DOB, zip, tobacco use), employment information (hire date, job title, work state), annual benefit salary, company structure mapping (eligibility class, division, department), dependents (with relationship, DOB, sex, tobacco), and current plan enrollments with benefit tier and monthly costs.</div></div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(8)">GET &mdash; fire request</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  if(s===9){
+    h+='<div class="info-strip info-teal"><div class="info-label">Initiated by</div>Quoting System &mdash; broker marks quote as sold</div>';
+    h+='<div style="border:1px solid #ccfbf1;border-radius:9px;padding:13px;margin-bottom:10px;background:#f0fdf4">';
+    h+='<div style="font-size:13px;font-weight:700;color:#0f766e;margin-bottom:6px">&#x1F4CA; Broker Quoting Workflow &mdash; Quoting System</div>';
+    h+='<div style="font-size:12px;color:#6b7280;margin-bottom:9px">The broker has built and rated the renewal quote using the census and plan data. Click to mark as sold and send to EN.</div>';
+    h+='<button style="width:100%;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="openSoldModal()">'+
+    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1.2"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+    'Mark Quote as Sold &mdash; '+c.name+'</button></div>';
+    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/{companyId}/plans/medical/notification</div><div class="api-desc">Full payload: configuration (planName, carrierName, startDate, benefit, situsState, carrierPlanCode), eligibilityOptions (waitingPeriod, entryDateRule, terminationRule, rehirePeriod), rates.compositeRates.tierRates, contributions.contributionGroupings with tierMonthlyContributions. Also supports: dental, vision, life, AD&amp;D, critical illness, hospital indemnity, LTD, STD, voluntary variants, accident, cancer.</div></div>';
+    h+='<div class="highlight-box" style="font-size:12px"><strong>/employees/notification:</strong> POST employee census alongside the integration request to seed a brand-new EN company with census data automatically.</div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(9)" style="background:#0d9488;border-color:#0d9488">POST &mdash; fire request to EN</button>';
+    h+='<div class="rbox" id="rbox"></div>';
+  }
+  document.getElementById('leftBody').innerHTML=h;
+  document.getElementById('leftTitle').textContent=stepMeta[s].lt;
+  document.getElementById('leftBadge').textContent='';
+  document.getElementById('leftBadge').className='';
+}
+
+function renderRight(s){
+  var c=cos[selCo], h='';
+  if(s===0){
+    h='<div class="q-chrome">'+
+    '<div class="q-topbar"><span class="q-logo">Quoting Partner System</span><span style="font-size:11px;color:rgba(255,255,255,0.7)">Company Management &rsaquo; Connect to EN</span></div>'+
+    '<div class="q-body">'+
+    '<div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Send Integration Requests to Employee Navigator</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-bottom:11px">Select one or more companies to establish a connection with EN.</div>'+
+    '<div style="background:#fff;border-radius:8px;border:1px solid #d1fae5;padding:10px;margin-bottom:11px">'+
+    '<div style="font-size:11px;font-weight:700;color:#0f766e;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em">Companies in your book of business</div>'+
+    cos.map(function(co,i){
+      return '<label style="display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;cursor:pointer;margin-bottom:3px;border:1px solid #e5e7eb;background:#fafafa">'+'<input type="checkbox" id="coCheck'+i+'" checked style="accent-color:#0d9488;width:15px;height:15px;cursor:pointer">'+'<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div><div style="font-size:11px;color:#6b7280">'+co.fein+' &bull; '+co.state+'</div></div>'+'<span style="font-size:10px;color:#0d9488;font-weight:600">'+co.emp+' employees</span>'+'</label>';
+    }).join('')+
+    '</div>'+
+    '<button style="width:100%;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="sendIntegrationRequests()">'+
+    '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5L6.5 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+    'Send Integration Requests to EN</button>'+
+    '</div></div>'+
+    '<p class="step-desc" style="margin-top:10px">The broker selects the companies they want to connect. Clicking the button sends integration requests to EN for all selected companies simultaneously.</p>';
+  }
+  if(s===1){
+    h='<div id="rightApiResult" style="display:none"></div>'+
+    '<div class="info-strip info-teal" style="font-size:13px">Fire the POST on the left to see the requests send to EN in real time.</div>';
+  }
+  if(s===2){
+    h='<div class="en-login-wrap" id="loginWrap">'+
+    '<div class="en-login-card">'+
+    '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:17px">'+
+    '<svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="17" fill="#16a34a"/><circle cx="18" cy="18" r="9" fill="none" stroke="white" stroke-width="2.5"/><line x1="18" y1="1" x2="18" y2="9" stroke="white" stroke-width="2.5"/><line x1="18" y1="27" x2="18" y2="35" stroke="white" stroke-width="2.5"/><line x1="1" y1="18" x2="9" y2="18" stroke="white" stroke-width="2.5"/><line x1="27" y1="18" x2="35" y2="18" stroke="white" stroke-width="2.5"/></svg>'+
+    '<div><div style="font-size:16px;font-weight:700;color:#1a4480;line-height:1">employee</div><div style="font-size:10px;letter-spacing:0.12em;color:#1a4480">NAVIGATOR</div></div></div>'+
+    '<label class="en-login-field-label">Username</label>'+
+    '<input class="en-login-field" type="text" value="BrokerQuoting">'+
+    '<label class="en-login-field-label">Password</label>'+
+    '<input class="en-login-field" type="password" value="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">'+
+    '<button class="en-login-btn" id="loginBtn" onclick="doEnLogin()">Login</button>'+
+    '</div></div>'+
+    '<p class="step-desc" style="margin-top:10px">Click Login to authenticate in EN &mdash; you will be taken automatically to Step 4 where you link the companies.</p>';
+  }
+  if(s===3){
+    h='<div class="en-chrome" id="enHomeChrome">'+
+    '<div class="en-topbar"><span class="en-logo-txt">Employee Navigator</span><div class="en-nav"><span class="en-nav-item act">Home</span><span class="en-nav-item">Marketplace</span></div></div>'+
+    '<div class="en-body"><div class="en-int-panel">'+
+    '<div class="en-int-header"><span class="en-int-title">Integrations</span><button class="btn-blue-en" style="font-size:11px;padding:4px 10px" onclick="showQPendingInteg()">Manage</button></div>'+
+    '<div class="en-stats-grid">'+
+    '<div class="en-stat"><div class="en-stat-num">156</div><div class="en-stat-lbl">Available Payrolls</div><div class="en-stat-btn-wrap"><button class="btn-outline-en" style="font-size:11px;padding:4px 10px">Learn More</button></div></div>'+
+    '<div class="en-stat"><div class="en-stat-num">4</div><div class="en-stat-lbl">Needs Action</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:4px 10px">Take Action</button></div></div>'+
+    '<div class="en-stat" style="border:2px solid #2563eb;border-radius:7px;padding:4px"><div class="en-stat-num">3</div><div class="en-stat-lbl">Pending Integrations</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:4px 10px" onclick="showQPendingInteg()">Manage</button></div></div>'+
+    '<div class="en-stat"><div class="en-stat-num">2</div><div class="en-stat-lbl">Plan Notifications</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:4px 10px">Take Action</button></div></div>'+
+    '</div></div></div></div>'+
+    '<div id="qPendingIntegArea" style="display:none;margin-top:10px">'+
+    '<div class="en-chrome">'+
+    '<div class="en-topbar"><span class="en-logo-txt">Employee Navigator &mdash; Pending Integrations</span></div>'+
+    '<div class="en-body" style="padding:10px">'+
+    '<div style="display:flex;gap:0;border-bottom:1px solid #e5e7eb;margin-bottom:9px">'+
+    '<div style="padding:6px 10px;font-size:13px;font-weight:700;color:#dc2626;border-bottom:2px solid #dc2626">Requires Your Action <span style="background:#dc2626;color:#fff;border-radius:20px;padding:1px 5px;font-size:10px">3</span></div>'+
+    '<div style="padding:6px 10px;font-size:13px;color:#2563eb">All Integrations</div></div>'+
+    '<div class="info-strip info-blue" style="font-size:12px;margin-bottom:9px">Integrations submitted from the Quoting system must be linked to a new or existing company in EN to enable the integration features.</div>'+
+    '<table class="en-table"><thead><tr><th>Partner</th><th>Company</th><th>Client ID</th><th>Status</th><th>Action</th></tr></thead>'+
+    '<tbody>'+
+    cos.map(function(co,i){return '<tr><td>Quoting Partner</td><td>'+co.name+'</td><td style="font-family:monospace;font-size:10px">'+co.id.slice(0,13)+'&hellip;</td><td><span class="spl sp-pend" style="font-size:10px">Received</span></td><td><button class="en-link-btn" onclick="openQLinkWizard('+i+')">Link &#x1F517;</button></td></tr>';}).join('')+
+    '</tbody></table></div></div>'+
+    '</div>'+
+    '<div id="qLinkWizardArea" style="display:none;margin-top:10px">'+
+    '<div class="en-chrome"><div class="en-topbar"><span class="en-logo-txt">EN &mdash; Link Integration &mdash; <span id="qWizCoName"></span></span></div>'+
+    '<div class="en-body">'+
+    '<div id="qWizStep1" class="wizard-step active">'+
+    '<div style="font-size:14px;font-weight:700;color:#111;margin-bottom:5px">Quoting Partner Integration</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-bottom:9px">Company: <strong id="qWizCoDisplay"></strong> &bull; Identifier: <span id="qWizCoId" style="font-family:monospace;font-size:10px"></span></div>'+
+    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select product</label>'+
+    '<select class="en-select"><option>Quoting</option></select>'+
+    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select which employees should be included:</label>'+
+    '<div style="font-size:12px;color:#374151;margin-bottom:9px"><label style="display:flex;align-items:center;gap:7px;padding:3px 0;cursor:pointer"><input type="radio" name="qEmpSel" checked style="accent-color:#2563eb"> All Applicable Employees (already subscribed)</label></div>'+
+    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select company to link</label>'+
+    '<select class="en-select" id="qWizCompanySelect"><option>'+cos[0].name+'</option><option>'+cos[1].name+'</option><option>'+cos[2].name+'</option></select>'+
+    '<div style="display:flex;gap:9px;margin-top:6px">'+
+    '<button class="btn-blue-en" style="font-size:13px" onclick="qWizNext()">Next</button>'+
+    '<span style="font-size:12px;color:#6b7280;align-self:center">OR</span>'+
+    '<button class="btn-blue-en" style="background:#6366f1;font-size:13px" onclick="qWizCreateNew()">Create New Company</button>'+
+    '</div></div>'+
+    '<div id="qWizStep2" class="wizard-step">'+
+    '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:7px;padding:11px;text-align:center">'+
+    '<div style="font-size:14px;font-weight:700;color:#166534;margin-bottom:3px">&#10003; Company Linked!</div>'+
+    '<div id="qWizDoneMsg" style="font-size:13px;color:#166534"></div>'+
+    '</div></div>'+
+    '</div></div></div>';
+  }
+  if(s>=4 && s<=8){
+    h='<div id="rightApiResult"><div class="info-strip info-teal" style="font-size:13px;background:#f0fdf4;border:1px solid #5eead4;color:#0f766e">Fire the request on the left &mdash; results will appear here.</div></div>';
+  }
+  if(s===9){
+    h='<div id="taReveal" style="display:none"></div>'+
+    '<div class="info-strip info-teal" style="font-size:13px">Use <strong>Mark Quote as Sold</strong> on the left, then fire the API call to see the full EN response and Take Action experience.</div>';
+  }
+  document.getElementById('rightBody').innerHTML=h;
+  document.getElementById('rightTitle').textContent=stepMeta[s].rt;
+  var st=document.getElementById('rightSysTag'), sys=stepMeta[s].sys;
+  if(sys==='EN') st.innerHTML='<span class="sys-tag sys-en">EN</span>';
+  else if(sys==='Q') st.innerHTML='<span class="sys-tag sys-q">Quoting System</span>';
+  else st.innerHTML='<span class="sys-tag sys-both">EN + Quoting</span>';
+}
+
+function showLinkWizardStep3(){
+  if(document.getElementById('linkWizardStep3')) {
+    document.getElementById('linkWizardStep3').style.display='block';
+    document.getElementById('linkWizardStep3').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+function lw3Next(){
+  if(document.getElementById('lw3DoneMsg')) {
+    document.getElementById('lw3DoneMsg').textContent='Linked to "'+cos[selCo].name+'" in EN. Connection is now Active.';
+    document.getElementById('lw3Step1').classList.remove('active');
+    document.getElementById('lw3Step2').classList.add('active');
+  }
+}
+function lw3CreateNew(){
+  if(document.getElementById('lw3DoneMsg')) {
+    document.getElementById('lw3DoneMsg').textContent='"'+cos[selCo].name+'" created as a new company. Connection is Active.';
+    document.getElementById('lw3Step1').classList.remove('active');
+    document.getElementById('lw3Step2').classList.add('active');
+  }
+}
+function showQPendingInteg(){
+  document.getElementById('qPendingIntegArea').style.display='block';
+  document.getElementById('qPendingIntegArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+var qWizardCo=0;
+function openQLinkWizard(i){
+  qWizardCo=i;
+  document.getElementById('qWizCoName').textContent=cos[i].name;
+  document.getElementById('qWizCoDisplay').textContent=cos[i].name;
+  document.getElementById('qWizCoId').textContent=cos[i].id.slice(0,18)+'...';
+  document.getElementById('qWizStep1').classList.add('active');
+  document.getElementById('qWizStep2').classList.remove('active');
+  document.getElementById('qLinkWizardArea').style.display='block';
+  document.getElementById('qLinkWizardArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function markCompanyLinked(idx, msg){
+  // Update wizard confirmation
+  document.getElementById('qWizDoneMsg').textContent=msg;
+  document.getElementById('qWizStep1').classList.remove('active');
+  document.getElementById('qWizStep2').classList.add('active');
+  // Update the row in the pending integrations table
+  var rows=document.querySelectorAll('#qPendingIntegArea table tbody tr');
+  if(rows[idx]){
+    var td=rows[idx].querySelector('td:nth-child(4)');
+    if(td) td.innerHTML='<span class="spl sp200" style="font-size:10px">Linked &#10003;</span>';
+    var tdAction=rows[idx].querySelector('td:nth-child(5)');
+    if(tdAction) tdAction.innerHTML='<span style="font-size:11px;color:#16a34a">&#10003; Done</span>';
+  }
+}
+function qWizNext(){
+  markCompanyLinked(qWizardCo, 'Linked to "'+cos[qWizardCo].name+'" in EN. Integration is now Active.');
+}
+function qWizCreateNew(){
+  markCompanyLinked(qWizardCo, '"'+cos[qWizardCo].name+'" created as a new EN company. Integration is Active.');
+}
+
+// Override fireCall to reveal right panel and take action
+var origFireCall=fireCall;
+fireCall=function(s){
+  origFireCall(s);
+  if(s===9){
+    setTimeout(function(){revealTakeAction();},1400);
+  }
+};
+
+function goTo(s){
+  if(s<0||s>9) return;
+  cur=s; fired[s]=false;
+  document.querySelectorAll('.fstep').forEach(function(el){
+    var ds=parseInt(el.getAttribute('data-s'));
+    el.classList.remove('active');
+    if(ds<s) el.classList.add('done');
+    else el.classList.remove('done');
+    if(ds===s) el.classList.add('active');
+  });
+  var t=WF_STEPS[s];
+  var wb=document.getElementById('wfBand');
+  wb.textContent='\u25B6 '+WF_NAMES[t];
+  wb.className='wf-band '+WF_CLASSES[t];
+  var pf=document.getElementById('progFill');
+  var d=stepMeta[s];
+  pf.style.width=d.pct+'%';
+  pf.className='prog-fill '+FILL_CLASSES[t];
+  document.getElementById('progLabel').textContent=d.prog;
+  document.getElementById('progPct').textContent=d.pct+'%';
+  document.getElementById('backBtn').style.display=s>0?'':'none';
+  var nb=document.getElementById('nextBtn');
+  if(s===9){nb.textContent='Complete \u2713';nb.onclick=function(){showDone();};}
+  else{nb.textContent='Next step \u2192';nb.onclick=function(){goTo(cur+1);};}
+  renderLeft(s); renderRight(s);
+}
+
+function showDone(){
+  document.querySelector('.ca').innerHTML='<div class="panel" style="grid-column:1/-1"><div class="pb"><div style="text-align:center;padding:1.5rem 1rem">'+
+  '<div style="font-size:40px;margin-bottom:12px">\u2713</div>'+
+  '<div style="font-size:20px;font-weight:700;color:#111;margin-bottom:8px">Quoting integration flow complete</div>'+
+  '<div style="font-size:13px;color:#555;line-height:1.7;max-width:480px;margin:0 auto 18px">From the Quoting system sending the integration request, through OAuth authorization, company/plan/census data retrieval, all the way to the sold plan landing in EN for the broker to Add, Renew, or Dismiss.</div>'+
+  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:400px;margin:0 auto 18px">'+
+  '<div class="sc" style="background:#dbeafe"><div class="sv" style="color:#1e40af">4</div><div class="sl">Workflow 1 steps</div></div>'+
+  '<div class="sc" style="background:#ccfbf1"><div class="sv" style="color:#0f766e">5</div><div class="sl">Workflow 2 steps</div></div>'+
+  '<div class="sc" style="background:#dcfce7"><div class="sv" style="color:#166534">1</div><div class="sl">Workflow 3 steps</div></div>'+
+  '</div>'+
+  '<button class="btn btn-teal" style="max-width:180px;margin:0 auto" onclick="resetDemo()">\u21BA Run again</button>'+
+  '</div></div></div>';
+  document.querySelector('.navbtns').style.display='none';
+  document.querySelectorAll('.fstep').forEach(function(el){el.classList.add('done');el.classList.remove('active');});
+  document.getElementById('progFill').style.width='100%';
+}
+
+function resetDemo(){
+  selCo=0; for(var i=0;i<10;i++) fired[i]=false; cur=0;
+  var ca=document.querySelector('.ca');
+  if(!ca.querySelector('#leftBody')){
+    ca.innerHTML='<div class="panel"><div class="ph"><span class="ph-title" id="leftTitle"></span><span id="leftBadge"></span></div><div class="pb" id="leftBody"></div></div>'+
+    '<div class="panel"><div class="ph"><span class="ph-title" id="rightTitle"></span><span id="rightSysTag"></span></div><div class="pb" id="rightBody"></div></div>';
+  }
+  document.querySelector('.navbtns').style.display='';
+  goTo(0);
+}
+
+goTo(0);
+</script>
+</body>
+</html>
