@@ -136,7 +136,6 @@ code{font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 4px;bor
 .spinner{width:14px;height:14px;border:2px solid #e5e7eb;border-top-color:#0d9488;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;flex-shrink:0}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn 0.35s ease forwards}
-.pii-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:12px;color:#92400e;margin-top:8px;line-height:1.5}
 @media(max-width:700px){.ca{grid-template-columns:1fr}.en-stats-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.fnav-row{flex-wrap:wrap}}
 </style>
 </head>
@@ -165,8 +164,8 @@ code{font-family:monospace;font-size:11px;background:#f3f4f6;padding:1px 4px;bor
   <div class="fnav-row">
     <span class="tier-label tlbl-1">Workflow 1</span>
     <div class="fstep active" data-s="0"><div class="snum">1</div><div class="slbl">Quoting Sys.</div></div>
-    <div class="fstep" data-s="1"><div class="snum">2</div><div class="slbl">POST Integ. Req</div></div>
-    <div class="fstep" data-s="2"><div class="snum">3</div><div class="slbl">EN Login</div></div>
+    <div class="fstep" data-s="1"><div class="snum">2</div><div class="slbl">EN Login</div></div>
+    <div class="fstep" data-s="2"><div class="snum">3</div><div class="slbl">POST Integ.</div></div>
     <div class="fstep" data-s="3"><div class="snum">4</div><div class="slbl">Link Company</div></div>
   </div>
   <div class="fnav-row">
@@ -253,12 +252,13 @@ var plans=[
   {id:"PL-8804",name:"Group Term Life 2x",benefit:"GroupLife",carrier:"Principal"}
 ];
 var emps=[
-  {init:"JM",name:"Jordan Martinez",title:"Sr. Engineer",av:"av-b",plans:3,deps:2,tobacco:false},
-  {init:"PT",name:"Priya Tanner",title:"Product Manager",av:"av-g",plans:2,deps:1,tobacco:false},
-  {init:"DK",name:"Derek Kim",title:"Sales Lead",av:"av-p",plans:3,deps:0,tobacco:true},
-  {init:"AL",name:"Aisha Lewis",title:"HR Manager",av:"av-a",plans:4,deps:3,tobacco:false}
+  {init:"JM",name:"Jordan Martinez",title:"Sr. Engineer",plans:3,deps:2,tobacco:false},
+  {init:"PT",name:"Priya Tanner",title:"Product Manager",plans:2,deps:1,tobacco:false},
+  {init:"DK",name:"Derek Kim",title:"Sales Lead",plans:3,deps:0,tobacco:true},
+  {init:"AL",name:"Aisha Lewis",title:"HR Manager",plans:4,deps:3,tobacco:false}
 ];
 
+// Steps: 0=Quoting sys, 1=EN Login, 2=POST Integration Req (fires after login), 3=Link, 4-8=Workflow2, 9=Workflow3
 var WF_STEPS=[0,0,0,0,1,1,1,1,1,2];
 var WF_NAMES=[
   "Business Workflow 1 \u2014 Broker Establishes the Integration for Individual Companies with the Quoting System",
@@ -275,30 +275,76 @@ function hl(j){
           .replace(/\b(true|false|null)\b/g,'<span class="rb">$1</span>');
 }
 
-var CENSUS_DATA = '{\n  "companyIdentifier": "efe6f11f-fda1-457d-904b-d2c0d8334daf",\n  "employees": [\n    {\n      "employeeIdentifier": "EMP-001-abc123",\n      "demographics": {\n        "firstName": "Jordan",\n        "firstInitialLastName": "J. M.",\n        "sex": "Male",\n        "birthDate": "1988-04-12",\n        "addresses": {\n          "homeAddress": {\n            "city": "San Francisco",\n            "state": "CA",\n            "postalCode": "94102",\n            "fipsCountyCode": "06075"\n          }\n        },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": {\n        "benefitHireDate": "2019-06-01",\n        "jobTitle": "Sr. Engineer",\n        "benefitWorkState": "California"\n      },\n      "employmentCompensation": {\n        "annualBenefitSalary": { "annualBenefitSalary": 145000, "effectiveDate": "2025-01-01" }\n      },\n      "companyStructureMapping": {\n        "eligibilityClass": "Full-Time",\n        "division": "Engineering",\n        "department": "Platform",\n        "officeLocation": "San Francisco HQ"\n      },\n      "dependents": [\n        {\n          "dependentIdentifier": "DEP-001a",\n          "demographics": {\n            "relationship": "Spouse",\n            "firstName": "Sarah",\n            "firstInitialLastName": "S. M.",\n            "sex": "Female",\n            "birthDate": "1990-09-15",\n            "tobaccoUseInformation": { "isTobaccoUser": false }\n          }\n        },\n        {\n          "dependentIdentifier": "DEP-001b",\n          "demographics": {\n            "relationship": "Child",\n            "firstName": "Lily",\n            "firstInitialLastName": "L. M.",\n            "sex": "Female",\n            "birthDate": "2018-03-22",\n            "tobaccoUseInformation": { "isTobaccoUser": false }\n          }\n        }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": {\n            "employeeBenefit": {\n              "effectiveDate": "2025-01-01",\n              "details": { "planIdentifier": "PL-8801", "carrierName": "Anthem BCBS", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 1240.00, "benefitDetails": { "benefitTier": "EmployeePlusSpouse", "isCOBRA": false } }\n            }\n          }\n        }\n      ]\n    },\n    {\n      "employeeIdentifier": "EMP-002-def456",\n      "demographics": {\n        "firstName": "Priya",\n        "firstInitialLastName": "P. T.",\n        "sex": "Female",\n        "birthDate": "1991-09-03",\n        "addresses": {\n          "homeAddress": { "city": "San Francisco", "state": "CA", "postalCode": "94105", "fipsCountyCode": "06075" }\n        },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": { "benefitHireDate": "2021-03-15", "jobTitle": "Product Manager", "benefitWorkState": "California" },\n      "employmentCompensation": { "annualBenefitSalary": { "annualBenefitSalary": 130000, "effectiveDate": "2025-01-01" } },\n      "companyStructureMapping": { "eligibilityClass": "Full-Time", "division": "Product", "department": "Core" },\n      "dependents": [\n        {\n          "dependentIdentifier": "DEP-002a",\n          "demographics": { "relationship": "Child", "firstName": "Rohan", "firstInitialLastName": "R. T.", "sex": "Male", "birthDate": "2020-07-11", "tobaccoUseInformation": { "isTobaccoUser": false } }\n        }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": {\n            "employeeBenefit": {\n              "effectiveDate": "2025-01-01",\n              "details": { "planIdentifier": "PL-8801", "carrierName": "Anthem BCBS", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 620.00, "benefitDetails": { "benefitTier": "Employee", "isCOBRA": false } }\n            }\n          }\n        }\n      ]\n    }\n  ]\n}';
+var CENSUS_DATA='{\n  "companyIdentifier": "efe6f11f-fda1-457d-904b-d2c0d8334daf",\n  "employees": [\n    {\n      "employeeIdentifier": "EMP-001-abc123",\n      "demographics": {\n        "firstName": "Jordan",\n        "firstInitialLastName": "J. M.",\n        "sex": "Male",\n        "birthDate": "1988-04-12",\n        "addresses": { "homeAddress": { "city": "San Francisco", "state": "CA", "postalCode": "94102" } },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": { "benefitHireDate": "2019-06-01", "jobTitle": "Sr. Engineer", "benefitWorkState": "California" },\n      "employmentCompensation": { "annualBenefitSalary": { "annualBenefitSalary": 145000, "effectiveDate": "2025-01-01" } },\n      "companyStructureMapping": { "eligibilityClass": "Full-Time", "division": "Engineering" },\n      "dependents": [\n        { "dependentIdentifier": "DEP-001a", "demographics": { "relationship": "Spouse", "firstInitialLastName": "S. M.", "sex": "Female", "birthDate": "1990-09-15", "tobaccoUseInformation": { "isTobaccoUser": false } } },\n        { "dependentIdentifier": "DEP-001b", "demographics": { "relationship": "Child", "firstInitialLastName": "L. M.", "sex": "Female", "birthDate": "2018-03-22", "tobaccoUseInformation": { "isTobaccoUser": false } } }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": { "employeeBenefit": { "effectiveDate": "2025-01-01", "details": { "planIdentifier": "PL-8801", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 1240.00, "benefitDetails": { "benefitTier": "EmployeePlusSpouse" } } } }\n        }\n      ]\n    },\n    {\n      "employeeIdentifier": "EMP-002-def456",\n      "demographics": {\n        "firstName": "Priya",\n        "firstInitialLastName": "P. T.",\n        "sex": "Female",\n        "birthDate": "1991-09-03",\n        "addresses": { "homeAddress": { "city": "San Francisco", "state": "CA", "postalCode": "94105" } },\n        "tobaccoUseInformation": { "isTobaccoUser": false }\n      },\n      "employmentInformation": { "benefitHireDate": "2021-03-15", "jobTitle": "Product Manager", "benefitWorkState": "California" },\n      "employmentCompensation": { "annualBenefitSalary": { "annualBenefitSalary": 130000, "effectiveDate": "2025-01-01" } },\n      "companyStructureMapping": { "eligibilityClass": "Full-Time", "division": "Product" },\n      "dependents": [\n        { "dependentIdentifier": "DEP-002a", "demographics": { "relationship": "Child", "firstInitialLastName": "R. T.", "sex": "Male", "birthDate": "2020-07-11", "tobaccoUseInformation": { "isTobaccoUser": false } } }\n      ],\n      "memberPlanEnrollments": [\n        {\n          "benefitEligibility": { "benefit": "Medical", "isEligible": true, "decision": "Enrolled", "period": "ActiveOpenEnrollment" },\n          "memberEnrolledPlan": { "employeeBenefit": { "effectiveDate": "2025-01-01", "details": { "planIdentifier": "PL-8801", "planName": "EN Blue PPO 2000", "benefit": "Medical", "totalMonthlyPlanCost": 620.00, "benefitDetails": { "benefitTier": "Employee" } } } }\n        }\n      ]\n    }\n  ]\n}';
 
 function getResp(s){
   var c=cos[selCo];
-  if(s==1) return JSON.stringify({requests:cos.map(function(co){return {companyIdentifier:co.id,companyName:co.name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+co.id.slice(0,8)+"-2026"};})},null,2);
+  // s=2 is the POST Integration Request
+  if(s==2) return JSON.stringify({requests:cos.map(function(co){return{companyIdentifier:co.id,companyName:co.name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+co.id.slice(0,8)+"-2026"};})},null,2);
   if(s==4) return JSON.stringify({companies:[
-    {benAdminCompanyIdentifier:"efe6f11f-fda1-457d-904b-d2c0d8334daf",benAdminCompanyName:"Acme Corp",federalEmployerIdentificationNumber:"12-3456789",state:"CA",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]},
-    {benAdminCompanyIdentifier:"a3c72b18-9e4f-4d2a-bb31-7f1e8c903a55",benAdminCompanyName:"TechStart Solutions",federalEmployerIdentificationNumber:"55-4433221",state:"TX",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]},
-    {benAdminCompanyIdentifier:"9d481f3c-20a7-4e87-c912-0b5d6e72f844",benAdminCompanyName:"Blue Ridge Manufacturing",federalEmployerIdentificationNumber:"98-7654321",state:"NC",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett",relatedPartnerCompanies:[]}
+    {benAdminCompanyIdentifier:"efe6f11f-fda1-457d-904b-d2c0d8334daf",benAdminCompanyName:"Acme Corp",federalEmployerIdentificationNumber:"12-3456789",state:"CA",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett"},
+    {benAdminCompanyIdentifier:"a3c72b18-9e4f-4d2a-bb31-7f1e8c903a55",benAdminCompanyName:"TechStart Solutions",federalEmployerIdentificationNumber:"55-4433221",state:"TX",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett"},
+    {benAdminCompanyIdentifier:"9d481f3c-20a7-4e87-c912-0b5d6e72f844",benAdminCompanyName:"Blue Ridge Manufacturing",federalEmployerIdentificationNumber:"98-7654321",state:"NC",agencyName:"Pacific Benefits Group",agentName:"Ryan Everett"}
   ]},null,2);
   if(s==5) return JSON.stringify({information:{companyIdentifier:c.id,demographic:{name:c.name,federalEmployerIdentificationNumber:c.fein,stateOfFormation:c.state,primaryAddress:{street1:"123 Market St",city:"San Francisco",state:"CA",postalCode:"94102"}},companyContact:{firstName:"Jane",lastName:"Smith",email:"jsmith@acmecorp.com"},agencyContact:{agencyName:c.agency,agentName:"Ryan Everett"},activeEmployeeCount:c.emp},openEnrollment:{effectiveDate:"2026-01-01",startDate:"2025-11-01",endDate:"2025-11-30",administrativeEndDate:"2025-12-05"},companyStructure:{divisions:["Engineering","Product","Sales","Operations"],departments:["Platform","Core","Growth","HR"]}},null,2);
   if(s==6) return JSON.stringify({plans:plans.map(function(p){return{planIdentifier:p.id,benefit:p.benefit,name:p.name,startDate:"2025-01-01",endDate:"2025-12-31",carrierName:p.carrier,planDetailUrl:"/api/companies/"+c.id+"/plans/"+p.id+"/health-management"};})},null,2);
   if(s==7) return JSON.stringify({companyIdentifier:c.id,plan:{planIdentifier:"PL-8801",configuration:{name:"EN Blue PPO 2000",startDate:"2025-01-01",endDate:"2025-12-31",situsState:"CA",carrierName:"Anthem BCBS",policyNumber:"GRP-00123",billOption:"SelfBill",isSelfFunded:false},eligibility:{newHireWaitingPeriodObject:{waitingPeriodType:"Days",waitingPeriodValue:30},newHireEntryDateObject:{entryDateRule:"FirstOfMonthAfter"},terminationDateObject:{terminationRule:"EndOfMonthOfTermination"}},rates:{compositeRates:{tierRates:[{tier:"Employee",rate:620.00},{tier:"EmployeePlusSpouse",rate:1240.00},{tier:"EmployeePlusChildren",rate:1100.00},{tier:"EmployeePlusFamily",rate:1750.00}]}},contributions:{contributionGroupings:[{contributionGroupingBasedOn:"Everyone",tierMonthlyContributions:[{contributionTier:"Employee",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:500.00},{contributionTier:"EmployeePlusSpouse",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:800.00},{contributionTier:"EmployeePlusChildren",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:750.00},{contributionTier:"EmployeePlusFamily",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:1200.00}]}]}}},null,2);
   if(s==8) return CENSUS_DATA;
-  if(s==9) return JSON.stringify({companyIdentifier:c.id,plan:{planIdentifier:"PL-NEW-2026",configuration:{policyNumber:"GRP-00123",carrierName:"Anthem BCBS",planName:"EN Blue PPO 1500 Renewal 2026",startDate:"2026-01-01",endDate:"2026-12-31",nextRenewalDate:"2027-01-01",carrierPlanCode:"PPO1500",carrierPlanTypeCode:"PPO",planBillOption:"SelfBill",isSelfFunded:false,situsState:"CA",benefit:"Medical",originalPlanStartDate:"2020-01-01"},eligibilityOptions:[{eligibilityRules:{waitingPeriod:{waitingPeriodType:"Days",waitingPeriodValue:30},entryDateRule:"FirstOfMonthAfter",terminationRule:"EndOfMonthOfTermination",rehirePeriod:{periodType:"Days",periodValue:90},rehireEntryDateRule:"HireDate"}}],rates:{compositeRates:{tierRates:[{tier:"Employee",rate:595.00},{tier:"EmployeePlusSpouse",rate:1190.00},{tier:"EmployeePlusChildren",rate:1050.00},{tier:"EmployeePlusFamily",rate:1680.00}]}},contributions:{contributionGroupings:[{contributionGroupingBasedOn:"Everyone",tierMonthlyContributions:[{contributionTier:"Employee",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:485.00},{contributionTier:"EmployeePlusSpouse",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:780.00},{contributionTier:"EmployeePlusChildren",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:730.00},{contributionTier:"EmployeePlusFamily",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:1160.00}]}]}}},null,2);
+  if(s==9) return JSON.stringify({companyIdentifier:c.id,plan:{planIdentifier:"PL-NEW-2026",configuration:{policyNumber:"GRP-00123",carrierName:"Anthem BCBS",planName:"EN Blue PPO 1500 Renewal 2026",startDate:"2026-01-01",endDate:"2026-12-31",carrierPlanCode:"PPO1500",carrierPlanTypeCode:"PPO",planBillOption:"SelfBill",isSelfFunded:false,situsState:"CA",benefit:"Medical",originalPlanStartDate:"2020-01-01"},eligibilityOptions:[{eligibilityRules:{waitingPeriod:{waitingPeriodType:"Days",waitingPeriodValue:30},entryDateRule:"FirstOfMonthAfter",terminationRule:"EndOfMonthOfTermination",rehirePeriod:{periodType:"Days",periodValue:90},rehireEntryDateRule:"HireDate"}}],rates:{compositeRates:{tierRates:[{tier:"Employee",rate:595.00},{tier:"EmployeePlusSpouse",rate:1190.00},{tier:"EmployeePlusChildren",rate:1050.00},{tier:"EmployeePlusFamily",rate:1680.00}]}},contributions:{contributionGroupings:[{contributionGroupingBasedOn:"Everyone",tierMonthlyContributions:[{contributionTier:"Employee",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:485.00},{contributionTier:"EmployeePlusSpouse",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:780.00},{contributionTier:"EmployeePlusChildren",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:730.00},{contributionTier:"EmployeePlusFamily",contributionBasis:"Employer",contributionType:"FlatDollarAmount",contribution:1160.00}]}]}}},null,2);
   return "{}";
 }
 
-function getReq1(){
-  return JSON.stringify({requests:[
-    {companyIdentifier:cos[selCo].id,companyName:cos[selCo].name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+cos[selCo].id.slice(0,8)+"-2026"}
-  ]},null,2);
+// ── Step 1: Quoting system "Send" button navigates to EN Login (step 1) ──────
+function sendToEnLogin(){
+  goTo(1);
 }
 
+// ── Step 1 (EN Login): broker logs in, then POST fires automatically ─────────
+function doEnLogin(){
+  var btn=document.getElementById('loginBtn');
+  if(!btn) return;
+  btn.disabled=true; btn.textContent='Logging in\u2026';
+  var wrap=document.getElementById('loginWrap');
+  if(wrap){
+    // Show redirect animation
+    setTimeout(function(){
+      wrap.innerHTML='<div class="redirect-screen fade-in">'+
+        '<div class="spinner" style="width:18px;height:18px;border-width:3px;border-top-color:#16a34a"></div>'+
+        '<div style="font-size:15px;font-weight:700;color:#374151">Authenticated \u2014 sending integration requests to EN\u2026</div>'+
+        '<div style="font-size:13px;color:#6b7280;max-width:280px;text-align:center;line-height:1.5">Broker is logged in. EN is now receiving the integration requests from the Quoting system.</div>'+
+        '</div>';
+      // Advance to step 2 (POST) and immediately fire the request
+      setTimeout(function(){
+        goTo(2);
+        setTimeout(function(){
+          // Auto-fire the POST on step 2
+          var btn2=document.getElementById('fireBtn');
+          if(btn2 && !fired[2]){
+            btn2.disabled=true; btn2.textContent='Sending\u2026';
+            var rb=document.getElementById('rbox');
+            if(rb){
+              rb.classList.add('vis');
+              rb.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><div class="spinner"></div>Posting integration requests to EN\u2026</div>';
+              setTimeout(function(){
+                rb.innerHTML=hl(getResp(2));
+                btn2.textContent='\u2713 Response received'; btn2.className='btn btn-success';
+                fired[2]=true;
+                var lb=document.getElementById('leftBadge');
+                if(lb){lb.textContent='200 OK';lb.className='spl sp200';}
+                document.querySelectorAll('.fstep').forEach(function(el){
+                  if(parseInt(el.getAttribute('data-s'))===2) el.classList.add('done');
+                });
+                showRightResult(2);
+              },900+Math.random()*400);
+            }
+          }
+        },100);
+      },1600);
+    },700);
+  }
+}
+
+// ── Generic fire call (for steps 4-9) ────────────────────────────────────────
 function fireCall(s){
   if(fired[s]) return;
   var btn=document.getElementById('fireBtn');
@@ -309,10 +355,6 @@ function fireCall(s){
   rb.classList.add('vis');
   rb.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><div class="spinner"></div>Awaiting response\u2026</div>';
   setTimeout(function(){
-    if(s===1){
-      var reqBox=document.getElementById('reqBox');
-      if(reqBox){reqBox.innerHTML=hl(getReq1());reqBox.classList.add('vis');}
-    }
     rb.innerHTML=hl(getResp(s));
     btn.textContent='\u2713 Response received'; btn.className='btn btn-success';
     fired[s]=true;
@@ -322,14 +364,16 @@ function fireCall(s){
       if(parseInt(el.getAttribute('data-s'))===s) el.classList.add('done');
     });
     showRightResult(s);
-  }, 800+Math.random()*500);
+    if(s===9) setTimeout(revealTakeAction,600);
+  },800+Math.random()*500);
 }
 
+// ── Right panel results ───────────────────────────────────────────────────────
 function showRightResult(s){
   var el=document.getElementById('rightApiResult');
   if(!el) return;
   var c=cos[selCo];
-  if(s===1){
+  if(s===2){
     el.style.display='block';
     var reqRows='<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:9px">';
     reqRows+='<div style="display:grid;grid-template-columns:1fr 110px;background:#f0fdf4;padding:6px 10px;font-size:11px;font-weight:700;color:#0f766e;border-bottom:1px solid #d1fae5"><span>Company sent to EN</span><span style="text-align:right">Status</span></div>';
@@ -341,8 +385,8 @@ function showRightResult(s){
         '</div>';
     });
     reqRows+='</div>';
-    el.innerHTML='<div class="info-strip info-teal" style="margin-top:0"><div class="info-label">Integration requests sent &mdash; EN received '+cos.length+' companies</div>Each company is now in <strong>Received</strong> status. The broker logs into EN next to link each one.</div>'+reqRows+
-    '<div class="info-strip info-amber" style="font-size:12px"><strong>Next step:</strong> The broker logs into EN and navigates to Pending Integrations to link each company. Until linked, the connection status remains Received.</div>';
+    el.innerHTML='<div class="info-strip info-teal"><div class="info-label">Integration requests sent &mdash; EN received '+cos.length+' companies</div>Each company is now in <strong>Received</strong> status. The broker navigates to Pending Integrations in EN to link each one.</div>'+reqRows+
+    '<div class="info-strip info-amber" style="font-size:12px"><strong>Next:</strong> The broker logs into EN (already done) and links each company in Pending Integrations to complete the connection.</div>';
   }
   if(s===4){
     el.style.display='block';
@@ -355,52 +399,40 @@ function showRightResult(s){
       h+='<div><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div>';
       h+='<div style="font-size:10px;color:#6b7280;font-family:monospace">'+co.id.slice(0,22)+'&hellip; &bull; FEIN '+co.fein+' &bull; '+co.state+'</div>';
       h+=(linked?'<div style="font-size:11px;color:#16a34a;margin-top:2px">&#10003; Already linked in Quoting system</div>':'<div style="font-size:11px;color:#f59e0b;margin-top:2px">&#9888; Not found &mdash; create new company shell</div>');
-      h+='</div>';
-      h+=(linked?'<span class="bdg bdg-green" style="font-size:10px;margin-left:auto">Linked &#10003;</span>':'<span class="bdg bdg-amber" style="font-size:10px;margin-left:auto">Create shell</span>');
+      h+='</div>'+(linked?'<span class="bdg bdg-green" style="font-size:10px;margin-left:auto">Linked &#10003;</span>':'<span class="bdg bdg-amber" style="font-size:10px;margin-left:auto">Create shell</span>');
       h+='</div>';
     });
-    h+='</div>';
-    h+='<div style="font-size:12px;color:#555;line-height:1.5">Match using <code>federalEmployerIdentificationNumber</code> or company name. For unlinked companies, the Quoting system creates a new company shell using the name and FEIN from this response. Click a company to use it for Steps 6&ndash;10.</div>';
+    h+='</div><div style="font-size:12px;color:#555;line-height:1.5">Match using <code>federalEmployerIdentificationNumber</code>. Unlinked companies &rarr; Quoting system creates a new shell. Click a company to use it for Steps 6&ndash;10.</div>';
     el.innerHTML=h;
   }
   if(s===5){
     el.style.display='block';
     var c2=cos[selCo];
     el.innerHTML=
-    '<div class="api-box">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company information</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company information</div>'+
     '<div class="plan-row"><span class="pr-name">companyIdentifier</span><span class="pr-meta" style="font-family:monospace;font-size:10px">'+c2.id.slice(0,22)+'&hellip;</span></div>'+
     '<div class="plan-row"><span class="pr-name">name</span><span class="pr-meta">'+c2.name+'</span></div>'+
     '<div class="plan-row"><span class="pr-name">FEIN</span><span class="pr-meta">'+c2.fein+'</span></div>'+
     '<div class="plan-row"><span class="pr-name">stateOfFormation</span><span class="pr-meta">'+c2.state+'</span></div>'+
     '<div class="plan-row"><span class="pr-name">activeEmployeeCount</span><span class="pr-meta">'+c2.emp+'</span></div>'+
     '</div>'+
-    '<div class="api-box">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Primary address</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Primary address</div>'+
     '<div class="plan-row"><span class="pr-name">street1</span><span class="pr-meta">123 Market St</span></div>'+
-    '<div class="plan-row"><span class="pr-name">city</span><span class="pr-meta">San Francisco</span></div>'+
-    '<div class="plan-row"><span class="pr-name">state</span><span class="pr-meta">CA</span></div>'+
-    '<div class="plan-row"><span class="pr-name">postalCode</span><span class="pr-meta">94102</span></div>'+
+    '<div class="plan-row"><span class="pr-name">city / state / zip</span><span class="pr-meta">San Francisco / CA / 94102</span></div>'+
     '</div>'+
-    '<div class="api-box">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Agency &amp; contacts</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Agency &amp; contacts</div>'+
     '<div class="plan-row"><span class="pr-name">agencyName</span><span class="pr-meta">'+c2.agency+'</span></div>'+
     '<div class="plan-row"><span class="pr-name">agentName</span><span class="pr-meta">Ryan Everett</span></div>'+
-    '<div class="plan-row"><span class="pr-name">contactName</span><span class="pr-meta">Jane Smith</span></div>'+
     '<div class="plan-row"><span class="pr-name">contactEmail</span><span class="pr-meta">jsmith@company.com</span></div>'+
     '</div>'+
-    '<div class="api-box">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Open enrollment window</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Open enrollment window</div>'+
     '<div class="plan-row"><span class="pr-name">effectiveDate</span><span class="pr-meta">2026-01-01</span></div>'+
-    '<div class="plan-row"><span class="pr-name">startDate</span><span class="pr-meta">2025-11-01</span></div>'+
-    '<div class="plan-row"><span class="pr-name">endDate</span><span class="pr-meta">2025-11-30</span></div>'+
+    '<div class="plan-row"><span class="pr-name">startDate / endDate</span><span class="pr-meta">2025-11-01 / 2025-11-30</span></div>'+
     '<div class="plan-row"><span class="pr-name">administrativeEndDate</span><span class="pr-meta">2025-12-05</span></div>'+
     '</div>'+
-    '<div class="api-box">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company structure</div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Company structure</div>'+
     '<div class="plan-row"><span class="pr-name">divisions</span><span class="pr-meta">Engineering, Product, Sales, Operations</span></div>'+
     '<div class="plan-row"><span class="pr-name">departments</span><span class="pr-meta">Platform, Core, Growth, HR</span></div>'+
-    '<div class="plan-row"><span class="pr-name">businessUnits</span><span class="pr-meta">US West, US East</span></div>'+
     '<div class="plan-row"><span class="pr-name">officeLocations</span><span class="pr-meta">San Francisco HQ, Austin Office</span></div>'+
     '</div>';
   }
@@ -410,69 +442,49 @@ function showRightResult(s){
     plans.forEach(function(p){
       h2+='<div class="plan-row"><div><div class="pr-name">'+p.name+'</div><div class="pr-meta">'+p.carrier+' &bull; '+p.id+'</div></div><span class="bdg bdg-blue" style="font-size:10px">'+p.benefit+'</span></div>';
     });
-    h2+='<div class="info-strip info-teal" style="margin-top:9px;font-size:12px">Each <code>planDetailUrl</code> links directly to the benefit model endpoint &rarr; Step 8.</div>';
+    h2+='<div class="info-strip info-teal" style="margin-top:9px;font-size:12px">Each <code>planDetailUrl</code> links to the benefit model endpoint &rarr; Step 8.</div>';
     el.innerHTML=h2;
   }
   if(s===7){
     el.style.display='block';
     el.innerHTML='<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Configuration</div>'+
     '<div class="plan-row"><span class="pr-name">name</span><span class="pr-meta">EN Blue PPO 2000</span></div>'+
-    '<div class="plan-row"><span class="pr-name">carrierName</span><span class="pr-meta">Anthem BCBS</span></div>'+
-    '<div class="plan-row"><span class="pr-name">policyNumber</span><span class="pr-meta">GRP-00123</span></div>'+
-    '<div class="plan-row"><span class="pr-name">situsState / billOption</span><span class="pr-meta">CA / SelfBill</span></div>'+
-    '<div class="plan-row"><span class="pr-name">isSelfFunded</span><span class="pr-meta">false</span></div>'+
+    '<div class="plan-row"><span class="pr-name">carrierName / policyNumber</span><span class="pr-meta">Anthem BCBS / GRP-00123</span></div>'+
+    '<div class="plan-row"><span class="pr-name">situsState / isSelfFunded</span><span class="pr-meta">CA / false</span></div>'+
     '</div>'+
-    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">ACA composite rates</div>'+
-    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$620.00 / mo</span></div>'+
-    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$1,240.00 / mo</span></div>'+
-    '<div class="plan-row"><span class="pr-name">EmployeePlusChildren</span><span class="pr-meta">$1,100.00 / mo</span></div>'+
-    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,750.00 / mo</span></div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">ACA composite rates (monthly)</div>'+
+    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$620.00</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$1,240.00</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusChildren</span><span class="pr-meta">$1,100.00</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,750.00</span></div>'+
     '</div>'+
-    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Employer contributions</div>'+
-    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$500 Employer FlatDollar</span></div>'+
-    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$800 Employer FlatDollar</span></div>'+
-    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,200 Employer FlatDollar</span></div>'+
+    '<div class="api-box"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Employer contributions (Everyone)</div>'+
+    '<div class="plan-row"><span class="pr-name">Employee</span><span class="pr-meta">$500 FlatDollar</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusSpouse</span><span class="pr-meta">$800 FlatDollar</span></div>'+
+    '<div class="plan-row"><span class="pr-name">EmployeePlusFamily</span><span class="pr-meta">$1,200 FlatDollar</span></div>'+
     '</div>';
   }
   if(s===8){
     el.style.display='block';
-    var h3='<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:8px">Quote census &mdash; '+cos[selCo].name+' (PII redacted)</div>';
+    var h3='<div style="font-size:13px;font-weight:700;color:#6b7280;margin-bottom:8px">Quote census &mdash; '+cos[selCo].name+'</div>';
     emps.forEach(function(e){
       h3+='<div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px;margin-bottom:8px">'+
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
         '<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#ccfbf1;color:#0f766e;flex-shrink:0">'+e.init+'</div>'+
-        '<div><div style="font-size:13px;font-weight:700;color:#111">'+e.name.split(' ')[0]+' '+e.name.split(' ')[1][0]+'. (redacted)</div>'+
+        '<div><div style="font-size:13px;font-weight:700;color:#111">'+e.name.split(' ')[0]+' '+e.name.split(' ')[1][0]+'. (initials only)</div>'+
         '<div style="font-size:11px;color:#6b7280">'+e.title+' &bull; '+(e.tobacco?'Tobacco user':'Non-tobacco')+'</div></div></div>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">'+
         '<div style="color:#6b7280">Plans enrolled</div><div>'+e.plans+'</div>'+
         '<div style="color:#6b7280">Dependents</div><div>'+e.deps+'</div>'+
         '</div></div>';
     });
-
     el.innerHTML=h3;
   }
 }
 
-function showLinkWizard(){
-  document.getElementById('linkWizardArea').style.display='block';
-  document.getElementById('linkWizardArea').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-function lwNext(){
-  document.getElementById('lwDoneMsg').textContent='Linked to "'+cos[selCo].name+'" in Employee Navigator. Connection is now Active.';
-  document.getElementById('lwStep1').classList.remove('active');
-  document.getElementById('lwStep2').classList.add('active');
-}
-function lwCreateNew(){
-  document.getElementById('lwDoneMsg').textContent='"'+cos[selCo].name+'" created as a new company in Employee Navigator.';
-  document.getElementById('lwStep1').classList.remove('active');
-  document.getElementById('lwStep2').classList.add('active');
-}
-
 function selCompany(i){ selCo=i; showRightResult(4); }
-
 function openSoldModal(){
-  var c=cos[selCo];
-  document.getElementById('soldCoName').textContent=c.name;
+  document.getElementById('soldCoName').textContent=cos[selCo].name;
   document.getElementById('soldStep1').style.display='block';
   document.getElementById('soldStep2').style.display='none';
   document.getElementById('soldModalBg').style.display='flex';
@@ -482,7 +494,6 @@ function soldConfirm(){
   document.getElementById('soldStep1').style.display='none';
   document.getElementById('soldStep2').style.display='block';
 }
-
 function revealTakeAction(){
   var c=cos[selCo];
   var el=document.getElementById('taReveal');
@@ -499,7 +510,7 @@ function revealTakeAction(){
   '<div class="en-stat"><div class="en-stat-num" style="font-size:16px;color:#0d9488">1</div><div class="en-stat-lbl">Plan Notifications</div><div class="en-stat-btn-wrap"><button style="background:#0d9488;color:#fff;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;cursor:pointer" onclick="showTaPanel()">Take Action</button></div></div>'+
   '</div></div>'+
   '<div id="taPanel" style="display:none;margin-top:10px">'+
-  '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:6px">Add Plan from Partner System &mdash; <span style="color:#0d9488">'+c.name+'</span></div>'+
+  '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:7px">Add Plan from Partner System &mdash; <span style="color:#0d9488">'+c.name+'</span></div>'+
   '<div style="border:1px solid #e5e7eb;border-radius:8px;padding:11px;margin-bottom:8px">'+
   '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:3px">EN Blue PPO 1500 Renewal 2026</div>'+
   '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px;font-size:11px;color:#6b7280"><span class="bdg bdg-teal" style="font-size:10px">Medical</span><span>Anthem BCBS</span><span>2026-01-01 &rarr; 2026-12-31</span></div>'+
@@ -523,150 +534,88 @@ function taDo(action){
   var r=document.getElementById('taResult');r.style.display='block';r.innerHTML=msgs[action];
 }
 
-function sendIntegrationRequests(){
-  // Navigate to step 1 first so the fire button and right panel exist
-  goTo(1);
-  // Then immediately fire the request after a short tick
-  setTimeout(function(){
-    var btn=document.getElementById('fireBtn');
-    if(btn) {
-      btn.disabled=true; btn.textContent='Sending…';
-      var rb=document.getElementById('rbox');
-      if(rb){
-        rb.classList.add('vis');
-        rb.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:4px"><div class="spinner"></div>Awaiting response…</div>';
-        setTimeout(function(){
-          rb.innerHTML=hl(getResp(1));
-          btn.textContent='✓ Response received'; btn.className='btn btn-success';
-          fired[1]=true;
-          var lb=document.getElementById('leftBadge');
-          if(lb){lb.textContent='200 OK';lb.className='spl sp200';}
-          document.querySelectorAll('.fstep').forEach(function(el){
-            if(parseInt(el.getAttribute('data-s'))===1) el.classList.add('done');
-          });
-          showRightResult(1);
-        }, 900+Math.random()*400);
-      }
-    }
-  }, 50);
-}
-function doEnLogin(){
-  var btn=document.getElementById('loginBtn');
-  if(!btn) return;
-  btn.disabled=true; btn.textContent='Logging in…';
-  var wrap=document.getElementById('loginWrap');
-  if(wrap){
-    setTimeout(function(){
-      wrap.innerHTML='<div class="redirect-screen fade-in">'+
-        '<div class="spinner" style="width:18px;height:18px;border-width:3px;border-top-color:#16a34a"></div>'+
-        '<div style="font-size:15px;font-weight:700;color:#374151">Logged in &mdash; loading Pending Integrations…</div>'+
-        '<div style="font-size:13px;color:#6b7280;max-width:280px;text-align:center;line-height:1.5">Taking you to Step 4 where the broker links the companies sent by the Quoting system.</div>'+
-        '</div>';
-      setTimeout(function(){ goTo(3); }, 1600);
-    }, 700);
-  }
-}
-function doLogin(){
-  var btn=document.getElementById('loginBtn');
-  if(!btn) return;
-  btn.disabled=true; btn.textContent='Logging in\u2026';
-  var wrap=document.getElementById('loginWrap');
-  if(wrap){
-    setTimeout(function(){
-      wrap.innerHTML='<div class="redirect-screen fade-in">'+
-        '<div class="spinner" style="width:18px;height:18px;border-width:3px;border-top-color:#16a34a"></div>'+
-        '<div style="font-size:15px;font-weight:700;color:#374151">Authenticated \u2014 redirecting back to Quoting system\u2026</div>'+
-        '<div class="redirect-url-bar">quoting-partner.com/callback?code=<span style="color:#0d9488">AUTH_CODE_xyz789</span>&state=abc123secure</div>'+
-        '<div style="font-size:13px;color:#6b7280;max-width:280px;text-align:center;line-height:1.5">EN has issued the authorization code. Your browser is being sent back to the Quoting system to complete the token exchange.</div>'+
-        '</div>';
-      setTimeout(function(){ goTo(3); }, 1600);
-    }, 700);
-  }
-}
-
 var stepMeta=[
   {lt:"Quoting System \u2014 Select &amp; send companies to EN",rt:"Quoting System \u2014 Company selection",sys:"Q",pct:10,prog:"Step 1 \u2014 Quoting System"},
-  {lt:"POST Quoting Company Integration Request API",rt:"EN \u2014 Pending Integrations + Link",sys:"Q",pct:20,prog:"Step 2 \u2014 POST integration request"},
-  {lt:"Broker logs into EN",rt:"Employee Navigator \u2014 Login",sys:"EN",pct:30,prog:"Step 3 \u2014 EN Login"},
-  {lt:"Broker links companies in EN",rt:"Employee Navigator \u2014 Pending Integrations",sys:"EN",pct:40,prog:"Step 4 \u2014 Broker links companies"},
-  {lt:"Auth Code flow + GET Company List",rt:"Quoting System \u2014 Company list",sys:"Q",pct:50,prog:"Step 5 \u2014 Auth Code + Company list"},
-  {lt:"GET Company Management API \u2014 Company Detail",rt:"Quoting System \u2014 Company detail",sys:"Q",pct:60,prog:"Step 6 \u2014 Fetch company details"},
-  {lt:"GET Plan List Management API",rt:"Quoting System \u2014 Plan list",sys:"Q",pct:70,prog:"Step 7 \u2014 Fetch plan list"},
-  {lt:"GET Health Plan Management API",rt:"Quoting System \u2014 Plan details",sys:"Q",pct:78,prog:"Step 8 \u2014 Fetch plan details"},
-  {lt:"GET Quote Census API",rt:"Quoting System \u2014 PII-redacted census",sys:"Q",pct:88,prog:"Step 9 \u2014 Quote census (PII redacted)"},
+  {lt:"Broker logs into Employee Navigator",rt:"Employee Navigator \u2014 Login",sys:"EN",pct:22,prog:"Step 2 \u2014 EN Login (required before POST)"},
+  {lt:"POST Quoting Company Integration Request API",rt:"EN \u2014 Integration requests received",sys:"Q",pct:34,prog:"Step 3 \u2014 POST integration requests"},
+  {lt:"Broker links companies in EN",rt:"Employee Navigator \u2014 Pending Integrations",sys:"EN",pct:44,prog:"Step 4 \u2014 Broker links companies"},
+  {lt:"Auth Code Flow + GET Company List",rt:"Quoting System \u2014 Company list",sys:"Q",pct:54,prog:"Step 5 \u2014 Auth Code + Company list"},
+  {lt:"GET Company Management API \u2014 Company Detail",rt:"Quoting System \u2014 Company detail",sys:"Q",pct:63,prog:"Step 6 \u2014 Fetch company details"},
+  {lt:"GET Plan List Management API",rt:"Quoting System \u2014 Plan list",sys:"Q",pct:72,prog:"Step 7 \u2014 Fetch plan list"},
+  {lt:"GET Health Plan Management API",rt:"Quoting System \u2014 Plan details",sys:"Q",pct:81,prog:"Step 8 \u2014 Fetch plan details"},
+  {lt:"GET Quote Census API",rt:"Quoting System \u2014 Quote census",sys:"Q",pct:90,prog:"Step 9 \u2014 Quote census"},
   {lt:"POST Quoting Company Benefits Notification API",rt:"EN + Quoting \u2014 Sold plan pushed",sys:"BOTH",pct:100,prog:"Step 10 \u2014 Push sold plan to EN"}
 ];
 
 function renderLeft(s){
   var h='', c=cos[selCo];
   if(s===0){
-    h+='<p class="step-desc">The integration starts in the <strong>Quoting system</strong>. The broker selects one or more companies to connect to Employee Navigator and sends the integration requests. EN will then show these in the broker&#39;s Pending Integrations tab to be linked.</p>';
+    h+='<p class="step-desc">The integration starts in the <strong>Quoting system</strong>. The broker selects companies and clicks <strong>Send Integration Requests to EN</strong>. Before the POST can be made, the broker must log into EN to authenticate &mdash; clicking Send takes them to EN login.</p>';
     h+='<div class="info-strip info-teal"><div class="info-label">Action taken in</div>Quoting System &mdash; by the broker</div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#0d9488"></div><div><div class="tl-title">Broker selects companies in the Quoting system</div><div class="tl-txt">Choose one or more companies to connect to EN</div></div></div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Quoting system sends integration requests to EN</div><div class="tl-txt">Uses OAuth 2.0 Authorization Code flow &mdash; broker must be logged in for this step</div></div></div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#f59e0b"></div><div><div class="tl-title">Broker then goes to EN to link the companies</div><div class="tl-txt">After the POST, the broker logs into EN and links each company to complete the connection</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#0d9488"></div><div><div class="tl-title">Broker selects companies to connect</div><div class="tl-txt">One or more companies can be selected and sent in a single request</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Click Send &rarr; EN Login required first</div><div class="tl-txt">The POST uses OAuth 2.0 Authorization Code flow. The broker must log into EN before the request can fire.</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#f59e0b"></div><div><div class="tl-title">After login &rarr; POST fires automatically</div><div class="tl-txt">Then the broker links the companies in EN Pending Integrations</div></div></div>';
   }
   if(s===1){
-    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; OAuth 2.0 Authorization Code Flow</div>';
-    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/integrations</div><div class="api-desc">Sends up to 100 company integration requests in a single call. Each includes the company identifier, name, and optional authorization key. Status begins as <strong>Received</strong> until the broker links each company in EN.</div></div>';
-    h+='<div class="highlight-box">This call uses the <strong>Authorization Code flow</strong> &mdash; the broker must be authenticated. Once received, EN shows the requests in the broker&#39;s Pending Integrations tab for linking.</div>';
-    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(1)">POST &mdash; fire request</button>';
-    h+='<div style="font-size:13px;font-weight:700;color:#6b7280;margin:7px 0 3px">Request body &mdash; what you are sending to EN</div>';
-    h+='<div class="rbox" id="rbox"></div>';
+    h+='<p class="step-desc">The POST Quoting Company Integration Request API uses the <strong>OAuth 2.0 Authorization Code flow</strong> &mdash; meaning the broker must be authenticated in EN for this call to succeed. The broker logs in here first, then the requests are sent automatically.</p>';
+    h+='<div class="info-strip info-blue"><div class="info-label">Action taken in</div>Employee Navigator &mdash; broker logs in to authorize the integration request</div>';
+    h+='<div class="api-box">'+
+    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">OAuth 2.0 Authorization Code Flow</div>'+
+    '<div style="font-family:monospace;font-size:10px;word-break:break-all;color:#555;line-height:1.7;background:#f3f4f6;padding:7px;border-radius:5px">'+
+    'Redirect to EN login:<br>https://employeenavigator.com/oauth/authorize?<br>  client_id=<span style="color:#2563eb">QUOTING_CLIENT_ID</span><br>  &amp;response_type=<span style="color:#2563eb">code</span><br>  &amp;scope=<span style="color:#2563eb">EnApi%20QuotingCompanyIntegrationApi</span><br>  &amp;redirect_uri=<span style="color:#2563eb">https://quoting-partner.com/callback</span>'+
+    '</div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker logs into EN on the right</div><div class="tl-txt">EN issues an authorization code, the Quoting system exchanges it for a bearer token</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#0d9488"></div><div><div class="tl-title">POST fires automatically after login</div><div class="tl-txt">All selected companies are sent to EN in a single request &mdash; Step 3 shows the result</div></div></div>';
   }
   if(s===2){
-    h+='<p class="step-desc">After the integration requests are sent, the broker logs into Employee Navigator. The demo auto-advances once login is complete &mdash; the broker will then link companies in the next step.</p>';
-    h+='<div class="info-strip info-blue"><div class="info-label">Action taken in</div>Employee Navigator &mdash; by the broker</div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker logs into Employee Navigator</div><div class="tl-txt">Click Login on the right to continue</div></div></div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Auto-advances to Pending Integrations</div><div class="tl-txt">The broker lands on the EN homepage and navigates to link the companies sent by the Quoting system</div></div></div>';
+    h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; using bearer token from EN login</div>';
+    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/integrations</div><div class="api-desc">Sends up to 100 company integration requests in a single call. Each includes the company identifier, name, and optional authorization key. Status begins as <strong>Received</strong> until the broker links each company in EN.</div></div>';
+    h+='<div class="highlight-box">Once received, EN shows the requests in the broker&#39;s Pending Integrations tab (Step 4). The broker then links each company to complete the connection.</div>';
+    h+='<div style="font-size:13px;font-weight:700;color:#6b7280;margin:7px 0 3px">Request sent to EN (auto-fired after login)</div>';
+    h+='<div class="rbox vis" id="rbox">'+hl(JSON.stringify({requests:cos.map(function(co){return{companyIdentifier:co.id,companyName:co.name,benAdminCompanyIdentifier:null,authorizationKey:"AUTH-"+co.id.slice(0,8)+"-2026"};})},null,2))+'</div>';
+    // Add a fake fire button to show "already received" state
+    h+='<button class="btn btn-success" id="fireBtn" style="margin-top:7px" disabled>&#10003; Response received</button>';
   }
   if(s===3){
-    h+='<p class="step-desc">The broker is now in EN. They navigate to <strong>Pending Integrations</strong> and click <strong>Link</strong> on each company sent by the Quoting system. Click around the interactive EN UI on the right.</p>';
+    h+='<p class="step-desc">The broker is now in EN. They navigate to <strong>Pending Integrations</strong> and click <strong>Link</strong> on each company sent by the Quoting system. Interact with the EN UI on the right.</p>';
     h+='<div class="info-strip info-blue"><div class="info-label">Action taken in</div>Employee Navigator &mdash; by the broker</div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker lands on EN homepage</div><div class="tl-txt">The Integrations panel shows 3 Pending Integrations &mdash; click Manage to proceed</div></div></div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Navigates to Pending Integrations</div><div class="tl-txt">Finds the companies sent by the Quoting system, each with status "Received"</div></div></div>';
-    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Clicks Link &rarr; selects or creates company</div><div class="tl-txt">Once linked, the connection is Active &mdash; the Quoting system can now retrieve data from EN</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#2563eb"></div><div><div class="tl-title">Broker lands on EN homepage</div><div class="tl-txt">3 Pending Integrations highlighted &mdash; click Manage to proceed</div></div></div>';
+    h+='<div class="tl"><div class="tl-dot" style="background:#16a34a"></div><div><div class="tl-title">Clicks Link on each company</div><div class="tl-txt">Choose Next (link existing) or Create New Company. Once linked, the Quoting system can retrieve data from EN.</div></div></div>';
   }
   if(s===4){
-    h+='<div class="info-strip info-blue" style="margin-bottom:8px"><div class="info-label">Auth flow &mdash; Authorization Code</div>The broker is authenticated via OAuth 2.0 Auth Code. Below is the redirect and token exchange before the GET is made.</div>';
-    h+='<details style="margin-bottom:8px;border:1px solid #e5e7eb;border-radius:7px;overflow:hidden"><summary style="padding:8px 11px;font-size:12px;font-weight:700;color:#6b7280;cursor:pointer;background:#f9fafb;list-style:none;display:flex;align-items:center;gap:6px"><span>&#9654;</span> OAuth redirect + token exchange (expand)</summary>'+
+    h+='<div class="info-strip info-blue" style="margin-bottom:8px"><div class="info-label">Auth flow &mdash; Authorization Code</div>The broker is authenticated. Expand below to see the OAuth redirect and token exchange.</div>';
+    h+='<details style="margin-bottom:8px;border:1px solid #e5e7eb;border-radius:7px;overflow:hidden"><summary style="padding:8px 11px;font-size:12px;font-weight:700;color:#6b7280;cursor:pointer;background:#f9fafb;list-style:none">&#9654; OAuth redirect + token exchange (expand)</summary>'+
     '<div style="padding:9px 11px;border-top:1px solid #e5e7eb">'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">1. Redirect to EN login</div>'+
-    '<div style="font-family:monospace;font-size:10px;word-break:break-all;color:#555;line-height:1.7;background:#f3f4f6;padding:6px;border-radius:5px;margin-bottom:7px">'+
-    'https://employeenavigator.com/oauth/authorize?<br>client_id=<span style="color:#2563eb">QUOTING_CLIENT_ID</span>&amp;response_type=<span style="color:#2563eb">code</span>&amp;scope=<span style="color:#2563eb">EnApi%20QuotingCompanyIntegrationApi</span>&amp;redirect_uri=<span style="color:#2563eb">https://quoting-partner.com/callback</span>'+
-    '</div>'+
-    '<div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">2. Token exchange (after broker logs in)</div>'+
-    '<div style="font-family:monospace;font-size:10px;line-height:1.7;color:#555;background:#f3f4f6;padding:6px;border-radius:5px">'+
-    'POST /identity/connect/token &mdash; grant_type=authorization_code &mdash; code=AUTH_CODE'+
-    '</div>'+
+    '<div style="font-family:monospace;font-size:10px;word-break:break-all;color:#555;line-height:1.7;background:#f3f4f6;padding:6px;border-radius:5px;margin-bottom:7px">GET https://employeenavigator.com/oauth/authorize?client_id=QUOTING_CLIENT_ID&amp;scope=EnApi%20QuotingCompanyIntegrationApi&amp;redirect_uri=https://quoting-partner.com/callback</div>'+
+    '<div style="font-family:monospace;font-size:10px;color:#555;background:#f3f4f6;padding:6px;border-radius:5px">POST /identity/connect/token &mdash; grant_type=authorization_code</div>'+
     '</div></details>';
     h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/companies-list</div><div class="api-desc">Returns all EN companies for the broker&#39;s book of business. Each entry includes the EN GUID (<code>benAdminCompanyIdentifier</code>), company name, FEIN, state, agency, and agent name.</div></div>';
-    h+='<div class="highlight-box" style="font-size:12px">For each company: check if already linked in the Quoting system. If linked &rarr; ready to use. If not &rarr; create a new company shell using the name and FEIN.</div>';
+    h+='<div class="highlight-box" style="font-size:12px">Match on <code>federalEmployerIdentificationNumber</code>. Already linked &rarr; use as-is. Not linked &rarr; create a new company shell.</div>';
     h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(4)">GET &mdash; fire request</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
   if(s===5){
-    h+='<div class="info-strip info-teal"><div class="info-label">Auth flow &mdash; Client Credentials for all remaining calls</div>No broker login required. Quoting system uses its own client_id + secret.</div>';
-    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/company-management</div><div class="api-desc">Returns full company profile: demographics, FEIN, address, contact info, active employee count, open enrollment window, and company structure (divisions, departments). Used to create or update the company in the Quoting system.</div></div>';
+    h+='<div class="info-strip info-teal"><div class="info-label">Auth flow switches &mdash; Client Credentials from here on</div>No broker login required. Quoting system uses its own client_id + secret for all remaining calls.</div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/company-management</div><div class="api-desc">Full company profile: demographics, FEIN, address, contact info, active employee count, open enrollment window, and company structure (divisions, departments, business units, office locations). Used to create or update the company in the Quoting system.</div></div>';
     h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
     h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(5)">GET &mdash; fire request</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
   if(s===6){
     h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
-    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans-list-management</div><div class="api-desc">Returns all active plans with <code>planIdentifier</code>, benefit type, carrier, dates, and <code>planDetailUrl</code>. Use the plan IDs to call the benefit model endpoint in Step 8.</div></div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans-list-management</div><div class="api-desc">Returns all active plans with <code>planIdentifier</code>, benefit type, carrier, dates, and <code>planDetailUrl</code> &mdash; the direct link to each plan&#39;s benefit model endpoint.</div></div>';
     h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(6)">GET &mdash; fire request</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
   if(s===7){
     h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; using planIdentifier from Step 7</div>';
-    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans/{planId}/health-management</div><div class="api-desc">Full plan record: configuration, eligibility rules, ACA composite rates, and employer contribution groupings. Called once per plan using the ID from Step 7. Same pattern for dental, vision, life, disability, medical savings.</div></div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/plans/{planId}/health-management</div><div class="api-desc">Full plan record: configuration, eligibility rules, ACA composite rates, and employer contribution groupings. Same endpoint pattern for dental, vision, life, disability, and medical savings.</div></div>';
     h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(7)">GET &mdash; fire request</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
   if(s===8){
     h+='<div class="info-strip info-teal"><div class="info-label">Call initiated by</div>Quoting System &mdash; system-to-system, client credentials</div>';
-    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/quote-census</div><div class="api-desc">Returns the employee census for quoting purposes. Includes demographics (firstName, sex, DOB, zip, tobacco use), employment information (hire date, job title, work state), annual benefit salary, company structure mapping (eligibility class, division, department), dependents (with relationship, DOB, sex, tobacco), and current plan enrollments with benefit tier and monthly costs.</div></div>';
+    h+='<div class="api-box"><span class="api-mget">GET</span> <span class="bdg bdg-blue" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/companies/{companyId}/quote-census</div><div class="api-desc">Employee census for quoting. Includes demographics (<code>firstName</code>, <code>firstInitialLastName</code>, sex, DOB, zip, tobacco use), employment info (hire date, job title, work state), annual benefit salary, company structure mapping (eligibility class, division, department), dependents (relationship, DOB, sex, tobacco), and current plan enrollments with benefit tier and monthly costs.</div></div>';
     h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(8)">GET &mdash; fire request</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
@@ -674,46 +623,47 @@ function renderLeft(s){
     h+='<div class="info-strip info-teal"><div class="info-label">Initiated by</div>Quoting System &mdash; broker marks quote as sold</div>';
     h+='<div style="border:1px solid #ccfbf1;border-radius:9px;padding:13px;margin-bottom:10px;background:#f0fdf4">';
     h+='<div style="font-size:13px;font-weight:700;color:#0f766e;margin-bottom:6px">&#x1F4CA; Broker Quoting Workflow &mdash; Quoting System</div>';
-    h+='<div style="font-size:12px;color:#6b7280;margin-bottom:9px">The broker has built and rated the renewal quote using the census and plan data. Click to mark as sold and send to EN.</div>';
+    h+='<div style="font-size:12px;color:#6b7280;margin-bottom:9px">The broker has built and rated the renewal quote. Click to mark as sold and send to EN.</div>';
     h+='<button style="width:100%;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="openSoldModal()">'+
     '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1.2"/><path d="M4 7l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
     'Mark Quote as Sold &mdash; '+c.name+'</button></div>';
-    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/{companyId}/plans/medical/notification</div><div class="api-desc">Full payload: configuration (planName, carrierName, startDate, benefit, situsState, carrierPlanCode), eligibilityOptions (waitingPeriod, entryDateRule, terminationRule, rehirePeriod), rates.compositeRates.tierRates, contributions.contributionGroupings with tierMonthlyContributions. Also supports: dental, vision, life, AD&amp;D, critical illness, hospital indemnity, LTD, STD, voluntary variants, accident, cancer.</div></div>';
-    h+='<div class="highlight-box" style="font-size:12px"><strong>/employees/notification:</strong> POST employee census alongside the integration request to seed a brand-new EN company with census data automatically.</div>';
-    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(9)" style="background:#0d9488;border-color:#0d9488">POST &mdash; fire request to EN</button>';
+    h+='<div class="api-box"><span class="api-mpost">POST</span> <span class="bdg bdg-green" style="font-size:10px;margin-left:4px">200</span><div class="api-ep">/api/Quoting/companies/{companyId}/plans/medical/notification</div><div class="api-desc">Full payload: configuration (planName, carrierName, startDate, benefit, situsState, carrierPlanCode, billOption), eligibilityOptions (waitingPeriod, entryDateRule, terminationRule, rehirePeriod), rates.compositeRates.tierRates, contributions.contributionGroupings with tierMonthlyContributions per tier. Also supports dental, vision, life, AD&amp;D, LTD, STD, voluntary variants.</div></div>';
+    h+='<div class="highlight-box" style="font-size:12px"><strong>/employees/notification:</strong> POST census alongside the integration request (Step 3) to seed a brand-new EN company with census data automatically.</div>';
+    h+='<button class="btn btn-teal" id="fireBtn" onclick="fireCall(9)">POST &mdash; fire request to EN</button>';
     h+='<div class="rbox" id="rbox"></div>';
   }
   document.getElementById('leftBody').innerHTML=h;
   document.getElementById('leftTitle').textContent=stepMeta[s].lt;
   document.getElementById('leftBadge').textContent='';
   document.getElementById('leftBadge').className='';
+  // If step 2 fired already (auto-fired from login), show badge
+  if(s===2 && fired[2]){
+    var lb=document.getElementById('leftBadge');
+    if(lb){lb.textContent='200 OK';lb.className='spl sp200';}
+  }
 }
 
 function renderRight(s){
-  var c=cos[selCo], h='';
+  var h='';
   if(s===0){
     h='<div class="q-chrome">'+
     '<div class="q-topbar"><span class="q-logo">Quoting Partner System</span><span style="font-size:11px;color:rgba(255,255,255,0.7)">Company Management &rsaquo; Connect to EN</span></div>'+
     '<div class="q-body">'+
     '<div style="font-size:14px;font-weight:700;color:#111;margin-bottom:4px">Send Integration Requests to Employee Navigator</div>'+
-    '<div style="font-size:12px;color:#6b7280;margin-bottom:11px">Select one or more companies to establish a connection with EN.</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-bottom:11px">Select companies to establish a connection with EN. You will be redirected to EN to log in before the request is sent.</div>'+
     '<div style="background:#fff;border-radius:8px;border:1px solid #d1fae5;padding:10px;margin-bottom:11px">'+
     '<div style="font-size:11px;font-weight:700;color:#0f766e;margin-bottom:7px;text-transform:uppercase;letter-spacing:0.04em">Companies in your book of business</div>'+
     cos.map(function(co,i){
-      return '<label style="display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;cursor:pointer;margin-bottom:3px;border:1px solid #e5e7eb;background:#fafafa">'+'<input type="checkbox" id="coCheck'+i+'" checked style="accent-color:#0d9488;width:15px;height:15px;cursor:pointer">'+'<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div><div style="font-size:11px;color:#6b7280">'+co.fein+' &bull; '+co.state+'</div></div>'+'<span style="font-size:10px;color:#0d9488;font-weight:600">'+co.emp+' employees</span>'+'</label>';
+      return '<label style="display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;cursor:pointer;margin-bottom:3px;border:1px solid #e5e7eb;background:#fafafa">'+'<input type="checkbox" checked style="accent-color:#0d9488;width:15px;height:15px;cursor:pointer">'+'<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#111">'+co.name+'</div><div style="font-size:11px;color:#6b7280">'+co.fein+' &bull; '+co.state+'</div></div>'+'<span style="font-size:10px;color:#0d9488;font-weight:600">'+co.emp+' employees</span>'+'</label>';
     }).join('')+
     '</div>'+
-    '<button style="width:100%;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="sendIntegrationRequests()">'+
+    '<button style="width:100%;padding:10px;background:#0d9488;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px" onclick="sendToEnLogin()">'+
     '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M6.5 2l4.5 4.5L6.5 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
     'Send Integration Requests to EN</button>'+
     '</div></div>'+
-    '<p class="step-desc" style="margin-top:10px">The broker selects the companies they want to connect. Clicking the button sends integration requests to EN for all selected companies simultaneously.</p>';
+    '<p class="step-desc" style="margin-top:10px">Clicking <strong>Send Integration Requests</strong> takes the broker to the EN Login page first. The POST fires automatically once they are authenticated.</p>';
   }
   if(s===1){
-    h='<div id="rightApiResult" style="display:none"></div>'+
-    '<div class="info-strip info-teal" style="font-size:13px">Fire the POST on the left to see the requests send to EN in real time.</div>';
-  }
-  if(s===2){
     h='<div class="en-login-wrap" id="loginWrap">'+
     '<div class="en-login-card">'+
     '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:17px">'+
@@ -722,10 +672,20 @@ function renderRight(s){
     '<label class="en-login-field-label">Username</label>'+
     '<input class="en-login-field" type="text" value="BrokerQuoting">'+
     '<label class="en-login-field-label">Password</label>'+
-    '<input class="en-login-field" type="password" value="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">'+
+    '<input class="en-login-field" type="password" value="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;">'+
     '<button class="en-login-btn" id="loginBtn" onclick="doEnLogin()">Login</button>'+
     '</div></div>'+
-    '<p class="step-desc" style="margin-top:10px">Click Login to authenticate in EN &mdash; you will be taken automatically to Step 4 where you link the companies.</p>';
+    '<p class="step-desc" style="margin-top:10px">Click <strong>Login</strong> &mdash; EN authenticates the broker, issues an authorization code, and the POST to <code>/Quoting/companies/integrations</code> fires automatically.</p>';
+  }
+  if(s===2){
+    h='<div id="rightApiResult" style="display:none"></div>'+
+    '<div class="info-strip info-teal" style="font-size:13px">POST fired after EN login &mdash; results will appear here.</div>';
+    // If already fired (auto-fired from login), show results
+    if(fired[2]){
+      h='<div id="rightApiResult"></div>';
+      // showRightResult will be called after render
+      setTimeout(function(){ showRightResult(2); },50);
+    }
   }
   if(s===3){
     h='<div class="en-chrome" id="enHomeChrome">'+
@@ -739,34 +699,31 @@ function renderRight(s){
     '<div class="en-stat"><div class="en-stat-num">2</div><div class="en-stat-lbl">Plan Notifications</div><div class="en-stat-btn-wrap"><button class="btn-blue-en" style="font-size:11px;padding:4px 10px">Take Action</button></div></div>'+
     '</div></div></div></div>'+
     '<div id="qPendingIntegArea" style="display:none;margin-top:10px">'+
-    '<div class="en-chrome">'+
-    '<div class="en-topbar"><span class="en-logo-txt">Employee Navigator &mdash; Pending Integrations</span></div>'+
+    '<div class="en-chrome"><div class="en-topbar"><span class="en-logo-txt">Employee Navigator &mdash; Pending Integrations</span></div>'+
     '<div class="en-body" style="padding:10px">'+
     '<div style="display:flex;gap:0;border-bottom:1px solid #e5e7eb;margin-bottom:9px">'+
-    '<div style="padding:6px 10px;font-size:13px;font-weight:700;color:#dc2626;border-bottom:2px solid #dc2626">Requires Your Action <span style="background:#dc2626;color:#fff;border-radius:20px;padding:1px 5px;font-size:10px">3</span></div>'+
-    '<div style="padding:6px 10px;font-size:13px;color:#2563eb">All Integrations</div></div>'+
-    '<div class="info-strip info-blue" style="font-size:12px;margin-bottom:9px">Integrations submitted from the Quoting system must be linked to a new or existing company in EN to enable the integration features.</div>'+
-    '<table class="en-table"><thead><tr><th>Partner</th><th>Company</th><th>Client ID</th><th>Status</th><th>Action</th></tr></thead>'+
-    '<tbody>'+
-    cos.map(function(co,i){return '<tr><td>Quoting Partner</td><td>'+co.name+'</td><td style="font-family:monospace;font-size:10px">'+co.id.slice(0,13)+'&hellip;</td><td><span class="spl sp-pend" style="font-size:10px">Received</span></td><td><button class="en-link-btn" onclick="openQLinkWizard('+i+')">Link &#x1F517;</button></td></tr>';}).join('')+
-    '</tbody></table></div></div>'+
-    '</div>'+
+    '<div style="padding:6px 10px;font-size:12px;font-weight:700;color:#dc2626;border-bottom:2px solid #dc2626">Requires Your Action <span style="background:#dc2626;color:#fff;border-radius:20px;padding:1px 5px;font-size:10px">3</span></div>'+
+    '<div style="padding:6px 10px;font-size:12px;color:#2563eb">All Integrations</div></div>'+
+    '<div class="info-strip info-blue" style="font-size:12px;margin-bottom:9px">These integrations were submitted from the Quoting system. Link each company to complete the connection.</div>'+
+    '<table class="en-table"><thead><tr><th>Partner</th><th>Company</th><th>Client ID</th><th>Status</th><th>Action</th></tr></thead><tbody>'+
+    cos.map(function(co,i){return '<tr id="pendRow'+i+'"><td>Quoting Partner</td><td>'+co.name+'</td><td style="font-family:monospace;font-size:10px">'+co.id.slice(0,13)+'&hellip;</td><td id="pendStatus'+i+'"><span class="spl sp-pend" style="font-size:10px">Received</span></td><td><button class="en-link-btn" id="pendAction'+i+'" onclick="openQLinkWizard('+i+')">Link &#x1F517;</button></td></tr>';}).join('')+
+    '</tbody></table></div></div></div>'+
     '<div id="qLinkWizardArea" style="display:none;margin-top:10px">'+
     '<div class="en-chrome"><div class="en-topbar"><span class="en-logo-txt">EN &mdash; Link Integration &mdash; <span id="qWizCoName"></span></span></div>'+
     '<div class="en-body">'+
     '<div id="qWizStep1" class="wizard-step active">'+
-    '<div style="font-size:14px;font-weight:700;color:#111;margin-bottom:5px">Quoting Partner Integration</div>'+
-    '<div style="font-size:12px;color:#6b7280;margin-bottom:9px">Company: <strong id="qWizCoDisplay"></strong> &bull; Identifier: <span id="qWizCoId" style="font-family:monospace;font-size:10px"></span></div>'+
+    '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:5px">Quoting Partner Integration</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-bottom:9px">Company: <strong id="qWizCoDisplay"></strong> &bull; <span id="qWizCoId" style="font-family:monospace;font-size:10px"></span></div>'+
     '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select product</label>'+
     '<select class="en-select"><option>Quoting</option></select>'+
-    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select which employees should be included:</label>'+
-    '<div style="font-size:12px;color:#374151;margin-bottom:9px"><label style="display:flex;align-items:center;gap:7px;padding:3px 0;cursor:pointer"><input type="radio" name="qEmpSel" checked style="accent-color:#2563eb"> All Applicable Employees (already subscribed)</label></div>'+
-    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Select company to link</label>'+
-    '<select class="en-select" id="qWizCompanySelect"><option>'+cos[0].name+'</option><option>'+cos[1].name+'</option><option>'+cos[2].name+'</option></select>'+
+    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Include employees:</label>'+
+    '<div style="font-size:12px;color:#374151;margin-bottom:9px"><label style="display:flex;align-items:center;gap:7px;cursor:pointer"><input type="radio" name="qEmpSel" checked style="accent-color:#2563eb"> All Applicable Employees</label></div>'+
+    '<label style="font-size:12px;color:#6b7280;display:block;margin-bottom:3px">Link to existing EN company:</label>'+
+    '<select class="en-select">'+cos.map(function(co){return '<option>'+co.name+'</option>';}).join('')+'</select>'+
     '<div style="display:flex;gap:9px;margin-top:6px">'+
-    '<button class="btn-blue-en" style="font-size:13px" onclick="qWizNext()">Next</button>'+
+    '<button class="btn-blue-en" style="font-size:12px" onclick="qWizNext()">Next</button>'+
     '<span style="font-size:12px;color:#6b7280;align-self:center">OR</span>'+
-    '<button class="btn-blue-en" style="background:#6366f1;font-size:13px" onclick="qWizCreateNew()">Create New Company</button>'+
+    '<button class="btn-blue-en" style="background:#6366f1;font-size:12px" onclick="qWizCreateNew()">Create New Company</button>'+
     '</div></div>'+
     '<div id="qWizStep2" class="wizard-step">'+
     '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:7px;padding:11px;text-align:center">'+
@@ -780,7 +737,7 @@ function renderRight(s){
   }
   if(s===9){
     h='<div id="taReveal" style="display:none"></div>'+
-    '<div class="info-strip info-teal" style="font-size:13px">Use <strong>Mark Quote as Sold</strong> on the left, then fire the API call to see the full EN response and Take Action experience.</div>';
+    '<div class="info-strip info-teal" style="font-size:13px">Use <strong>Mark Quote as Sold</strong> on the left, then fire the API call to see the full EN response and Take Action experience for <strong>'+cos[selCo].name+'</strong>.</div>';
   }
   document.getElementById('rightBody').innerHTML=h;
   document.getElementById('rightTitle').textContent=stepMeta[s].rt;
@@ -790,31 +747,11 @@ function renderRight(s){
   else st.innerHTML='<span class="sys-tag sys-both">EN + Quoting</span>';
 }
 
-function showLinkWizardStep3(){
-  if(document.getElementById('linkWizardStep3')) {
-    document.getElementById('linkWizardStep3').style.display='block';
-    document.getElementById('linkWizardStep3').scrollIntoView({behavior:'smooth',block:'nearest'});
-  }
-}
-function lw3Next(){
-  if(document.getElementById('lw3DoneMsg')) {
-    document.getElementById('lw3DoneMsg').textContent='Linked to "'+cos[selCo].name+'" in EN. Connection is now Active.';
-    document.getElementById('lw3Step1').classList.remove('active');
-    document.getElementById('lw3Step2').classList.add('active');
-  }
-}
-function lw3CreateNew(){
-  if(document.getElementById('lw3DoneMsg')) {
-    document.getElementById('lw3DoneMsg').textContent='"'+cos[selCo].name+'" created as a new company. Connection is Active.';
-    document.getElementById('lw3Step1').classList.remove('active');
-    document.getElementById('lw3Step2').classList.add('active');
-  }
-}
+var qWizardCo=0;
 function showQPendingInteg(){
   document.getElementById('qPendingIntegArea').style.display='block';
   document.getElementById('qPendingIntegArea').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-var qWizardCo=0;
 function openQLinkWizard(i){
   qWizardCo=i;
   document.getElementById('qWizCoName').textContent=cos[i].name;
@@ -825,39 +762,23 @@ function openQLinkWizard(i){
   document.getElementById('qLinkWizardArea').style.display='block';
   document.getElementById('qLinkWizardArea').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function markCompanyLinked(idx, msg){
-  // Update wizard confirmation
+function markLinked(idx,msg){
   document.getElementById('qWizDoneMsg').textContent=msg;
   document.getElementById('qWizStep1').classList.remove('active');
   document.getElementById('qWizStep2').classList.add('active');
-  // Update the row in the pending integrations table
-  var rows=document.querySelectorAll('#qPendingIntegArea table tbody tr');
-  if(rows[idx]){
-    var td=rows[idx].querySelector('td:nth-child(4)');
-    if(td) td.innerHTML='<span class="spl sp200" style="font-size:10px">Linked &#10003;</span>';
-    var tdAction=rows[idx].querySelector('td:nth-child(5)');
-    if(tdAction) tdAction.innerHTML='<span style="font-size:11px;color:#16a34a">&#10003; Done</span>';
-  }
+  var statusEl=document.getElementById('pendStatus'+idx);
+  if(statusEl) statusEl.innerHTML='<span class="spl sp200" style="font-size:10px">Linked &#10003;</span>';
+  var actionEl=document.getElementById('pendAction'+idx);
+  if(actionEl) actionEl.outerHTML='<span style="font-size:11px;color:#16a34a">&#10003; Done</span>';
 }
-function qWizNext(){
-  markCompanyLinked(qWizardCo, 'Linked to "'+cos[qWizardCo].name+'" in EN. Integration is now Active.');
-}
-function qWizCreateNew(){
-  markCompanyLinked(qWizardCo, '"'+cos[qWizardCo].name+'" created as a new EN company. Integration is Active.');
-}
-
-// Override fireCall to reveal right panel and take action
-var origFireCall=fireCall;
-fireCall=function(s){
-  origFireCall(s);
-  if(s===9){
-    setTimeout(function(){revealTakeAction();},1400);
-  }
-};
+function qWizNext(){ markLinked(qWizardCo,'Linked to "'+cos[qWizardCo].name+'" in EN. Integration is now Active.'); }
+function qWizCreateNew(){ markLinked(qWizardCo,'"'+cos[qWizardCo].name+'" created as new EN company. Integration is Active.'); }
 
 function goTo(s){
   if(s<0||s>9) return;
-  cur=s; fired[s]=false;
+  cur=s;
+  // Don't reset fired[2] when navigating — it auto-fires and should stay fired
+  if(s!==2) fired[s]=false;
   document.querySelectorAll('.fstep').forEach(function(el){
     var ds=parseInt(el.getAttribute('data-s'));
     el.classList.remove('active');
@@ -886,7 +807,7 @@ function showDone(){
   document.querySelector('.ca').innerHTML='<div class="panel" style="grid-column:1/-1"><div class="pb"><div style="text-align:center;padding:1.5rem 1rem">'+
   '<div style="font-size:40px;margin-bottom:12px">\u2713</div>'+
   '<div style="font-size:20px;font-weight:700;color:#111;margin-bottom:8px">Quoting integration flow complete</div>'+
-  '<div style="font-size:13px;color:#555;line-height:1.7;max-width:480px;margin:0 auto 18px">From the Quoting system sending the integration request, through OAuth authorization, company/plan/census data retrieval, all the way to the sold plan landing in EN for the broker to Add, Renew, or Dismiss.</div>'+
+  '<div style="font-size:13px;color:#555;line-height:1.7;max-width:480px;margin:0 auto 18px">From the Quoting system selecting companies and logging into EN to authorize the POST, through company/plan/census data retrieval, all the way to the sold plan landing in EN for the broker to Add, Renew, or Dismiss.</div>'+
   '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:400px;margin:0 auto 18px">'+
   '<div class="sc" style="background:#dbeafe"><div class="sv" style="color:#1e40af">4</div><div class="sl">Workflow 1 steps</div></div>'+
   '<div class="sc" style="background:#ccfbf1"><div class="sv" style="color:#0f766e">5</div><div class="sl">Workflow 2 steps</div></div>'+
